@@ -117,11 +117,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGES = [
-    ('en', _('English')),
-    ('ar', _('Arabic')),
-    # Add more languages here
-]
+# LANGUAGES = [
+#     ('en', _('English')),
+#     ('ar', _('Arabic')),
+#     # Add more languages here
+# ]
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale'),
@@ -130,7 +130,7 @@ LOCALE_PATHS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ar'
 
 TIME_ZONE = 'UTC'
 
@@ -156,4 +156,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/app-dashboard/'
+

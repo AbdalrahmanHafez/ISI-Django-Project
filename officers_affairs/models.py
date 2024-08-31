@@ -2,12 +2,13 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinLengthValidator
 
 
 class Rank(models.Model):
     
     RANK_CHOICES = [
-        ('ملازم','ملازم'),
+        ('1','ملازم'),
         ('ملازم أول','ملازم أول' ),
         ('نقيب', 'نقيب'),
         ('رائد', 'رائد'),
@@ -67,7 +68,13 @@ class Officer(models.Model):
     rank = models.ForeignKey(Rank, on_delete=models.SET_NULL, null=True, blank=True)
     military_number = models.CharField(max_length=50, unique=True)
     seniority_number = models.CharField(max_length=50)
-    national_id = models.CharField(max_length=14, blank=True, null=True)
+    national_id = models.CharField(
+        max_length=14,
+        validators=[MinLengthValidator(14)],
+        blank=True,
+        null=True,
+        
+    )
     blood_type = models.ForeignKey(BloodType, on_delete=models.SET_NULL, null=True, blank=True)
     weapon = models.ForeignKey(Weapon, on_delete=models.SET_NULL, null=True, blank=True)
     phone1 = models.CharField(max_length=15)
@@ -80,8 +87,8 @@ class Officer(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_unit')
     join_date = models.DateField(blank=True, null=True)
     previous_unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_units')
-    status = models.CharField(max_length=20, choices=[('خدمة', 'خدمة'), ('معاش', 'معاش')])
-    unit_status = models.CharField(max_length=50, choices=[('موجود', 'موجود'), ('منقول', 'منقول'), ('مأمورية', 'مأمورية')])
+    status = models.IntegerField(default=1 , choices=[(1, 'خدمة'), (0, 'معاش')])
+    unit_status = models.IntegerField( choices=[(1, 'موجود'), (0, 'منقول'), (2, 'مأمورية')])
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True)
     job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True)

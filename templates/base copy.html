@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar-sa" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرئيسية | منظومة شؤون ضباط</title>
+    <link rel="stylesheet" href= "{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.min.css' %}">
+    <script src="{% static 'js/modernizr-2.8.3.js' %}"></script>
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+   
+    <script>
+        
+        function toggleTheme() {
+            var themeLink = document.getElementById('theme-link');
+            if (themeLink.getAttribute('href') === "{% static 'css/style.css' %}") {
+                themeLink.setAttribute('href', "{% static 'css/dark-theme.css' %}");
+            } else {
+                themeLink.setAttribute('href', "{% static 'css/style.css' %}");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="left">
+                <!-- Single button -->
+                <div class="btn-group navbar-top-links">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <i class="glyphicon glyphicon-user"></i>
+                        مرحباً {{ user.username }}
+                        <span class="glyphicon glyphicon-list"></span>
+                    </button>
+                    <button onclick="toggleTheme()" aria-label="تبديل الثيم">
+                        <img src="{% static 'images/dark-mode-toggle-icon.svg' %}" alt="Toggle Theme">
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <span class="user-profile">
+                                <img src="{% static 'images/avatar1.jpg' %}" alt="avatar" class="img-responsive">
+                            </span>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">الاعدادات</a></li>
+                        <li><a href="#">تغير كلمة المرور</a></li>
+                        <li><a href="#">أي شئ اخر</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'login' %}"><i class="glyphicon glyphicon-log-out"></i> تسجيل الخروج</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+
+
+            <!-- Navbar -->
+
+            <div class="navbar-collapse collapse"
+                style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="right">
+                    <a href="#" style="margin-top: 40px;" class="navbar-brand">معهد النظم المعلومات</a>
+                    <img src="{% static 'images/ISILogo.png'%}" alt="logo" style="height: 150px; margin-right: 10px;">
+                </div>
+                <div style="flex-grow: 1; text-align: center;">
+                    <h1
+                        style="font-size: 48px; margin: 1; margin-top: 100px; margin-bottom: 40px; margin-left: 300px; color: black;">
+                        منظومة شئون الضباط</h1>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <div class="container wrapper clearfix" style="margin-top: 200px;">
+        <div class="row">
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 clearfix">
+                <div class="sidebar clearfix">
+                    <aside>
+                        <div class="sidebar-search">
+                            <div class="input-group">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success" type="button">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                                <input type="text" class="form-control" placeholder="البحث...">
+                            </div>
+                        </div>
+
+                        <div class="list-group clearfix">
+                            <span class="list-group-item active">
+                                القائمة الرئيسية
+                            </span>
+                            <a href="{% url 'login' %}" class="list-group-item">تسجيل ضابط</a>
+                            <a href="#" class="list-group-item">قائمة الضباط</a>
+                            <a href="#" class="list-group-item">الإجازات</a>
+                            <a href="#" class="list-group-item">النبطشيات</a>
+                            <a href="#" class="list-group-item">أعياد الميلاد</a>
+                            <a href="#" class="list-group-item">التمام اليومي للظباط</a>
+                        </div>
+                        <ul class="list-group lg-single">
+                            <li class="list-group-item">
+                                <a class="active">
+                                    العربية
+                                </a>
+                            </li>
+                        </ul>
+                        <footer>
+                            <p>جميع الحقوق محفوظة - 2024 &copy; </p>
+                        </footer>
+                    </aside>
+                   
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12 clearfix">
+                <ol class="breadcrumb">
+                    <li><a href="#">الرئيسية</a></li>
+                    <li><a href="#">المكتبة</a></li>
+                    <li class="active">البيانات</li>
+                </ol>
+                <div class="jumbotron clearfix">
+                    <main>
+                        {% block content %}
+                        {% endblock %}
+                    </main>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+
+</html>

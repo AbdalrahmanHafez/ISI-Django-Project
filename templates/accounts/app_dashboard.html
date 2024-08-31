@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم</title>
+    <link rel="stylesheet" href="{% static 'css/app_dashboard.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>لوحة التحكم</h1>
+        <p>اختر التطبيق الذي تريد الوصول إليه:</p>
+        <ul class="app-list">
+            {% for app in apps %}
+                <li><a href="{{ app.url }}">{{ app.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, sans-serif;
+    direction: rtl;
+    background-color: #222121;
+    color: rgb(255, 255, 255);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #363535;
+    color: rgb(255, 253, 253);
+}
+
+header .logo {
+    width: 100px;
+}
+
+header .user-info {
+    display: flex;
+    align-items: center;
+}
+
+header .user-avatar {
+    width: 50px;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.container {
+    display: flex;
+}
+
+aside {
+    width: 200px;
+    background-color: #635e5e;
+    padding: 10px;
+    
+}
+
+main {
+    flex: 1;
+    padding: 10px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #363535;
+    color: rgb(255, 253, 253);
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #000;   
+}
+
+button img {
+    width: 24px; /* Adjust size as needed */
+    height: auto;
+    
+}
+
+
+
+
+

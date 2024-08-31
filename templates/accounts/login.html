@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="Logo">
+            </div>
+            <h1>معهد نظم المعلومات</h1>
+            <h4> قم بتسجيل الدخول </h4>
+            
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% if form.non_field_errors %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">تسجيل الدخول</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

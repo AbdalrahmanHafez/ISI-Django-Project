@@ -1,0 +1,76 @@
+{% load static %}
+<div class="row" hx-trigger="officer_list_changed from:body" hx-get="{% url 'listOfficers' %}" hx-target="this">
+
+{% for officer in officer_list %}
+{% if officer.status == 1 %}
+  <!-- الضباط -->
+<div id="" class="col-md-4">
+    <!-- Widget: user widget style 1 -->
+  <div id="" class="card card-widget widget-user ">
+    <!-- Add the bg color to the header using any of the bg-* classes -->
+  <!-- قائمة منسدلة -->
+  <div style="position: absolute;" class="btn-group">   
+    <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <div class="dropdown-menu">
+      <a class="dropdown-item" href="#">تعديل</a>
+      <a class="dropdown-item" href="#">حذف</a>
+  <!-- Button trigger modal -->
+    </div>
+  </div>
+  
+  <div style="background: url({{officer.rank.image.url}}); background-size:cover "  class="widget-user-header bg-info">
+    <h3  class="widget-user-username" >{{ officer.rank }} </h3>
+    <h4 class="widget-user-desc">{{ officer.full_name }}</h4>
+  </div>
+  
+  <div class="widget-user-image">
+
+  {% if officer.profile_image %}
+    <img style="width:100px; height: 100px;" class="img-circle elevation-2" src="{{ officer.profile_image.url }}" alt="User image">
+  {% else %}
+    <img style="width:100px; height: 100px;" class="img-circle elevation-2" src="{% static 'images/user-avatar.png' %}" alt="User Avatar">
+
+  {% endif %}
+  </div>
+  <div class="card-footer">
+  
+    
+      
+      
+        <div class="description-block">
+          <h5 class="description-header text-dark">الوحده : {{ officer.current_unit.unit.name }}</h5>
+          <h5 class="description-header text-dark">الفرع : {{ officer.branch.name }}</h5>
+          <h5 class="description-header text-dark">القسم : {{ officer.section.name }}</h5>
+          <span class="description-text">الوظيفة :  {{ officer.job.name }} </span>
+        </div>
+        <div class="description-block">
+          <h5 class="description-header text-dark">الرقم العسكري : {{ officer.military_number }}</h5>
+          <h5 class="description-header text-dark">رقم الأقدمية  : {{ officer.seniority_number }}</h5>
+          <h5 class="description-header text-dark">السلاح : {{ officer.weapon.name }}</h5>
+          <h5 class="description-header text-dark">رقم الهاتف : {{ officer.phone1 }}  </h5>
+          {% if  officer.phone2 %}
+          <h5 class="description-header text-dark">  رقم الهاتف 2: {{ officer.phone2 }}  </h5>
+          {% endif %}
+          {% if officer.home_phone %}
+          <h5 class="description-header text-dark"> رقم الهاتف المنزلي : {{ officer.home_phone }}  </h5>
+          {% endif %}
+        </div>
+        <!-- /.description-block -->
+      
+          <!-- /.col -->
+    
+        <!-- /.row -->
+  </div>
+  </div>
+    <!-- /.widget-user -->
+</div>
+  <!-- نهاية الضابط -->
+  
+
+{% endif %}
+{% endfor %}
+
+
+</div>

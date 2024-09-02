@@ -155,8 +155,9 @@
           <div class="row">
 
 
+        {% include "officers_affairs/officer_list.html" %}
          
-        {% for officer in officers %}
+        {% comment %} {% for officer in officer_list %}
         {% if officer.status == 1 %}
           <!-- الضباط -->
               <div id="" class="col-md-4">
@@ -225,7 +226,7 @@
           
 
           {% endif %}
-          {% endfor %}
+          {% endfor %} {% endcomment %}
 
               <div class="row">
                 <div class="col text-center">
@@ -307,6 +308,7 @@
       toastBody.innerText = e.detail.value
       toast.show()
     })
+
   })()
 </script>
 

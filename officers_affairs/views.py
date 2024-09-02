@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from .models import *
 from .forms import OfficerForm
-from django.http import JsonResponse
-# Create your views here.
+from django.http import JsonResponse, HttpResponse
+import json
 
 
 
@@ -26,6 +26,25 @@ def add_officer(request):
             return JsonResponse({'success': False, 'errors': form.errors.as_json()})
     return JsonResponse({'success': False, 'errors': 'Invalid request method'})
 
+
+def addOfficer(request):
+    if request.method == "POST":
+        form = OfficerForm(request.POST, request.FILES)
+        if form.is_valid():
+            print("SAVING NEW OFFICER")
+            form.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": f"Officer added"
+                    })
+                })
+
+    else:
+        form = OfficerForm()
+
+    return render(request, "officers_affairs/addOfficer.html", {'form': form})
 
 
 

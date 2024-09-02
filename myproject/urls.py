@@ -16,16 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
-
+from django.views.generic import TemplateView
+from django.shortcuts import render
+from django.forms import ModelForm
 from django.conf.urls.static import static
 from myproject import settings
+from django.views.generic import CreateView
+from officers_affairs import models
+from django.http import HttpResponse
+import json
 
-
+def testView(request):
+    return render(request, "test.html")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
+    path('test/', testView),
     path('officers_affairs/', include('officers_affairs.urls')),
     
 ]

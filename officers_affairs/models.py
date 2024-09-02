@@ -3,7 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinLengthValidator
-
+from django.utils.translation import gettext_lazy as _
 
 class Rank(models.Model):
     
@@ -63,6 +63,23 @@ class Job(models.Model):
 
 
 
+class UnitStatus(models.Model):
+ # Define your choices for unit status
+    UNIT_STATUS_CHOICES = [
+        (1, _('موجود')),   # Available
+        (2, _('مأمورية')),   # Mission
+        (0, _('منقول')),   # Transferred
+    ]
+
+    # Fields for the Officer model
+    name = models.CharField(max_length=100)
+    unit_status = models.IntegerField(choices=UNIT_STATUS_CHOICES)
+
+    def __str__(self):
+        return self.name
+
+
+
 class Officer(models.Model):
     full_name = models.CharField(max_length=255)
     rank = models.ForeignKey(Rank, on_delete=models.SET_NULL, null=True, blank=True)
@@ -87,8 +104,8 @@ class Officer(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_unit')
     join_date = models.DateField(blank=True, null=True)
     previous_unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_units')
-    status = models.IntegerField(default=1 , choices=[(1, 'خدمة'), (0, 'معاش')])
-    unit_status = models.IntegerField( choices=[(1, 'موجود'), (0, 'منقول'), (2, 'مأمورية')])
+    status = models.IntegerField(default=1 , choices=[(1, _('خدمة')), (0, _('معاش'))])
+    unit_status = models.ForeignKey(UnitStatus, on_delete=models.SET_NULL, null=True, blank=True)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True)
     job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True)
@@ -101,3 +118,4 @@ class Officer(models.Model):
 
     def __str__(self):
         return self.full_name
+    

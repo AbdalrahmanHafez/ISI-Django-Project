@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{% static  'dist/css/adminlte_ar.min.css' %}">
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    
   </head>
   <body dir="rtl" class="hold-transition sidebar-mini">
 
@@ -201,6 +202,8 @@ $(function () {
 
  
 </script>
-
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -47,7 +47,7 @@
               <div class="card">
                 <div class="card-header border-0">
                   <div class="d-flex justify-content-between">
-                    <h3 class="card-title">الارباح</h3>   
+                    <h3 class="card-title">تيست</h3>   
                   </div>
                 </div>    
                 <div class="card-body">
@@ -63,11 +63,11 @@
   
                   <div class="d-flex flex-row justify-content-end">
                     <span class="mr-2">
-                      <i class="fas fa-square text-primary"></i> الاربح من بيع باط
+                      <i class="fas fa-square text-primary"></i> خوارج
                       <p id="soldtotals"></p>     
                     </span>
                     <span>
-                      <i class="fas fa-square text-gray"></i> الارباح من استعارة باط
+                      <i class="fas fa-square text-gray"></i> موجود
                       <p id="rentedtotals"></p>
                     </span>
                   </div>
@@ -79,36 +79,35 @@
           </div>
           <!-- /.row -->
   
-          <!-- form add books -->
-          <div class="row m-1 mb-3">   
-            <a href="#bookform" class="btn btn-primary" data-toggle="collapse">+ اضافة ضابط</a>
-          </div>
+          <!-- Button trigger modal -->
+          <div class="row m-1 mb-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addOfficerModal">+ اضافة ضابط</button>
+        </div>
+
           
-          <div id="bookform" class="card card-primary collapse">
-            <div class="card-header">
-              <h3 class="card-title">اضافة ضابط</h3>
+          <!-- Modal -->
+          <div class="modal fade" id="addOfficerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">اضافة ضابط</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="officerForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            {{ form.as_p }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+                            <button type="submit" class="btn btn-primary">اضافة</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <!-- /.card-header -->
-            <!-- form start -->
-            <form method="POST" enctype="multipart/form-data"  > 
-              <div class="card-body"> 
-                <input type="text" class="form-control">
-                <input type="text" class="form-control">
-                <input type="text" class="form-control">
-                <input type="text" class="form-control">
-                <input type="text" class="form-control">
-                <small id='totalrente' class="form-text text-muted"></small>
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer">
-                <button type="submit" class="btn btn-primary">اضافة</button>
-              </div>
-            </form>
-          </div>
-  
-                <!-- /.card -->
-          </div>
-          <!-- end form add books -->
+        </div>
   
   
           <!-- تصنيفات-->
@@ -116,20 +115,13 @@
           <div class="row justify-content-center mb-3">
             <div class="col-4 ">
               <ul class="nav">
+            {% for rank in ranks %}
             
                 <li class="nav-item ">
-                  <a id="" class="nav-link bg-primary" href="#">تاريخ</a>
+                  <a id="" class="nav-link bg-primary" href="#">{{ rank.name }}</a>
                 </li>
-                <li class="nav-item ">
-                  <a id="" class="nav-link bg-primary" href="#">فن</a>
-                </li>
-                <li class="nav-item ">
-                  <a id="" class="nav-link bg-primary" href="#">ثقافة</a>
-                </li>
-                <li class="nav-item ">
-                  <a id="" class="nav-link bg-primary" href="#">رومانسية</a>
-                </li>
-              </ul>
+
+            {% endfor %}
             </div>
           </div>
           <!-- books -->
@@ -139,6 +131,7 @@
 
          
         {% for officer in officers %}
+        {% if officer.status == 1 %}
           <!-- الضباط -->
               <div id="" class="col-md-4">
                   <!-- Widget: user widget style 1 -->
@@ -155,7 +148,7 @@
                 <!-- Button trigger modal -->
                   </div>
                 </div>
-
+               
                 <div style="background: url({{officer.rank.image.url}}); background-size:cover "  class="widget-user-header bg-info">
                   <h3  class="widget-user-username" >{{ officer.rank }} </h3>
                   <h4 class="widget-user-desc">{{ officer.full_name }}</h4>
@@ -203,6 +196,9 @@
                   <!-- /.widget-user -->
               </div>
           <!-- نهاية الضابط -->
+          
+
+          {% endif %}
           {% endfor %}
 
               <div class="row">
@@ -218,4 +214,35 @@
       <!-- /.content -->
 </div>
     <!-- /.content-wrapper -->
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#officerForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the default way
+
+            $.ajax({
+                url: '{% url "add_officer" %}', // URL for the view that handles the form submission
+                type: 'POST',
+                data: new FormData(this),
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.success) {
+                        // Reload the page or update the DOM to reflect the new officer
+                        location.reload(); // Simple way to refresh the page
+                    } else {
+                        alert('Error: ' + JSON.stringify(response.errors));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

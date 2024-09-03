@@ -22,18 +22,22 @@ def addOfficer(request):
     if request.method == "POST":
         form = OfficerForm(request.POST, request.FILES)
         if form.is_valid():
+            if form.instance.pk == None: # if New 
+                form.instance.created_by = request.user
+            form.instance.updated_by = request.user
             form.save()
             return HttpResponse(
                 status=204,
                 headers={
                     'HX-Trigger': json.dumps({
-                        "showMessage": f"Officer added",
+                        "showMessage": "تم اضافة ضابط",
                         "officer_list_changed": None
                     })
                 })
 
     else:
         form = OfficerForm()
+
 
     return render(request, "officers_affairs/addOfficer.html", {'form': form})
 

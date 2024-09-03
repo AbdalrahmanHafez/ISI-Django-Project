@@ -1,9 +1,6 @@
 {% load django_bootstrap5 %} 
 
-{% comment %} TODO: addOfficer check file upload works {% endcomment %}
-{% comment %} enctype="multipart/form-data" {% endcomment %}
-
-<form hx-post="{{ request.path }}" class="modal-content" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}'>
+<form hx-post="{{ request.path }}" class="modal-content" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' hx-encoding="multipart/form-data">
     <div class="modal-header">
       <h5 class="modal-title">اضافة ضابط</h5>
       <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">

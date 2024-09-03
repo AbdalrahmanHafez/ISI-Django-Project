@@ -19,6 +19,7 @@ def officers_home_view(request):
 
 
 def addOfficer(request):
+    
     if request.method == "POST":
         form = OfficerForm(request.POST, request.FILES)
         if form.is_valid():

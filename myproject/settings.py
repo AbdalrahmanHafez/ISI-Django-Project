@@ -83,22 +83,22 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'django_apps',
-        'USER': 'django_apps',
-        'PASSWORD': 'APPSf0rDj@ng0',
-        'HOST': '10.10.1.8',
-        'PORT': '',  # Leave blank for default port
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'TrustServerCertificate=yes;'
-        },
-    },
     # 'default': {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": "local.sqlite",
-    # }
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'django_apps',
+    #     'USER': 'django_apps',
+    #     'PASSWORD': 'APPSf0rDj@ng0',
+    #     'HOST': '10.10.1.8',
+    #     'PORT': '',  # Leave blank for default port
+    #     'OPTIONS': {
+    #         'driver': 'ODBC Driver 17 for SQL Server',
+    #         'extra_params': 'TrustServerCertificate=yes;'
+    #     },
+    # },
+    'default': {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "local.sqlite3",
+    }
 }
 
 

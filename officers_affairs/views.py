@@ -16,15 +16,6 @@ def officers_home_view(request):
 
 
 
-def add_officer(request):
-    if request.method == 'POST':
-        form = OfficerForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors.as_json()})
-    return JsonResponse({'success': False, 'errors': 'Invalid request method'})
 
 
 def addOfficer(request):

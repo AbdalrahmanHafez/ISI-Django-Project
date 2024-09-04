@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import *
 from .forms import OfficerForm
 from django.http import JsonResponse, HttpResponse
@@ -17,10 +17,27 @@ def officers_home_view(request):
 
 
 
-
-def addOfficer(request):
+def addOfficer(request, pk= None): # creates or Updates an officer
+    if pk:
+        officer = get_object_or_404(Officer, pk= pk)
+        if request.method == "POST":
+            form = OfficerForm(request.POST, request.FILES, instance= officer)
+            if form.is_valid():
+                form.instance.updated_by = request.user
+                form.save()
+                return HttpResponse(
+                    status=204,
+                    headers={
+                        'HX-Trigger': json.dumps({
+                            "showMessage": "تم تعديل ضابط",
+                            "officer_list_changed": None
+                        })
+                    })
+        else: # GET
+            form = OfficerForm(instance= officer)
     
-    if request.method == "POST":
+    # No PK, Create New
+    elif request.method == "POST":
         form = OfficerForm(request.POST, request.FILES)
         if form.is_valid():
             if form.instance.pk == None: # if New 
@@ -36,7 +53,7 @@ def addOfficer(request):
                     })
                 })
 
-    else:
+    else: # Empty Create
         form = OfficerForm()
 
 

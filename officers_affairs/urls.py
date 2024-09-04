@@ -4,7 +4,6 @@ from . import views
 from . import models
 
 urlpatterns = [
-   
     path('officers_home/', views.officers_home_view, name='home'),
     path('officers/', views.officers_view, name='officers'),
     # path('delete_officers/', views.officers_delete_view, name='delete'),
@@ -13,4 +12,5 @@ urlpatterns = [
     path('listOfficers/', generic.ListView.as_view(model= models.Officer), name="listOfficers"),
     path('addOfficer/', views.addOfficer, name="addOfficer" ),
     path('addOfficer/<int:pk>', views.addOfficer, name="addOfficer" ),
+    path('officerDelete/<int:pk>', views.officerDelete.as_view(), name="officerDelete" ),
 ]

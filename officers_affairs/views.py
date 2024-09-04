@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from .models import *
 from .forms import OfficerForm
 from django.http import JsonResponse, HttpResponse
+from django.views import generic
+from django.urls import reverse_lazy, reverse
 import json
 
 
@@ -68,9 +70,15 @@ def officers_view(request):
     return render(request, 'officers_affairs/officers.html', context)
 
 
-# def officers_delete_view(request):
-#     return render(request, 'officers_affairs/delete.html')
+class officerDelete(generic.DeleteView):
+    model = Officer
 
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        return HttpResponse( status=204, headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": "تم حذف ضابط",
+                        "officer_list_changed": None
+                    }) })
 
-# def officers_update_view(request):
-#     return render(request, 'officers_affairs/update.html')

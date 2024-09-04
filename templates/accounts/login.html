@@ -5,40 +5,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول</title>
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-</head>
-<body>
-    <div class="login-wrapper">
-        <div class="login-container">
-            <div class="logo">
-                <img src="{% static 'images/logo.png' %}" alt="Logo">
-            </div>
-            <h1>معهد نظم المعلومات</h1>
-            <h4> قم بتسجيل الدخول </h4>
-            
-            {% if form.errors %}
-                <div class="alert alert-danger">
-                    <ul>
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                        {% if form.non_field_errors %}
-                            {% for error in form.non_field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        {% endif %}
-                    </ul>
-                </div>
-            {% endif %}
+    
+    <style>
+        body{
+    background: url("{% static 'images/2.login_background.jpg' %}") no-repeat center center fixed; 
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">تسجيل الدخول</button>
-            </form>
-        </div>
+    font-family: sans-serif;
+    /* text-align: center; */
+    direction: rtl;
+}
+.login{
+    width: 450px;
+    height: 550px; 
+    padding: 0px 50px ;
+    position: absolute; 
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50% , -50%);
+    box-sizing: border-box;
+    background: rgba( 0 , 0 , 0 , 0.6);
+    border-radius: 1rem
+}
+.login img{
+    width: 100px;
+    height: 100px;
+    position: relative;
+    bottom: 50px;
+    /* left: .5px; */
+    right: 120px;
+    border-radius: 50px;
+}
+.login h1{
+    margin: 0; 
+    padding: 20px 20px;
+    color: #fff;
+    text-align: center;
+}
+.login label{
+    color: #fff; 
+    font-weight:bold ;
+}
+.login input{
+    width: 100%; 
+    margin: 10px 0px;
+}
+.login input[type="text"],
+.login input[type="password"]{
+    border: none;
+    outline: none;
+    height: 40px;
+    background: transparent;
+    border-bottom: 1px solid #fff;
+    color: #fff;
+    font-size: 16px;
+
+}
+.login input[type="submit"]{
+    border: none;
+    outline: none;
+    color: #fff;
+    height: 40px;
+    font-size: 20px;
+    background: peru;
+    border-radius: 15px;
+    cursor: pointer;
+    margin-bottom: 25px;
+    transition: .5s ease;
+
+}
+.login input[type="submit"]:hover{
+    transform: scale(1.1);
+
+}
+.login a {
+    text-decoration:none ;
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+
+    </style>
+
+</head>
+
+
+<body>
+    <div class="login">
+        <img src="{% static 'images/1.logo.png' %}" alt="Logo">
+        <h1>تسجيل الدخول </h1>
+        
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="تسجيل الدخول">
+        </form>
+
+        <a href="#">هل نسيت كلمه المرور</a>
     </div>
+    
 </body>
 </html>

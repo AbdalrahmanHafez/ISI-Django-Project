@@ -9,8 +9,8 @@ urlpatterns = [
     # path('delete_officers/', views.officers_delete_view, name='delete'),
     # path('update_officers/', views.officers_update_view, name='update'),
     # Fragments
-    path('listOfficers/', generic.ListView.as_view(model= models.Officer), name="listOfficers"),
-    path('addOfficer/', views.addOfficer, name="addOfficer" ),
-    path('addOfficer/<int:pk>', views.addOfficer, name="addOfficer" ),
-    path('officerDelete/<int:pk>', views.officerDelete.as_view(), name="officerDelete" ),
+    path('officers_list/', generic.ListView.as_view(model= models.Officer), name="officers_list"),
+    path('officers_add/', views.officers_add, name="officers_add" ),
+    path('officers_add/<int:pk>', views.officers_add, name="officers_add" ),
+    path('officers_delete/<int:pk>', views.officers_delete.as_view(), name="officers_delete" ),
 ]

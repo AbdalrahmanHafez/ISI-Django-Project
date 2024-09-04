@@ -19,7 +19,7 @@ def officers_home_view(request):
 
 
 
-def addOfficer(request, pk= None): # creates or Updates an officer
+def officers_add(request, pk= None): # creates or Updates an officer
     if pk:
         officer = get_object_or_404(Officer, pk= pk)
         if request.method == "POST":
@@ -59,7 +59,7 @@ def addOfficer(request, pk= None): # creates or Updates an officer
         form = OfficerForm()
 
 
-    return render(request, "officers_affairs/addOfficer.html", {'form': form})
+    return render(request, "officers_affairs/officer_add.html", {'form': form})
 
 
 def officers_view(request):
@@ -70,7 +70,7 @@ def officers_view(request):
     return render(request, 'officers_affairs/officers.html', context)
 
 
-class officerDelete(generic.DeleteView):
+class officers_delete(generic.DeleteView):
     model = Officer
 
     def post(self, request, *args, **kwargs):

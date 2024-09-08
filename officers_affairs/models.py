@@ -6,7 +6,6 @@ from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
 class Rank(models.Model):
-    
     RANK_CHOICES = [
         ('7','ملازم'),
         ('6','ملازم أول' ),
@@ -16,7 +15,6 @@ class Rank(models.Model):
         ('2', 'عقيد'),
         ('1', 'عميد'),
     ]
-    
     
     name = models.CharField(max_length=100, choices=RANK_CHOICES , unique=True)
     image = models.ImageField(upload_to='ranks/', null=True, blank=True)  # لحفظ صورة الرتبة

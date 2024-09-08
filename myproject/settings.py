@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-vu#tx$80pnhd@#o4t2qraxr4sgjb8$460#_*+-4bkoaa**3gm@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bootstrap5',
+    'django_filters',
 ]
 SITE_ID = 2
 
@@ -83,22 +84,25 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'django_apps',
-        'USER': 'django_apps',
-        'PASSWORD': 'APPSf0rDj@ng0',
-        'HOST': '10.10.1.8',
-        'PORT': '',  # Leave blank for default port
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'TrustServerCertificate=yes;'
-        },
-    },
+
     # 'default': {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": "local.sqlite3",
-    # }
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'django_apps',
+    #     'USER': 'django_apps',
+    #     'PASSWORD': 'APPSf0rDj@ng0',
+    #     'HOST': '10.10.1.8',
+    #     'PORT': '',  # Leave blank for default port
+    #     'OPTIONS': {
+    #         'driver': 'ODBC Driver 17 for SQL Server',
+    #         'extra_params': 'TrustServerCertificate=yes;'
+    #     },
+    # },
+
+    'default': {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "local.sqlite3",
+    }
+
 }
 
 

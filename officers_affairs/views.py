@@ -5,18 +5,18 @@ from django.http import JsonResponse, HttpResponse
 from django.views import generic
 from django.urls import reverse_lazy, reverse
 import json
-
+from . import filters
 
 
 def officers_home_view(request):
-    context ={
+
+    context= {
         'ranks':Rank.objects.all(),
-        'officer_list':Officer.objects.all(),
-        'form': OfficerForm()
+        'form': OfficerForm(),
+        'officers_filter': filters.OfficerFilter(request.GET)
     }
+
     return render(request, 'officers_affairs/home.html', context)
-
-
 
 
 def officers_add(request, pk= None): # creates or Updates an officer
@@ -82,3 +82,8 @@ class officers_delete(generic.DeleteView):
                         "officer_list_changed": None
                     }) })
 
+def officers_list(request):
+    ctx={
+        'officers_filter': filters.OfficerFilter(request.GET)
+    }
+    return render(request, 'officers_affairs/officer_list.html', ctx)

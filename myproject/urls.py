@@ -15,13 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.contrib.auth.decorators import login_required
+from django.urls import path, include, reverse_lazy
 from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.forms import ModelForm
 from django.conf.urls.static import static
 from myproject import settings
-from django.views.generic import CreateView
+from django.views.generic import CreateView, RedirectView
 from officers_affairs import models
 from django.http import HttpResponse
 import json
@@ -34,6 +35,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('test/', testView),
     path('officers_affairs/', include('officers_affairs.urls')),
+    path('', RedirectView.as_view(url=reverse_lazy("home")))
     
 ]
 if settings.DEBUG:

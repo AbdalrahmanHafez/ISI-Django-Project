@@ -48,8 +48,14 @@
         <span class="sr-only">Toggle Dropdown</span>
       </button>
       <div class="dropdown-menu">
+
+        {% if perms.officers_affairs.add_officer %}
         <a class="dropdown-item" hx-get="{% url "officers_add" pk=officer.pk %}" hx-target="#dialog">تعديل</a>
+        {% endif %}
+
+        {% if perms.officers_affairs.delete_officer %}
         <a class="dropdown-item" hx-get="{% url "officers_delete" pk=officer.pk %}" hx-target="#dialog">حذف</a>
+        {% endif %}
     <!-- Button trigger modal -->
       </div>
     </div>

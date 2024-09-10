@@ -1,4 +1,8 @@
 {% load static %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
@@ -101,8 +105,8 @@
     <div class="login">
         <img src="{% static 'images/1.logo.png' %}" alt="Logo">
         <h1>تسجيل الدخول </h1>
-        
-        {% if form.errors %}
+       
+        {% comment %} {% if form.errors %}
             <div class="alert alert-danger">
                 <ul>
                     {% for field in form %}
@@ -117,11 +121,11 @@
                     {% endif %}
                 </ul>
             </div>
-        {% endif %}
+        {% endif %} {% endcomment %}
 
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            {% bootstrap_form form %}
             <input type="submit" value="تسجيل الدخول">
         </form>
 

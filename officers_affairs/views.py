@@ -1,4 +1,6 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from .models import *
 from .forms import OfficerForm
 from django.http import JsonResponse, HttpResponse
@@ -19,6 +21,8 @@ def officers_home_view(request):
     return render(request, 'officers_affairs/home.html', context)
 
 
+@login_required
+@permission_required('officers_affairs.add_officer', raise_exception=True)
 def officers_add(request, pk= None): # creates or Updates an officer
     if pk:
         officer = get_object_or_404(Officer, pk= pk)
@@ -70,7 +74,9 @@ def officers_view(request):
     return render(request, 'officers_affairs/officers.html', context)
 
 
-class officers_delete(generic.DeleteView):
+class officers_delete(PermissionRequiredMixin, generic.DeleteView):
+    permission_required = ('officers_affairs.delete_officer', )
+
     model = Officer
 
     def post(self, request, *args, **kwargs):

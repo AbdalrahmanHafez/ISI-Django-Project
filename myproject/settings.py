@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_require_login.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -165,4 +166,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_URL = "/login/"
+# LOGOUT_REDIRECT_URL = "/logout/"
+REQUIRE_LOGIN_PUBLIC_URLS = (LOGIN_URL,  )
 

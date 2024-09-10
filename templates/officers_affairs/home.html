@@ -7,13 +7,22 @@
 {% load static %}
 
 
-
 <div style="direction: rtl;" class="wrapper">
-
-    <!-- Content Wrapper. Contains page content -->
-    <div   class="content-wrapper">
-      <!-- Content Header (Page header) -->
   
+  <!-- Content Wrapper. Contains page content -->
+  <div   class="content-wrapper">
+    <!-- Content Header (Page header) -->
+
+    {% comment %} TODO: permissions {% endcomment %}
+    {% comment %} {{ perms.officers_affairs }} {% endcomment %}
+    {% if perms.officers_affairs.delete_officer %}
+      <h5>user can Delete officer </h5>
+    {% endif %}
+
+    {% if perms.officers_affairs.add_officer %}
+      <h5>user can Add officer </h5>
+    {% endif %}
+
       <!--الاحصائيات-->
       <div class="content">
         <div class="container-fluid">
@@ -81,7 +90,10 @@
   
 
           <div class="d-flex gap-2 mb-3">
-            <button hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
+
+            {% if perms.officers_affairs.add_officer %}
+              <button hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
+          {% endif %}
             
             <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
               فلتر

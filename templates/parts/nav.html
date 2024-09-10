@@ -11,6 +11,9 @@
         <a href="#" class="nav-link">الرئيسية</a>
       </li>
 
+     
+
+      
     </ul>
 
     <!-- SEARCH FORM -->
@@ -24,5 +27,12 @@
         </div>
       </div>
     </form>
+
+    <form class="me-auto" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-light">تسجيل الخروج</button>
+    </form>
+
+
   </nav>
   <!-- /.navbar -->

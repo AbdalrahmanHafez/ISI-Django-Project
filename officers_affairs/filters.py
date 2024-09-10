@@ -37,16 +37,24 @@ class OfficerFilter(django_filters.FilterSet):
         label="الرقم القومي"
     )
 
-    rank = django_filters.ModelMultipleChoiceFilter(
+
+    rank = django_filters.ModelChoiceFilter(
         field_name='rank',
         queryset=Rank.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.Select,  
     )
+    
+    # rank = django_filters.ModelMultipleChoiceFilter(
+    #     field_name='rank',
+    #     queryset=Rank.objects.all(),
+    #     widget=forms.CheckboxSelectMultiple,
+    # )
 
 
     class Meta:
         model = Officer
         # fields = {"full_name": ['icontains']}
+        # fields = ["rank"]
         fields = {}
 
 

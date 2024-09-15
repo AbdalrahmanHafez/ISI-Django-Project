@@ -1,0 +1,10 @@
+asgiref==3.8.1
+Django==5.0.8
+mssql-django==1.5
+pillow==10.4.0
+pyodbc==5.1.0
+pytz==2024.1
+sqlparse==0.5.1
+tzdata==2024.1
+# u must download ODBC Driver 17 for SQL Server and install it
+django-bootstrap5==24.2

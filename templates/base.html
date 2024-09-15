@@ -1,4 +1,5 @@
 {% load static %}
+{% load mathfilters %}
 
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -146,12 +147,12 @@
           type: 'pie',
           data: {
             datasets: [{
-              data: ['35','25','40'],
+              data: [{{count_officers_availble}}, {{count_officers_total|sub:count_officers_availble}}],
               backgroundColor :["#27c100","#f3545d","#fdaf4b"],
               borderWidth: 10,
               
             }],
-            labels: ['Available', 'Sold', 'Rented'] 
+            labels: ['موجود', 'خارج'] 
           },
           options : {
             responsive: true, 

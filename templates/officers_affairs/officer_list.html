@@ -22,7 +22,7 @@
       </div>
       {% endfor %}
 
-      <button type="submit" class="btn btn-primary">تحديث</button>
+      <button type="submit" class="btn btn-primary">بحث</button>
   </div>
 </div>
 
@@ -34,21 +34,22 @@
   {{ officer.full_name }}<br />
   {% endfor %} {% endcomment %}
 
-
   {% for officer in officers_filter.qs%}
-  {% if officer.status == 1 %}
+  {% if officer.status_id == 1 %}
+  {% if perms.officers_affairs.view_officer %}
     <!-- الضباط -->
-  <div id="" class="col-md-4">
+  <div id="" class="col-md-4 officer officer{{ officerRank.rank.id }} officerhide ">
       <!-- Widget: user widget style 1 -->
     <div id="" class="card card-widget widget-user ">
       <!-- Add the bg color to the header using any of the bg-* classes -->
     <!-- قائمة منسدلة -->
     <div style="position: absolute;" class="btn-group">   
-      <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"  aria-haspopup="true" aria-expanded="false">
+      <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"  aria-haspopup="false" aria-expanded="false">
         <span class="sr-only">Toggle Dropdown</span>
       </button>
       <div class="dropdown-menu">
 
+        
         {% if perms.officers_affairs.add_officer %}
         <a class="dropdown-item" hx-get="{% url "officers_add" pk=officer.pk %}" hx-target="#dialog">تعديل</a>
         {% endif %}
@@ -102,14 +103,18 @@
             <!-- /.col -->
       
           <!-- /.row -->
+          
     </div>
+    {% endif %}
     </div>
       <!-- /.widget-user -->
+      
   </div>
     <!-- نهاية الضابط -->
     
-
+    
   {% endif %}
   {% endfor %}
+
 
 </div>

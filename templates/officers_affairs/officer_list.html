@@ -30,15 +30,12 @@
 
   </form>
 
-  {% comment %} {% for officer in officers_filter.qs %}
-  {{ officer.full_name }}<br />
-  {% endfor %} {% endcomment %}
 
   {% for officer in officers_filter.qs%}
   {% if officer.status_id == 1 %}
   {% if perms.officers_affairs.view_officer %}
     <!-- الضباط -->
-  <div id="" class="col-md-4 officer officer{{ officerRank.rank.id }} officerhide ">
+  <div id="" class="col-md-4">
       <!-- Widget: user widget style 1 -->
     <div id="" class="card card-widget widget-user ">
       <!-- Add the bg color to the header using any of the bg-* classes -->
@@ -114,6 +111,9 @@
     
     
   {% endif %}
+
+  {% empty %}
+    <h4>لايوجد</h4>
   {% endfor %}
 
 

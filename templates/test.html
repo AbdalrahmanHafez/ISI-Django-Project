@@ -1,1 +1,4 @@
-hello world
+{% load static %}
+<script src="{% static "js/htmx.min.js" %} "></script>
+
+<div hx-on:click="alert('Clicked!')">Click</div>

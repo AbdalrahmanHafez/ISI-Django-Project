@@ -1,33 +1,53 @@
 {% load static %}
 {% load django_bootstrap5 %}
+{% load custom_filters %}
+
 <div class="row" id="officers_list" hx-trigger="officer_list_changed from:body" hx-get="{% url 'officers_list' %}" hx-target="this">
   <form hx-get="{% url "officers_list" %}" hx-target="#officers_list" class="">
-   
 
-    {% comment %} {% bootstrap_form officers_filter.form %} {% endcomment %}
+    <!-- Rank Filter buttons -->
 
-<div class="collapse" id="collapseExample">
-  <div class="card card-body">
-    {% for field in officers_filter.form.visible_fields %}
-      <div class="">
-        <label>{{ field.label }}</label>
-        {% comment %} {% for f in field  %}
-          {{ f }}
-        {% endfor %} {% endcomment %}
-        {{ field }}
-        
-        {% for error in field.errors %}
-        <span class="help-block">{{ error }}</span>
-        {% endfor %}
-      </div>
+    <div class="btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+      <input type="radio" class="btn-check" id="rank-null" autocomplete="off"
+          {% if officers_filter.form.rank.value == None %} checked {% endif %}
+          hx-on:click="this.closest('form').querySelector('[name=rank]').value = undefined; document.getElementById('filterSubmitBtn').click()"
+          href="javascript:void(0)"
+      >
+      <label class="btn btn-outline-secondary" for="rank-null">*</label>
+
+      {% for rank in ranks %}
+      <input type="radio" class="btn-check" id="rank-{{rank.id}}" autocomplete="off"
+          {% if officers_filter.form.rank.value == rank.id|to_string %} checked {% endif %}
+          hx-on:click="this.closest('form').querySelector('[name=rank]').value = {{rank.id}}; document.getElementById('filterSubmitBtn').click()"
+          href="javascript:void(0)"
+      >
+      <label class="btn btn-outline-primary" for="rank-{{rank.id}}">{{rank.name}}</label>
       {% endfor %}
+    </div>
+          
 
-      <button type="submit" class="btn btn-primary">بحث</button>
-  </div>
-</div>
+      {% comment %} {% bootstrap_form officers_filter.form %} {% endcomment %}
 
+    <div class="collapse" id="collapseExample">
+      <div class="card card-body">
+        {% for field in officers_filter.form.visible_fields %}
+          <div class="">
+            <label>{{ field.label }}</label>
+            {% comment %} {% for f in field  %}
+              {{ f }}
+            {% endfor %} {% endcomment %}
+            {{ field }}
+            
+            {% for error in field.errors %}
+            <span class="help-block">{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% endfor %}
 
-
+          <button type="submit" class="btn btn-primary" id="filterSubmitBtn">بحث</button>
+      </div>
+    </div>
+  
   </form>
 
 

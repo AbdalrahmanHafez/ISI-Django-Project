@@ -92,7 +92,8 @@ class officers_delete(PermissionRequiredMixin, generic.DeleteView):
 
 def officers_list(request):
     ctx={
-        'officers_filter': filters.OfficerFilter(request.GET)
+        'ranks':Rank.objects.all(),
+        'officers_filter': filters.OfficerFilter(request.GET),
     }
     return render(request, 'officers_affairs/officer_list.html', ctx)
 

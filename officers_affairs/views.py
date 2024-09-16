@@ -15,7 +15,9 @@ def officers_home_view(request):
     context= {
         'ranks':Rank.objects.all(),
         'form': OfficerForm(),
-        'officers_filter': filters.OfficerFilter(request.GET)
+        'officers_filter': filters.OfficerFilter(request.GET),
+        'count_officers_total': Officer.objects.count(),
+        'count_officers_availble': Officer.objects.filter(unit_status__name="موجود").count(),
     }
 
     return render(request, 'officers_affairs/home.html', context)
@@ -90,7 +92,8 @@ class officers_delete(PermissionRequiredMixin, generic.DeleteView):
 
 def officers_list(request):
     ctx={
-        'officers_filter': filters.OfficerFilter(request.GET)
+        'ranks':Rank.objects.all(),
+        'officers_filter': filters.OfficerFilter(request.GET),
     }
     return render(request, 'officers_affairs/officer_list.html', ctx)
 

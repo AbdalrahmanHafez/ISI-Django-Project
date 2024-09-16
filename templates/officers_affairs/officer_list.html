@@ -1,40 +1,59 @@
 {% load static %}
 {% load django_bootstrap5 %}
+{% load custom_filters %}
+
 <div class="row" id="officers_list" hx-trigger="officer_list_changed from:body" hx-get="{% url 'officers_list' %}" hx-target="this">
   <form hx-get="{% url "officers_list" %}" hx-target="#officers_list" class="">
-   
 
-    {% comment %} {% bootstrap_form officers_filter.form %} {% endcomment %}
+    <!-- Rank Filter buttons -->
 
-<div class="collapse" id="collapseExample">
-  <div class="card card-body">
-    {% for field in officers_filter.form.visible_fields %}
-      <div class="">
-        <label>{{ field.label }}</label>
-        {% comment %} {% for f in field  %}
-          {{ f }}
-        {% endfor %} {% endcomment %}
-        {{ field }}
-        
-        {% for error in field.errors %}
-        <span class="help-block">{{ error }}</span>
-        {% endfor %}
-      </div>
+    <div class="btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+      <input type="radio" class="btn-check" id="rank-null" autocomplete="off"
+          {% if officers_filter.form.rank.value == None %} checked {% endif %}
+          hx-on:click="this.closest('form').querySelector('[name=rank]').value = undefined; document.getElementById('filterSubmitBtn').click()"
+          href="javascript:void(0)"
+      >
+      <label class="btn btn-outline-secondary" for="rank-null">*</label>
+
+      {% for rank in ranks %}
+      <input type="radio" class="btn-check" id="rank-{{rank.id}}" autocomplete="off"
+          {% if officers_filter.form.rank.value == rank.id|to_string %} checked {% endif %}
+          hx-on:click="this.closest('form').querySelector('[name=rank]').value = {{rank.id}}; document.getElementById('filterSubmitBtn').click()"
+          href="javascript:void(0)"
+      >
+      <label class="btn btn-outline-primary" for="rank-{{rank.id}}">{{rank.name}}</label>
       {% endfor %}
+    </div>
+          
 
-      <button type="submit" class="btn btn-primary">تحديث</button>
-  </div>
-</div>
+      {% comment %} {% bootstrap_form officers_filter.form %} {% endcomment %}
 
+    <div class="collapse" id="collapseExample">
+      <div class="card card-body">
+        {% for field in officers_filter.form.visible_fields %}
+          <div class="">
+            <label>{{ field.label }}</label>
+            {% comment %} {% for f in field  %}
+              {{ f }}
+            {% endfor %} {% endcomment %}
+            {{ field }}
+            
+            {% for error in field.errors %}
+            <span class="help-block">{{ error }}</span>
+            {% endfor %}
+          </div>
+          {% endfor %}
 
-
+          <button type="submit" class="btn btn-primary" id="filterSubmitBtn">بحث</button>
+      </div>
+    </div>
+  
   </form>
-
-
 
 
   {% for officer in officers_filter.qs%}
   {% if officer.status_id == 1 %}
+  {% if perms.officers_affairs.view_officer %}
     <!-- الضباط -->
   <div id="" class="col-md-4">
       <!-- Widget: user widget style 1 -->
@@ -42,11 +61,12 @@
       <!-- Add the bg color to the header using any of the bg-* classes -->
     <!-- قائمة منسدلة -->
     <div style="position: absolute;" class="btn-group">   
-      <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"  aria-haspopup="true" aria-expanded="false">
+      <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"  aria-haspopup="false" aria-expanded="false">
         <span class="sr-only">Toggle Dropdown</span>
       </button>
       <div class="dropdown-menu">
 
+        
         {% if perms.officers_affairs.add_officer %}
         <a class="dropdown-item" hx-get="{% url "officers_add" pk=officer.pk %}" hx-target="#dialog">تعديل</a>
         {% endif %}
@@ -100,14 +120,21 @@
             <!-- /.col -->
       
           <!-- /.row -->
+          
     </div>
+    {% endif %}
     </div>
       <!-- /.widget-user -->
+      
   </div>
     <!-- نهاية الضابط -->
     
-
+    
   {% endif %}
+
+  {% empty %}
+    <h4>لايوجد</h4>
   {% endfor %}
+
 
 </div>

@@ -23,7 +23,7 @@ from django.forms import ModelForm
 from django.conf.urls.static import static
 from myproject import settings
 from django.views.generic import CreateView, RedirectView
-from officers_affairs import models
+from officers_affairs import models, views
 from django.http import HttpResponse
 import json
 
@@ -35,7 +35,8 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('test/', testView),
     path('officers_affairs/', include('officers_affairs.urls')),
-    path('', RedirectView.as_view(url=reverse_lazy("home")))
+    path('', RedirectView.as_view(url=reverse_lazy("home"))),
+    path('about/', views.about, name='about'),
     
 ]
 if settings.DEBUG:

@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="{% static  'dist/css/adminlte_ar.min.css' %}">
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/stylesdark.css' %}">
     
     {% load django_bootstrap5 %}
     {% bootstrap_css %}
@@ -176,10 +178,34 @@
         })
 
       })
+
+   
     </script>
 
 
-
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+      const themeToggleButton = document.getElementById('theme-toggle');
+      const body = document.body;
+  
+      // Load the saved theme from localStorage
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+          body.classList.add(savedTheme);
+      }
+  
+      themeToggleButton.addEventListener('click', () => {
+          if (body.classList.contains('dark-mode')) {
+              body.classList.remove('dark-mode');
+              localStorage.setItem('theme', '');
+          } else {
+              body.classList.add('dark-mode');
+              localStorage.setItem('theme', 'dark-mode');
+          }
+      });
+  });
+  </script>
+  
 
   </body>
 </html>

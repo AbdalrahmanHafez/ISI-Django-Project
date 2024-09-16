@@ -13,4 +13,5 @@ urlpatterns = [
     path('officers_add/', views.officers_add, name="officers_add" ),
     path('officers_add/<int:pk>', views.officers_add, name="officers_add" ),
     path('officers_delete/<int:pk>', views.officers_delete.as_view(), name="officers_delete" ),
+    path('about/', views.about, name='about'),
 ]

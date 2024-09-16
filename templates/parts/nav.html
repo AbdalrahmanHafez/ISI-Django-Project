@@ -8,7 +8,7 @@
         <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">الرئيسية</a>
+        <a href="{% url 'home' %}" class="nav-link">الرئيسية</a>
       </li>
 
      
@@ -27,9 +27,12 @@
         </div>
       </div>
     </form>
-
+    <button id="theme-toggle" class="theme-toggle-button">
+      <i class="fas fa-moon"></i>
+  </button>
     <form class="me-auto" method="post" action="{% url 'logout' %}">
         {% csrf_token %}
+        
         <button type="submit" class="btn btn-light">تسجيل الخروج</button>
     </form>
 

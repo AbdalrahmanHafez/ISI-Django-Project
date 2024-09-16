@@ -93,3 +93,7 @@ def officers_list(request):
         'officers_filter': filters.OfficerFilter(request.GET)
     }
     return render(request, 'officers_affairs/officer_list.html', ctx)
+
+
+def about(request):
+    return render(request, 'about.html')

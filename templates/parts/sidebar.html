@@ -3,18 +3,21 @@
   <!-- Main Sidebar Container -->
   <aside style="position: fixed;" class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="#" class="brand-link">
+    <a href="{% url 'home' %}" class="brand-link">
       <span class="brand-text font-weight-bold">منظومة شئون ضباط</span>
     </a>
 
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
+       
+
+      
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">مركز الحاسب</a>
+          <a class="text-bold">المستخدم الأن  </a><a href="#" class="d-block">  {{request.user.username }} </a>
         </div>
       </div>
 
@@ -23,10 +26,10 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{% url 'officers' %}" class="nav-link">
               <i class="nav-icon fas fa-th"></i>
               <p>
-                New Books
+                قائمة جميع الضباط
               </p>
             </a>
           </li>
@@ -82,12 +85,12 @@
               <p>تم استعارته</p>
             </a>
           </li>
-          <li style="cursor: pointer;" class="nav-item">
-            <a id="" class="nav-link">
-              <i class="nav-icon far fa-circle text-info"></i>
-              <p>متاح</p>
+          <li class="nav-item">
+            <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
+                <i class="nav-icon fas fa-key"></i>
+                <p>تغيير كلمة المرور</p>
             </a>
-          </li>
+        </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

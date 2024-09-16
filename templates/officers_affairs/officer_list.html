@@ -30,13 +30,11 @@
 
   </form>
 
-  {% comment %} {% for officer in officers_filter.qs %}
-  {{ officer.full_name }}<br />
-  {% endfor %} {% endcomment %}
+
 
 
   {% for officer in officers_filter.qs%}
-  {% if officer.status == 1 %}
+  {% if officer.status_id == 1 %}
     <!-- الضباط -->
   <div id="" class="col-md-4">
       <!-- Widget: user widget style 1 -->

@@ -1,5 +1,5 @@
 {% load static %}
-{% load mathfilters %}
+
 
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -26,8 +26,7 @@
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
     <script src="{% static  'dist/js/adminlte.js' %}"></script>
     <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
-    {% comment %} <script src="{% static  'dist/js/demo.js' %}"></script> {% endcomment %}
-    <script src="{% static "js/htmx.min.js" %} "></script>
+    <script src="{% static 'js/htmx.min.js' %} "></script>
 
   </head>
   <body dir="rtl" class="hold-transition sidebar-mini">
@@ -42,172 +41,9 @@
 
 
 
-    <script>
-      $(document).ready(function(){
-        $('#myModal').on('shown.bs.modal', function () {
-          $('#myInput').trigger('focus')
-        });
-    /*here i will make loop for get id category and status for contact with books */
-    /*حساب اجمالي الارباح و هي عبارة عن حاصل جمع سعر الكتب عند البيع بالاضافة الى سعر استعارة الكتاب*/
-      });
-
-      $(function () {
-        'use strict'
-      
-        var ticksStyle = {
-          fontColor: '#495057',
-          fontStyle: 'bold'
-        }
-
-        var mode      = 'index'
-        var intersect = true
-
-        var $salesChart = $('#sales-chart')
-
-        var salesChart  = new Chart($salesChart, {
-
-          type   : 'bar',
-          
-          data   : {
-
-            labels  : [
-                
-
-              'تفاصيل الارباح',
-
-            ],
+    
 
 
-            datasets: [
-              {
-                backgroundColor: '#007bff',
-                borderColor    : '#007bff',
-                data           : [ 
-                    '50',
-                ]
-              },
-              {
-                backgroundColor: '#ced4da',
-                borderColor    : '#ced4da',
-                data           : [ 
-                      '30',
-                ]
-              }
-            ]
-          },
-
-        
-        
-        options: {
-            maintainAspectRatio: false,
-            tooltips           : {
-              mode     : mode,
-              intersect: intersect
-            },
-            hover              : {
-              mode     : mode,
-              intersect: intersect
-            },
-            legend             : {
-              display: false
-            },
-            scales             : {
-              yAxes: [{
-                // display: false,
-                gridLines: {
-                  display      : true,
-                  lineWidth    : '4px',
-                  color        : 'rgba(0, 0, 0, .2)',
-                  zeroLineColor: 'transparent'
-                },
-                ticks    : $.extend({
-                  beginAtZero: true,
-
-                  // Include a dollar sign in the ticks
-                  callback: function (value, index, values) {
-                    if (value >= 1000) {
-                      value /= 1000
-                      value += 'k'
-                    }
-                    return '$' + value
-                  }
-                }, ticksStyle)
-              }],
-              xAxes: [{
-                display  : true,
-                gridLines: {
-                  display: false
-                },
-                ticks    : ticksStyle
-              }]
-            }
-          }
-        });
-        
-      var pieChart = document.getElementById('visitors-chart').getContext('2d')
-
-        var myPieChart = new Chart(pieChart, {
-          type: 'pie',
-          data: {
-            datasets: [{
-              data: [{{count_officers_availble}}, {{count_officers_total|sub:count_officers_availble}}],
-              backgroundColor :["#27c100","#f3545d","#fdaf4b"],
-              borderWidth: 10,
-              
-            }],
-            labels: ['موجود', 'خارج'] 
-          },
-          options : {
-            responsive: true, 
-            maintainAspectRatio: false,
-            legend: {
-              position : 'bottom',
-              labels : {
-                fontColor: '#000',
-                fontSize: 15,
-                usePointStyle : true,
-                padding:30
-              }
-            },
-            pieceLabel: {
-              render: 'percentage',
-              fontColor: 'white',
-              fontSize: 14,
-            },
-
-
-          }
-        })
-
-      })
-
-   
-    </script>
-
-
-<script>
-  document.addEventListener('DOMContentLoaded', (event) => {
-      const themeToggleButton = document.getElementById('theme-toggle');
-      const body = document.body;
-  
-      // Load the saved theme from localStorage
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-          body.classList.add(savedTheme);
-      }
-  
-      themeToggleButton.addEventListener('click', () => {
-          if (body.classList.contains('dark-mode')) {
-              body.classList.remove('dark-mode');
-              localStorage.setItem('theme', '');
-          } else {
-              body.classList.add('dark-mode');
-              localStorage.setItem('theme', 'dark-mode');
-          }
-      });
-  });
-  </script>
-  
 
   </body>
 </html>

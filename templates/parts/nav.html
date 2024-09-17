@@ -7,12 +7,14 @@
         <li class="nav-item d-none d-sm-inline-block"> <a href="{% url 'home' %}" class="nav-link">الرئيسية</a> </li>
         
         <ul class="nav-item d-none d-md-block">
-          <form method="GET" class="form-inline ml-3">
+          <form method="GET" action="{% url 'officers' %}" class="form-inline ml-3">
             <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" name="search_name" type="search" placeholder="Search" aria-label="Search">
+              <input class="form-control form-control-navbar" name="search_name" type="search" placeholder="بحث بالاسم" aria-label="Search">
               <div class="input-group-append">
-                  <button class="btn btn-navbar" type="submit"> <i class="fas fa-search"></i> </button>
-                </div>
+                <button class="btn btn-navbar" type="submit">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
             </div>
           </form>
         </ul>
@@ -20,7 +22,7 @@
 
         <button class="theme-toggle-button" id='darkModeButton'> <i class="fas fa-moon"></i> </button>
 
-    </ul>
+      </ul>
               
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}

@@ -167,3 +167,25 @@ button img {
 .description-block>.description-text {
     text-transform: uppercase;
 }
+
+.dropdown-item.edit-item:hover {
+    background-color: #28a745; /* Green for edit */
+    color: white;
+}
+
+.dropdown-item.delete-item:hover {
+    background-color: #dc3545; /* Red for delete */
+    color: white;
+}
+
+/* Optional: To change the button color on hover */
+.btn.dropdown-toggle:hover {
+    background-color: #007bff; /* Customize the button hover color if needed */
+    color: white;
+}
+
+
+.user-panel .info a:hover {
+    color: #0056b3; /* Darker blue on hover */
+    text-decoration: underline; /* Add underline on hover */
+  }

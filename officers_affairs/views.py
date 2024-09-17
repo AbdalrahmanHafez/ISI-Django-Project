@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from .models import *
-from .forms import OfficerForm
+from .forms import OfficerForm,RankForm
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 from django.urls import reverse_lazy, reverse
@@ -10,7 +10,15 @@ import json
 from . import filters
 
 
+
+@permission_required('officers_affairs.view_rank', raise_exception=True)
 def officers_home_view(request):
+    
+    if request.method == 'POST':
+        add_rank = RankForm(request.POST, request.FILES)
+        if add_rank.is_valid():
+            add_rank.save()
+            
 
     context= {
         'ranks':Rank.objects.all(),
@@ -18,6 +26,7 @@ def officers_home_view(request):
         'officers_filter': filters.OfficerFilter(request.GET),
         'count_officers_total': Officer.objects.count(),
         'count_officers_availble': Officer.objects.filter(unit_status__name="موجود").count(),
+        'formrank':RankForm(),
     }
 
     return render(request, 'officers_affairs/home.html', context)
@@ -69,9 +78,17 @@ def officers_add(request, pk= None): # creates or Updates an officer
 
 
 def officers_view(request):
+    search=Officer.objects.order_by('rank')
+    title = None
+    if 'search_name' in request.GET:
+        title = request.GET.get('search_name')
+        if title:
+            search = search.filter(full_name__icontains=title)
+    
+    
     context ={
         'ranks':Rank.objects.all(),
-        'officers': Officer.objects.order_by('-rank'),
+        'officers': search,
     }
     return render(request, 'officers_affairs/officers.html', context)
 

@@ -1,19 +1,31 @@
-  
+{% load static %}
+
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
     <div class="sidebar-brand">
        <a href="{% url "home" %}" class="brand-link"> 
-        {% comment %} <img src="../../dist/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow">  {% endcomment %}
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width:60px; height:60px;" class="me-1">
         <span class="brand-text fw-light">منظومة شئون ضباط</span>
       </a>
     </div>
        
     <div class="sidebar-wrapper">
 
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-        <div class="image">
+      
+      <!-- Date and Time -->
+        <nav class="d-flex justify-content-center">
+          <span id="current-date" style="font-size: 14px; color: #dcdedf;"></span>_
+          <span id="current-time" style="font-size: 14px; color: #dcdedf;"></span>
+        </nav>
+
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center" style="background-color: #f4f6f9; padding: 10px; border-radius: 10px;">
+        <div class="image me-3">
+          <img src="{% static 'images/user-placeholder.png' %}" class="rounded-circle elevation-3" alt="User Image" style="width: 50px; height: 50px; border: 2px solid #007bff; padding: 3px; box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23)!important">
         </div>
         <div class="info">
-          <a class="text-bold">المستخدم الأن  </a><a href="#" class="d-block">  {{request.user.username }} </a>
+          <span class="text-bold d-block" style="font-size: 14px; color: #6c757d;">المستخدم الآن</span>
+          <a href="#" class="d-block" style="font-size: 18px; font-weight: bold; color: #007bff; text-decoration: none;">
+            {{ request.user.username }}
+          </a>
         </div>
       </div>
 
@@ -24,26 +36,38 @@
 
                 <li class="nav-item">
                   <a href="#" class="nav-link active"> <i class="nav-icon fas fa-star"></i> <p> الرتب <i class="fas fa-angle-left right"></i> </p> </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item"> <a id="addcat" href="#" class="nav-link"> <i class="fa fa-plus "></i> <p  class="text-light"> Add New </p> </a> </li> 
+                    <ul class="nav nav-treeview">
+                      {% if perms.officers_affairs.add_rank %}  
+                          <li class="nav-item">
+                            <a id="addrank" href="#" class="nav-link">
+                                <i class="fa fa-plus "></i>
+                                <p  class="text-light"> إضافة </p>
+                            </a>
+                          </li> 
+                      <form id="rank_add_form" method="POST" enctype="multipart/form-data" data-bs-theme="light">
+                      <div id="rankinput">
+                        {% csrf_token %}
+                          {{formrank.as_p}}
 
-                    <form id="cat" method="POST">
-                  
-                        <input type="text" class="form-control">
+                          <button type="submit" class="btn btn-success">حفظ</button>
+                          <button id="backrank" class="btn btn-primary ">تراجع</button>
+                      </div>
+                      </form> 
+                      {% endif %}
+                      {% if perms.officers_affairs.view_rank %}
+                      {% for rank in ranks %}
+                          <li style="cursor: pointer;" class="nav-item">
+                            <a id="" class="nav-link">
+                              <i class="far fa-circle nav-icon"></i>
+                              <p>{{ rank.name }}</p>
+                            </a>
+                          </li>
+                      {% endfor %}
+                      {% endif %}    
+                
 
-                        <button type="submit" class="btn btn-success">save</button>
-                        <button id="backcat" class="btn btn-primary ">back</button>
-                    </form>  
-                    {% for rank in ranks %}
-                        <li style="cursor: pointer;" class="nav-item">
-                          <a id="" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>{{ rank.name }}</p>
-                          </a>
-                        </li>
-                    {% endfor %}
-                  </ul>
-              </li>
+                    </ul>
+          </li>
               
           <li class="nav-header">الكتب المستعارة</li>
           
@@ -61,12 +85,57 @@
           </li>
           <li class="nav-item">
             <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                <i class="nav-icon fas fa-key"></i>
+                <i class="nav-icon fas fa-key "></i>
                 <p>تغيير كلمة المرور</p>
             </a>
         </li>
+        </ul>
+      </nav>
+       
 
-            </ul> <!--end::Sidebar Menu-->
-        </nav>
-    </div> <!--end::Sidebar Wrapper-->
-</aside> <!--end::Sidebar--> <!--begin::App Main-->
+      <!-- /.sidebar-menu -->
+    </div>
+
+    <!-- /.sidebar -->
+
+                  
+
+  </aside>
+
+
+
+  <!-- في المكان ده هحط المحتوى -->
+
+
+
+<!-- JavaScript for real-time Arabic Date and Time in 12-hour format -->
+<script>
+  function updateDateTime() {
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Cairo' };
+    const optionsTime = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, timeZone: 'Africa/Cairo' };
+    
+    const now = new Date();
+    const date = now.toLocaleDateString('ar-EG', optionsDate);
+    const time = now.toLocaleTimeString('ar-EG', optionsTime);
+
+    document.getElementById('current-date').textContent = date;
+    document.getElementById('current-time').textContent = time;
+  }
+
+  // Update date and time every second
+  setInterval(updateDateTime, 1000);
+
+  // Initial call to set the time immediately
+  updateDateTime();
+
+
+
+$('#rank_add_form').click(function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+});
+
+</script>
+
+
+

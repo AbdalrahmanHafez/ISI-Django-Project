@@ -9,6 +9,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <title>معهد نظم المعلومات</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/ISILogo.png' %}">
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
 
     <!-- IonIcons -->
@@ -47,10 +48,27 @@
       {% include 'parts/sidebar.html' %}
 
       
-      {% block content %} {% endblock %}
+      <main class="app-main">
+        {% block content %} {% endblock %}
+
+      </main>
       
       {% include 'parts/footer.html' %}
     </div>
+
+
+    
+<script>
+  $('#rankinput').hide()
+  $('#addrank').click(function(){
+    $('#rankinput').show()
+  });
+
+  $('#backrank').click(function(){
+    $('#rankinput').hide()
+  });
+</script>
+
 
 
 

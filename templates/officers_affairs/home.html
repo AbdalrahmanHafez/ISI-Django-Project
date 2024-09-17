@@ -7,10 +7,9 @@
 {% load static %}
 {% load mathfilters %}
 
-<div style="direction: rtl;" class="">
   
   <!-- Content Wrapper. Contains page content -->
-  <div   class="">
+  
     <!-- Content Header (Page header) -->
 
    
@@ -28,7 +27,7 @@
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span class="text-bold text-lg">{{count_officers_total}}</span>
+                      <span class="fw-bold fs-4">{{count_officers_total}}</span>
                       <span>اجمالي عدد الضباط</span>
                     </p>  
                   </div>
@@ -47,13 +46,13 @@
               <div class="card">
                 <div class="card-header border-0">
                   <div class="d-flex justify-content-between">
-                    <h3 class="card-title">تيست</h3>   
+                    <h3 class="card-title">إحصائيات</h3>   
                   </div>
                 </div>    
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span id="totalsalarys" class="text-bold text-lg">$250</span><br></p>
+                      <span id="totalsalarys" class="fw-bold fs-5">عدد الطلبات</span><br></p>
                   </div>
                   <!-- /.d-flex -->
   
@@ -83,11 +82,12 @@
           <div class="d-flex gap-2 mb-2 mt-3">
 
             {% if perms.officers_affairs.add_officer %}
-              <button hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
+            <button class="btn btn-primary mb-3" hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
             {% endif %}
             
-            <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-              بحث
+            <!-- Filter options -->
+            <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+              خيارات بحث متقدمة
             </button>
           </div>
   
@@ -102,15 +102,14 @@
               
 
       </div>
-    </div>
         <!-- /.container-fluid -->
-  </div>
+  
       <!-- /.content -->
 </div>
     <!-- /.content-wrapper -->
 
 <!-- Modal Placeholder -->
-<div id="modal" class="modal fade" >
+<div id="modal" class="modal fade">
     <div id="dialog" class="modal-dialog" hx-target="this"></div>
 </div>
 
@@ -123,7 +122,6 @@
         aria-label="Close"></button>
     </div>
     </div>
-</div>
 
 <script>
   const modal = new bootstrap.Modal(document.getElementById("modal"))
@@ -191,7 +189,7 @@
         labels  : [
             
 
-          'تفاصيل الارباح',
+          'تفاصيل الأجازات',
 
         ],
 
@@ -201,7 +199,7 @@
             backgroundColor: '#007bff',
             borderColor    : '#007bff',
             data           : [ 
-                '50',
+                '30',
             ]
           },
           {
@@ -209,6 +207,13 @@
             borderColor    : '#ced4da',
             data           : [ 
                   '30',
+            ]
+          },
+          {
+            backgroundColor: '#250',
+            borderColor    : '#ced4da',
+            data           : [ 
+                  '40',
             ]
           }
         ]

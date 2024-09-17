@@ -3,6 +3,7 @@ from django.views import generic
 from . import views
 from . import models
 
+
 urlpatterns = [
     path('officers_home/', views.officers_home_view, name='home'),
     path('officers/', views.officers_view, name='officers'),
@@ -13,5 +14,6 @@ urlpatterns = [
     path('officers_add/', views.officers_add, name="officers_add" ),
     path('officers_add/<int:pk>', views.officers_add, name="officers_add" ),
     path('officers_delete/<int:pk>', views.officers_delete.as_view(), name="officers_delete" ),
+    
    
 ]

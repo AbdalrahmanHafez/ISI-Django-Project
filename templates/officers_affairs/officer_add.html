@@ -1,4 +1,4 @@
-{% load django_bootstrap5 %} 
+{% load django_bootstrap5 %}
 
 <form hx-post="{{ request.path }}" class="modal-content" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' hx-encoding="multipart/form-data">
     <div class="modal-header">
@@ -18,3 +18,4 @@
       </button>
     </div>
 </form>
+

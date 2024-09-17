@@ -8,8 +8,8 @@ from django.utils.translation import gettext_lazy as _
 
 class Rank(models.Model):
     
-    name = models.CharField(max_length=100, unique=True)
-    image = models.ImageField(upload_to='ranks/', null=True, blank=True)
+    name = models.CharField(max_length=100, unique=True,verbose_name="الرتبه")
+    image = models.ImageField(upload_to='ranks/', null=True, blank=True,verbose_name="صورة الرتبه")
     def __str__(self):
         return self.name
 

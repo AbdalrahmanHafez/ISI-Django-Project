@@ -10,7 +10,7 @@
 <div style="direction: rtl;" class="wrapper">
   
   <!-- Content Wrapper. Contains page content -->
-  <div   class="content-wrapper">
+  
     <!-- Content Header (Page header) -->
 
    
@@ -47,13 +47,13 @@
               <div class="card">
                 <div class="card-header border-0">
                   <div class="d-flex justify-content-between">
-                    <h3 class="card-title">تيست</h3>   
+                    <h3 class="card-title">إحصائيات</h3>   
                   </div>
                 </div>    
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span id="totalsalarys" class="text-bold text-lg">$250</span><br></p>
+                      <span id="totalsalarys" class="text-bold text-lg">عدد الطلبات</span><br></p>
                   </div>
                   <!-- /.d-flex -->
   
@@ -80,14 +80,15 @@
           <!-- /.row -->
   
 
-          <div class="d-flex gap-2 mb-2">
+          <div class="d-flex gap-2 mb-3">
 
             {% if perms.officers_affairs.add_officer %}
-              <button hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
+            <button class="btn btn-primary mb-3" hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
             {% endif %}
             
-            <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-              بحث
+            <!-- Filter options -->
+            <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+              خيارات بحث متقدمة
             </button>
           </div>
   
@@ -108,7 +109,7 @@
       </div>
     </div>
         <!-- /.container-fluid -->
-  </div>
+  
       <!-- /.content -->
 </div>
     <!-- /.content-wrapper -->
@@ -195,7 +196,7 @@
         labels  : [
             
 
-          'تفاصيل الارباح',
+          'تفاصيل الأجازات',
 
         ],
 
@@ -205,7 +206,7 @@
             backgroundColor: '#007bff',
             borderColor    : '#007bff',
             data           : [ 
-                '50',
+                '30',
             ]
           },
           {
@@ -213,6 +214,13 @@
             borderColor    : '#ced4da',
             data           : [ 
                   '30',
+            ]
+          },
+          {
+            backgroundColor: '#250',
+            borderColor    : '#ced4da',
+            data           : [ 
+                  '40',
             ]
           }
         ]

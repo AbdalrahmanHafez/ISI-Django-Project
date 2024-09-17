@@ -9,6 +9,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <title>معهد نظم المعلومات</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/ISILogo.png' %}">
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
 
     <!-- IonIcons -->
@@ -18,7 +19,7 @@
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 
-    <link rel="stylesheet" href="{% static 'css/stylesdark.css' %}">
+ 
     
     {% load django_bootstrap5 %}
     {% bootstrap_css %}
@@ -31,17 +32,34 @@
   </head>
   <body dir="rtl" class="hold-transition sidebar-mini">
 
-
+   <div class="container-fluid">
     {% include 'parts/nav.html' %}
     {% include 'parts/sidebar.html' %}
-
-    {% block content %} {% endblock %}
-
-    {% include 'parts/footer.html' %}
-
-
+    
+    <div class="content-wrapper">
+    {% block content %}
+    
+    
+    {% endblock %}
 
     
+    </div>
+  
+  </div>
+  {% include 'parts/footer.html' %}
+
+    
+<script>
+$('#rankinput').hide()
+$('#addrank').click(function(){
+  $('#rankinput').show()
+});
+
+$('#backrank').click(function(){
+  $('#rankinput').hide()
+});
+</script>
+
 
 
 

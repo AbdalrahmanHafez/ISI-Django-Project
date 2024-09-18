@@ -5,6 +5,7 @@ from .models import Officer
 
 @receiver(post_save, sender=Officer)
 def create_user_for_officer(sender, instance, created, **kwargs):
+    print('test')
     if created:
         # Create a corresponding user
         username = instance.full_name.replace(" ", "").lower()  # Generate a username from the full name

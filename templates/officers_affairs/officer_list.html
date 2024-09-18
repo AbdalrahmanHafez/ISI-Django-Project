@@ -6,7 +6,7 @@
 
 
 <div class="row" id="officers_list" hx-trigger="officer_list_changed from:body" hx-get="{% url 'officers_list' %}" hx-target="this">
-  <form hx-get="{% url "officers_list" %}" hx-target="#officers_list" class="">
+  <form hx-get="{% url "officers_list" %}" hx-target="#officers_list" class="mb-3">
 
     <!-- Rank Filter buttons -->
 
@@ -60,7 +60,7 @@
       <div class="card card-widget widget-user">
           <!-- Officer Card Dropdown (if permitted) -->
           {% if perms.officers_affairs.change_officer or perms.officers_affairs.delete_officer %}
-          <div class="btn-group position-absolute top-0 end-0">
+          <div class="position-absolute top-0 end-0">
               <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown">
                   <span class="sr-only">Toggle Dropdown</span>
               </button>
@@ -78,15 +78,15 @@
           <!-- Officer Header with Rank -->
           <div class="widget-user-header text-white" style="background-image: url('{{ officer.rank.image.url }}'); background-size: cover;">
               <h3 class="widget-user-username">{{ officer.rank.name }}</h3>
-              <h4 class="widget-user-desc">{{ officer.full_name }}</h4>
+              <h4 class="widget-user-desc" style="text-shadow:1px 1px black">{{ officer.full_name }}</h4>
           </div>
 
           <!-- Officer Image -->
           <div class="widget-user-image">
               {% if officer.profile_image %}
-              <img class="img-circle elevation-2" style="width:100px; height:100px;" src="{{ officer.profile_image.url }}" alt="Officer Image">
+              <img class="rounded-circle elevation-2" style="width:100px; height:100px; box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)!important" src="{{ officer.profile_image.url }}" alt="Officer Image">
               {% else %}
-              <img class="img-circle elevation-2" style="width:100px; height:100px;" src="{% static 'images/user-avatar.png' %}" alt="User Avatar">
+              <img class="rounded-circle elevation-2" style="width:100px; height:100px; box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)!important" src="{% static 'images/user-avatar.png' %}" alt="User Avatar">
               {% endif %}
           </div>
 
@@ -111,6 +111,9 @@
   </div>
   {% endif %}
   {% endif %}
+
+  {% empty %}
+    <h3>لايوجد</h3>
   {% endfor %}
 </div>
 

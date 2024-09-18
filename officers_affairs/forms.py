@@ -12,19 +12,18 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         model = Officer
         # fields = "__all__"
         # labels = { "": _("Name of the farmer company"), "FieldName": _("Name of the field") }
-        exclude = ("created_by", "updated_by", "created_at", "updated_at")
+        exclude = ("created_by", "updated_by", "created_at", "updated_at", "user")
     
     def save(self, commit=True):
         officer = super().save(commit=False)
 
-        if self.cleaned_data.get('create_user'):
+        if not officer.user:
             # Create a User instance
             username = officer.full_name.lower().replace(" ", "_")
-            user = User.objects.create(username=username)
+            user = User.objects.create_user(username=username, password='123')  # Default passworduser = User.objects.create(username=username)
             officer.user = user
 
-        if commit:
-            officer.save()
+      
 
         return officer    
         
@@ -46,6 +45,14 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
     #     self.fields['birth_date'].input_formats = ['%d-%m-%Y']
         
         
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field, forms.DateField):
+                field.widget.attrs.update({
+                    'class': 'hijri-picker form-control',  
+                    'type': 'text',  
+                })
              
 
 class RankForm(forms.ModelForm):

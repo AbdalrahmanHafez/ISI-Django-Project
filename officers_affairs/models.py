@@ -11,7 +11,7 @@ from django.dispatch import receiver
 class Rank(models.Model):
     
     name = models.CharField(max_length=100, unique=True,verbose_name="الرتبه")
-    image = models.ImageField(upload_to='ranks/', null=True, blank=True,verbose_name="صورة الرتبه")
+    image = models.ImageField(upload_to='ranks/', null=True, blank=True,verbose_name="صورة")
     def __str__(self):
         return self.name
 
@@ -78,7 +78,7 @@ class OfficerStatus(models.Model):
 class Officer(models.Model):
     
     is_leader = models.BooleanField(default=False, verbose_name="قائد الفرع")
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='officer_profile', unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='officer_profile', null=True,blank=True)
     full_name = models.CharField(max_length=255, verbose_name="اسم الضابط")
     rank = models.ForeignKey(Rank, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الرتبة")
     military_number = models.CharField(max_length=50, unique=True, verbose_name="الرقم العسكري")

@@ -1,141 +1,113 @@
-<!-- في المكان ده هحط سلايد بار -->
 {% load static %}
 
-
-
-
-
-
-  <!-- Main Sidebar Container -->
-  <aside style="position: fixed;" class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo -->
-    <a href="{% url 'home' %}" class="brand-link d-flex align-items-center">
-      <img src="{% static 'images/logo.png' %}" alt="Logo" style="width:60px; height:60px;" class="me-1">
-      <span class="brand-text font-weight-bold">منظومة شئون ضباط</span>
-    </a>
-
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <!-- Sidebar user panel (optional) -->
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
+    <div class="sidebar-brand">
+       <a href="{% url "home" %}" class="brand-link"> 
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width:60px; height:60px;" class="me-1">
+        <span class="brand-text fw-light">منظومة شئون ضباط</span>
+      </a>
+    </div>
        
+    <div class="sidebar-wrapper">
+
+      
       <!-- Date and Time -->
-      <div  class=" sidebar-dark-primary  ">
-        <div class="nav-icon fas fa-clock" id="arabic-datetime">
+        <nav class="d-flex justify-content-center">
           <span id="current-date" style="font-size: 14px; color: #dcdedf;"></span>_
           <span id="current-time" style="font-size: 14px; color: #dcdedf;"></span>
+        </nav>
+
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center" style="background-color: #f4f6f9; padding: 10px; border-radius: 10px;">
+        <div class="image me-3">
+          <img src="{% static 'images/user-placeholder.png' %}" class="rounded-circle elevation-3" alt="User Image" style="width: 50px; height: 50px; border: 2px solid #007bff; padding: 3px; box-shadow:0 10px 20px rgba(0,0,0,.19),0 6px 6px rgba(0,0,0,.23)!important">
+        </div>
+        <div class="info">
+          <span class="text-bold d-block" style="font-size: 14px; color: #6c757d;">المستخدم الآن</span>
+          <a href="#" class="d-block" style="font-size: 18px; font-weight: bold; color: #007bff; text-decoration: none;">
+            {{ request.user.username }}
+          </a>
         </div>
       </div>
 
-      
-  
-<!-- Sidebar user panel (optional) -->
-<div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center" style="background-color: #f4f6f9; padding: 10px; border-radius: 10px;">
-  <div class="image me-3">
-    <img src="{% static 'images/user-placeholder.png' %}" class="img-circle elevation-3" alt="User Image" style="width: 50px; height: 50px; border: 2px solid #007bff; padding: 3px;">
-  </div>
-  <div class="info">
-    <span class="text-bold d-block" style="font-size: 14px; color: #6c757d;">المستخدم الآن</span>
-    <a href="#" class="d-block" style="font-size: 18px; font-weight: bold; color: #007bff; text-decoration: none;">
-      {{ request.user.username }}
-    </a>
-  
-
-  </div>
-
-</div>
-
-      <!-- Sidebar Menu -->
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-
-          <li class="nav-item">
-            <a href="{% url 'officers' %}" class="nav-link">
-              <i class="nav-icon fas fa-th"></i>
-              <p>
-                قائمة جميع الضباط
-              </p>
-            </a>
-          </li>
-
-       
-
-          
-          
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-star"></i>
-              <p>
-                الرتب
-                <i class="fas fa-angle-left right"></i>
-                
-              </p>
-            </a>
+      <nav class="mt-2"> 
+        <!--begin::Sidebar Menu-->
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
             
-            <ul class="nav nav-treeview">
-              {% if perms.officers_affairs.add_rank %}  
-                  <li class="nav-item">
-                    <a id="addrank" href="#" class="nav-link">
-                        <i class="fa fa-plus "></i>
-                        <p  class="text-light"> إضافة </p>
-                    </a>
-                  </li> 
-              <form id="ran" method="POST" enctype="multipart/form-data">
-               <div id="rankinput">
-                {% csrf_token %}
-                  {{formrank}}
-
-                  <button type="submit" class="btn btn-success">حفظ</button>
-                  <button id="backrank" class="btn btn-primary ">تراجع</button>
-               </div>
-              </form> 
-              {% endif %}
-              {% if perms.officers_affairs.view_rank %}
-              {% for rank in ranks %}
-                  <li style="cursor: pointer;" class="nav-item">
-                    <a id="" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>{{ rank.name }}</p>
-                    </a>
-                  </li>
-              {% endfor %}
-              {% endif %}    
-        
-
-            </ul>
-            
-          </li>
-
-          <li class="nav-header">الكتب المستعارة</li>
-          
-          <li style="cursor: pointer;" class="nav-item">
-            <a id="statusSold" class="nav-link">
-              <i class="nav-icon far fa-circle text-danger"></i>
-              <p class="text">تم بيعه</p>
-            </a>
-          </li>
-          <li style="cursor: pointer;" class="nav-item">
-            <a id="" class="nav-link">
-              <i class="nav-icon far fa-circle text-warning"></i>
-              <p>تم استعارته</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                <i class="nav-icon fas fa-key "></i>
-                <p>تغيير كلمة المرور</p>
-            </a>
-        </li>
-        <li class="nav-item">
-          <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-              <i class="nav-icon fas fa-key "></i>
-              <p>تغيير كلمة المرور</p>
-          </a>
-      </li>
+            <!-- Officers List -->
+            <li class="nav-item">
+                <a href="{% url 'officers' %}" class="nav-link">
+                    <i class="nav-icon fas fa-th"></i>
+                    <p> قائمة جميع الضباط </p>
+                </a>
+            </li>
+    
+            <!-- Ranks Section -->
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link active">
+                    <i class="nav-icon fas fa-star"></i>
+                    <p> الرتب <i class="fas fa-angle-left right"></i> </p>
+                </a>
+    
+                <ul class="nav nav-treeview">
+                    {% if perms.officers_affairs.add_rank %}
+                    <!-- Add Rank Form Trigger -->
+                    <li class="nav-item">
+                        <a id="addrank" href="#" class="nav-link">
+                            <i class="fa fa-plus "></i>
+                            <p class="text-light"> إضافة </p>
+                        </a>
+                    </li>
+    
+                    <!-- Hidden Rank Add Form -->
+                    <li id="rankinput" class="nav-item" style="display: none;">
+                        <form id="rank_add_form" method="POST" enctype="multipart/form-data" data-bs-theme="light">
+                            {% csrf_token %}
+                            {{ formrank.as_p }}
+    
+                            <button type="submit" class="btn btn-success">حفظ</button>
+                            <button id="backrank" type="button" class="btn btn-primary">تراجع</button>
+                        </form>
+                    </li>
+                    {% endif %}
+    
+                    <!-- Display Existing Ranks -->
+                    {% if perms.officers_affairs.view_rank %}
+                    {% for rank in ranks %}
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>{{ rank.name }}</p>
+                        </a>
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+            </li>
+    
+            <!-- Borrowed Books Section -->
+            <li class="nav-header">الكتب المستعارة</li>
+            <li class="nav-item">
+                <a id="statusSold" class="nav-link">
+                    <i class="nav-icon far fa-circle text-danger"></i>
+                    <p>تم بيعه</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link">
+                    <i class="nav-icon far fa-circle text-warning"></i>
+                    <p>تم استعارته</p>
+                </a>
+            </li>
+    
+            <!-- Change Password Link -->
+            <li class="nav-item">
+                <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
+                    <i class="nav-icon fas fa-key"></i>
+                    <p>تغيير كلمة المرور</p>
+                </a>
+            </li>
         </ul>
-      </nav>
-       
-
+    </nav>
       <!-- /.sidebar-menu -->
     </div>
 
@@ -170,6 +142,13 @@
 
   // Initial call to set the time immediately
   updateDateTime();
+
+
+// $('#rank_add_form').click(function(e) {
+//     e.preventDefault();
+//     e.stopPropagation();
+// });
+
 </script>
 
 

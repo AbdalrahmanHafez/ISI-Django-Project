@@ -59,3 +59,133 @@ button img {
     width: 24px; /* Adjust size as needed */
     height: auto;
 }
+
+
+
+.box-widget {
+    border: none;
+    position: relative;
+}
+.box {
+    position: relative;
+    border-radius: 3px;
+    background: #ffffff;
+    border-top: 3px solid #d2d6de;
+    margin-bottom: 20px;
+    width: 100%;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+.widget-user .widget-user-header {
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  height: 135px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.widget-user .widget-user-username {
+  font-size: 25px;
+  font-weight: 300;
+  margin-bottom: 0;
+  margin-top: 0;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  color: white
+}
+
+.widget-user .widget-user-desc {
+  margin-top: 0;
+  color: white;
+}
+
+.widget-user .widget-user-image {
+  left: 50%;
+  margin-left: -45px;
+  position: absolute;
+  top: 80px;
+}
+
+.widget-user .widget-user-image > img {
+  border: 3px solid #ffffff;
+  height: auto;
+  width: 90px;
+}
+
+.widget-user .card-footer {
+  padding-top: 50px;
+}
+
+.widget-user-2 .widget-user-header {
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  padding: 1rem;
+}
+
+.widget-user-2 .widget-user-username {
+  font-size: 25px;
+  font-weight: 300;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.widget-user-2 .widget-user-desc {
+  margin-top: 0;
+}
+
+.widget-user-2 .widget-user-username,
+.widget-user-2 .widget-user-desc {
+  margin-left: 75px;
+}
+
+.widget-user-2 .widget-user-image > img {
+  float: left;
+  height: auto;
+  width: 65px;
+}
+.box-footer {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top: 1px solid #f4f4f4;
+    padding: 10px;
+    background-color: #fff;
+}
+.box .border-right {
+    border-right: 1px solid #f4f4f4;
+}
+.description-block {
+    display: block;
+    margin: 10px 0;
+    text-align: center;
+}
+.description-block>.description-header {
+    margin: 0;
+    padding: 0;
+    font-weight: 600;
+    font-size: 16px;
+}
+.description-block>.description-text {
+    text-transform: uppercase;
+}
+
+.dropdown-item.edit-item:hover {
+    background-color: #28a745; /* Green for edit */
+    color: white;
+}
+
+.dropdown-item.delete-item:hover {
+    background-color: #dc3545; /* Red for delete */
+    color: white;
+}
+
+/* Optional: To change the button color on hover */
+.btn.dropdown-toggle:hover {
+    background-color: #007bff; /* Customize the button hover color if needed */
+    color: white;
+}
+
+
+.user-panel .info a:hover {
+    color: #0056b3; /* Darker blue on hover */
+    text-decoration: underline; /* Add underline on hover */
+  }

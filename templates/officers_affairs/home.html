@@ -7,7 +7,6 @@
 {% load static %}
 {% load mathfilters %}
 
-<div style="direction: rtl;" class="wrapper">
   
   <!-- Content Wrapper. Contains page content -->
   
@@ -15,7 +14,7 @@
 
    
       <!--الاحصائيات-->
-      <div class="content">
+      <div>
         <div class="container-fluid">
           <div class="row">
             <div class="col-lg-6">
@@ -28,7 +27,7 @@
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span class="text-bold text-lg">{{count_officers_total}}</span>
+                      <span class="fw-bold fs-4">{{count_officers_total}}</span>
                       <span>اجمالي عدد الضباط</span>
                     </p>  
                   </div>
@@ -53,7 +52,7 @@
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span id="totalsalarys" class="text-bold text-lg">عدد الطلبات</span><br></p>
+                      <span id="totalsalarys" class="fw-bold fs-5">عدد الطلبات</span><br></p>
                   </div>
                   <!-- /.d-flex -->
   
@@ -80,7 +79,7 @@
           <!-- /.row -->
   
 
-          <div class="d-flex gap-2 mb-3">
+          <div class="d-flex gap-2 mb-2 mt-3">
 
             {% if perms.officers_affairs.add_officer %}
             <button class="btn btn-primary mb-3" hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
@@ -96,18 +95,13 @@
              
                   
                   
-        <div class="row">
+                  
             {% include "officers_affairs/officer_list.html" %}
 
-              <div class="row">
-                <div class="col text-center">
-                  <!--اضف صورة هنا في حالة عدم وجود كتب-->   
-                </div>
-              </div>
-          </div>    
+             
+              
 
       </div>
-    </div>
         <!-- /.container-fluid -->
   
       <!-- /.content -->
@@ -115,7 +109,7 @@
     <!-- /.content-wrapper -->
 
 <!-- Modal Placeholder -->
-<div id="modal" class="modal fade" >
+<div id="modal" class="modal fade">
     <div id="dialog" class="modal-dialog" hx-target="this"></div>
 </div>
 
@@ -128,7 +122,6 @@
         aria-label="Close"></button>
     </div>
     </div>
-</div>
 
 <script>
   const modal = new bootstrap.Modal(document.getElementById("modal"))

@@ -9,23 +9,16 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         # fields = "__all__"
         # labels = { "": _("Name of the farmer company"), "FieldName": _("Name of the field") }
         exclude = ("created_by", "updated_by", "created_at", "updated_at")
-        # widgets = {
-        #     'birth_date': forms.DateInput(
-        #         attrs={
-        #             'class': 'form-control', 
-        #             'id': 'hijri-picker', 
-        #             'placeholder': 'DD-MM-YYYY'
-        #         },
-        #         format='%d-%m-%Y'  # Match your desired format
-        #     ),
-        #     }
-       
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     # Set the input format for birth_date to match the widget
-    #     self.fields['birth_date'].input_formats = ['%d-%m-%Y']
         
         
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field, forms.DateField):
+                field.widget.attrs.update({
+                    'class': 'hijri-picker form-control',  
+                    'type': 'text',  
+                })
              
 
 class RankForm(forms.ModelForm):

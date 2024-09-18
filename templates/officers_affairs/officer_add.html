@@ -1,4 +1,10 @@
 {% load django_bootstrap5 %}
+{% load static %}
+
+<link href="{% static 'css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet" />
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script src="{% static 'js/bootstrap-hijri-datetimepickermin.js' %}"></script>
 
 <form hx-post="{{ request.path }}" class="modal-content" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' hx-encoding="multipart/form-data">
     <div class="modal-header">
@@ -18,4 +24,25 @@
       </button>
     </div>
 </form>
+
+<script type="text/javascript">
+  {% comment %} DATE PICKER {% endcomment %}
+    $( function initDefault() {
+        // https://www.jqueryscript.net/time-clock/hijri-date-picker-bootstrap.html 
+        // https://www.jqueryscript.net/time-clock/Clean-Data-Timepicker-with-jQuery-Bootstrap-3.html
+        $(".hijri-picker").hijriDatePicker({
+            hijri:false,
+            showSwitcher:false,
+            debug: false,
+            isRTL:true,  
+            format: 'YYYY-MM-DD',
+            widgetPositioning: {
+                    horizontal: 'auto',  // or 'left', 'right'
+                    vertical: 'bottom'   // or 'top' to force it above the input field
+                }
+
+        }); });
+
+
+</script>
 

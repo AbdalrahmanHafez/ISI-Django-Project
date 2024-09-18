@@ -1,14 +1,34 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Officer , Rank
+from django.contrib.auth.models import User
 
 
 class OfficerForm(LoginRequiredMixin, forms.ModelForm):
+    
+    create_user = forms.BooleanField(required=False, label="Create corresponding user")
+    
     class Meta:
         model = Officer
         # fields = "__all__"
         # labels = { "": _("Name of the farmer company"), "FieldName": _("Name of the field") }
         exclude = ("created_by", "updated_by", "created_at", "updated_at")
+    
+    def save(self, commit=True):
+        officer = super().save(commit=False)
+
+        if self.cleaned_data.get('create_user'):
+            # Create a User instance
+            username = officer.full_name.lower().replace(" ", "_")
+            user = User.objects.create(username=username)
+            officer.user = user
+
+        if commit:
+            officer.save()
+
+        return officer    
+        
+        
         # widgets = {
         #     'birth_date': forms.DateInput(
         #         attrs={

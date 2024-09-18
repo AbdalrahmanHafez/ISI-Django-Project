@@ -3,7 +3,6 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm ,Pass
 from django.contrib.auth.forms import AuthenticationForm, UsernameField
 
 
-
 class CustomAuthenticationForm(AuthenticationForm):
     username = UsernameField(
         label= "اسم المستخدم",
@@ -22,8 +21,7 @@ class CustomAuthenticationForm(AuthenticationForm):
     }
     
     
-from django import forms
-from django.contrib.auth.forms import PasswordChangeForm
+
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     old_password = forms.CharField(

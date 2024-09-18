@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from .models import *
@@ -77,6 +77,7 @@ def officers_add(request, pk= None): # creates or Updates an officer
     return render(request, "officers_affairs/officer_add.html", {'form': form})
 
 
+
 def officers_view(request):
     search=Officer.objects.order_by('rank')
     title = None
@@ -117,3 +118,16 @@ def officers_list(request):
 
 def about(request):
     return render(request, 'about.html')
+
+
+@login_required
+def officer_add_view(request):
+    if request.method == 'POST':
+        form = OfficerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('officer_list')  # Redirect to officer list or other appropriate page
+    else:
+        form = OfficerForm()
+
+    return render(request, 'officers_affairs/officer_add.html', {'form': form})

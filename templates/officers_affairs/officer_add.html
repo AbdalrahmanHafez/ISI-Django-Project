@@ -17,10 +17,7 @@
     <div class="modal-body">
         {% bootstrap_form form %}
         <!-- Add the create_user checkbox -->
-        <div class="form-check">
-          {{ form.create_user.label_tag }}
-          {{ form.create_user }}
-      </div>
+     
     </div>
 
     <div class="modal-footer">
@@ -31,7 +28,7 @@
 </form>
 
 <script type="text/javascript">
-  {% comment %} DATE PICKER {% endcomment %}
+  // {% comment %} DATE PICKER {% endcomment %}
     $( function initDefault() {
         // https://www.jqueryscript.net/time-clock/hijri-date-picker-bootstrap.html 
         // https://www.jqueryscript.net/time-clock/Clean-Data-Timepicker-with-jQuery-Bootstrap-3.html

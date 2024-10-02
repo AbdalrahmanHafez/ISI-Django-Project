@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">تعديل الملف الشخصي</h2>
+    <>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form user_form %}
+        {% bootstrap_form officer_form %}
+        <button type="submit" class="btn btn-primary">تحديث الملف الشخصي</button>
+    </form>
+</div>
+{% endblock %}

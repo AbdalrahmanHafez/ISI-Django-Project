@@ -1,60 +1,126 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Officer , Rank
-from django.contrib.auth.models import User
+from .models import Branch, Job, LeaveRequest, Officer, OfficerStatus , Rank, Section, Unit, UnitStatus, Weapon
+from django.contrib.auth.models import User,Group
 
 
 class OfficerForm(LoginRequiredMixin, forms.ModelForm):
     
-    create_user = forms.BooleanField(required=False, label="Create corresponding user")
+    create_user = forms.BooleanField(required=False, label="إنشاء مستخدم للضابط")
     
     class Meta:
         model = Officer
-        # fields = "__all__"
-        # labels = { "": _("Name of the farmer company"), "FieldName": _("Name of the field") }
-        exclude = ("created_by", "updated_by", "created_at", "updated_at", "user")
+        exclude = ("created_by", "updated_by", "created_at", "updated_at","user")
     
     def save(self, commit=True):
         officer = super().save(commit=False)
-
-        if not officer.user:
-            # Create a User instance
+        
+        # Check if we need to create a user
+        if self.cleaned_data.get('create_user') and not officer.user:
             username = officer.full_name.lower().replace(" ", "_")
-            user = User.objects.create_user(username=username, password='123')  # Default passworduser = User.objects.create(username=username)
-            officer.user = user
 
-      
+            # Ensure username uniqueness before creating the user
+            if not User.objects.filter(username=username).exists():
+                user = User.objects.create_user(username=username, password='123')
+                officer.user = user
+                 
+                # Assign user to group based on branch
+                if officer.branch:
+                    group, created = Group.objects.get_or_create(name=officer.branch.name)
+                    user.groups.add(group)
+                
+                
+            else:
+                self.add_error('create_user', "هناك مستخدم له نفس اسم المستخدم بالفعل !!!")
+                
+        # Handle updating user group if the branch has changed
+        if officer.user:
+            if officer.pk:  # Check if officer is being updated
+                original_officer = Officer.objects.get(pk=officer.pk)
+                if original_officer.branch != officer.branch:
+                    # Remove user from the old branch group
+                    if original_officer.branch:
+                        old_group, created = Group.objects.get_or_create(name=original_officer.branch.name)
+                        officer.user.groups.remove(old_group)
 
-        return officer    
-        
-        
-        # widgets = {
-        #     'birth_date': forms.DateInput(
-        #         attrs={
-        #             'class': 'form-control', 
-        #             'id': 'hijri-picker', 
-        #             'placeholder': 'DD-MM-YYYY'
-        #         },
-        #         format='%d-%m-%Y'  # Match your desired format
-        #     ),
-        #     }
-       
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     # Set the input format for birth_date to match the widget
-    #     self.fields['birth_date'].input_formats = ['%d-%m-%Y']
+                    # Add user to the new branch group
+                    if officer.branch:
+                        new_group, created = Group.objects.get_or_create(name=officer.branch.name)
+                        officer.user.groups.add(new_group)
+        if commit:
+            officer.save()
+
+        return officer
         
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            if isinstance(field, forms.DateField):
-                field.widget.attrs.update({
-                    'class': 'hijri-picker form-control',  
-                    'type': 'text',  
-                })
+                    if isinstance(field, forms.DateField):
+                        field.widget.attrs.update({
+                            'class': 'hijri-picker form-control',  
+                            'type': 'text',  
+            })
              
 
+class WeaponForm(forms.ModelForm):
+    class Meta:
+        model = Weapon
+        fields = ['name']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+            
+        }
+
+class UnitForm(forms.ModelForm):
+    class Meta:
+        model = Unit
+        fields = ['name']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+            
+        }
+        
+class BranchForm(forms.ModelForm):
+    class Meta:
+        model = Branch
+        fields = ['name']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+            
+        }
+        
+class SectionForm(forms.ModelForm):
+    class Meta:
+        model = Section
+        fields = ['name', 'branch']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+            'branch': forms.Select(attrs={'class':'form-control'})
+            
+        }
+
+class JobForm(forms.ModelForm):
+    class Meta:
+        model = Job
+        fields = ['name','section']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+            'section': forms.Select(attrs={'class':'form-control'})
+            
+        }        
+        
+class UnitForm(forms.ModelForm):
+    class Meta:
+        model = Unit
+        fields = ['name']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+            
+        }
+        
+        
+        
 class RankForm(forms.ModelForm):
     class Meta:
         model = Rank
@@ -63,3 +129,42 @@ class RankForm(forms.ModelForm):
             'name' : forms.TextInput(attrs={'class':'form-control'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'})
         }
+
+
+
+class OffUnitStatusForm(forms.ModelForm):
+    class Meta:
+        model = UnitStatus
+        fields = ['name']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+        }        
+        
+        
+class OfficerStatusForm(forms.ModelForm):
+    class Meta:
+        model = OfficerStatus
+        fields = ['name']
+        widgets = {
+            'name' : forms.TextInput(attrs={'class':'form-control'}),
+        }
+        
+        
+class LeaveRequestForm(forms.ModelForm):
+    class Meta:
+        model = LeaveRequest
+        fields = ['leave_type', 'start_date', 'end_date',]
+        labels = {
+            'leave_type': 'نوع الإجازة',
+            'start_date': 'تاريخ البدء',
+            'end_date': 'تاريخ الانتهاء',
+            
+        }
+        widgets = {
+            'leave_type': forms.Select(attrs={'class': 'form-control'}),
+            'start_date': forms.DateInput(attrs={'class': 'hijri-picker form-control', 'placeholder': 'اختر تاريخ البدء'}),
+            'end_date': forms.DateInput(attrs={'class': 'hijri-picker form-control', 'placeholder': 'اختر تاريخ الانتهاء'}),
+            'days_taken': forms.HiddenInput(),  # حقل مخفي
+            'remaining_days': forms.HiddenInput(),  # حقل مخفي
+        }
+        exclude = ('created_by',)

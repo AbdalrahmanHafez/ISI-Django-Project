@@ -1,0 +1,74 @@
+{% load django_bootstrap5 %}
+{% load custom_filters %}
+{% load static %}
+
+<div class="row" id="partial_officers" hx-trigger="officer_list_changed from:body" hx-get="{% url 'partial_officers' %}" hx-target="this"></div>
+ <!-- Main content -->
+ <section class="content">                  
+    <!-- Default box -->
+    <div class="card card-solid">
+      <div class="card-body pb-0">
+        <div class="row d-flex ">
+        <div class="row" id="partial_officers" hx-trigger="officer_list_changed from:body" hx-get="{% url 'partial_officers' %}" hx-target="this"></div>
+        {% for officer in officers %}
+          <!-- بداية الضابط -->
+          <div   class="col-12 col-sm-6 col-md-4 d-flex  ">
+            <div  id="" class="card ">
+              <div  class="card-header text-muted border-bottom-0 shadow">
+                {{officer.rank}}
+              </div>
+              <div class="card-body pt-0">
+                <div class="row">
+                  <div class="col-7">
+                    <h2 class="lead text-right"><b>{{ officer.full_name }}</b></h2>
+                    <ul class="fa-ul text-muted text-right">
+                      <li class="small"><span class="fa-li"></span>الحالة: {{ officer.unit_status|default:"غير معروفة" }}</li>
+                      <li class="small"><span class="fa-li"></span>{{ officer.get_status_display }}</li>
+                    </ul>
+
+                  </div>
+         
+                  <div class="col-5 text-center">
+                  {% if officer.profile_image %}
+                  <img class="img-circle elevation-2 img-fluid" src="{{ officer.profile_image.url }}" style="max-width: 100px; max-height: 100px;" alt="Officer Image">
+                  {% else %}
+                    <img class="img-circle elevation-2 img-fluid" src="{% static 'images/user-avatar.png' %}" style="max-width: 100px; max-height: 100px;" alt="">
+  
+                  {% endif %}
+                      
+                  </div>
+                </div>
+              </div>
+              {% if perms.officers_affairs.change_officer or perms.officers_affairs.delete_officer %}
+              <div class="card-footer">
+                <div class="text-right">
+                  {% if perms.officers_affairs.delete_officer %}
+                  <a hx-get="{% url 'officers_delete' pk=officer.pk %}" hx-target="#dialog"  class="btn btn-sm bg-danger">
+                    <i class="fas fa-trash"></i> حذف
+                  </a>
+                  {% endif %}
+                  {% if perms.officers_affairs.change_officer %}
+                  <a hx-get="{% url 'officers_add' pk=officer.pk %}" hx-target="#dialog" class="btn btn-sm btn-primary">
+                    <i class="fas fa-book"></i> تعديل
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            
+          </div>
+           <!-- نهاية الكتاب -->
+        {% endfor %}
+        </div>
+        
+      </div>
+      <!-- /.card-body -->
+
+      <!-- /.card-footer -->
+    </div>
+    <!-- /.card -->
+
+
+  </section>
+  <!-- /.content -->

@@ -1,8 +1,10 @@
-
-
+{% load django_bootstrap5 %}
+{% load static %}
+{% load custom_filters %}
 <nav class="app-header navbar navbar-expand bg-body"> 
   <div class="container-fluid"> 
       <ul class="navbar-nav">
+  
         <li class="nav-item"> <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> <i class="fas fa-bars"></i> </a> </li>
         <li class="nav-item d-none d-sm-inline-block"> <a href="{% url 'home' %}" class="nav-link">الرئيسية</a> </li>
         
@@ -23,11 +25,67 @@
         <button class="theme-toggle-button" id='darkModeButton'> <i class="fas fa-moon"></i> </button>
 
       </ul>
-              
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-secondary">تسجيل الخروج</button>
-      </form>
+
+      <a class="nav-link dropdown-toggle" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-bell"></i>
+        <span class="badge bg-danger" id="unreadCount">{{ unread_notifications_count }}</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
+        {% for notification in request.user.notification_set.all %}
+            <li>
+                <a class="dropdown-item notification-item d-flex" data-id="{{ notification.id }}" data-link="{{ notification.link }}" href="#">
+                    {{ notification.message }}
+                    <small class="text-muted">{{ notification.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</small>
+                </a>
+            </li>
+        {% empty %}
+            <li><a class="dropdown-item" href="#">لا توجد إشعارات</a></li>
+        {% endfor %}
+    </ul>
+    
+    <audio id="notificationSound" src="#" preload="auto"></audio>
+    
+    
+
+      <div class="d-flex align-items-center">
+        <div class="image me-2">
+            {% if request.user.officer_profile.profile_image %}
+                <img src="{{ request.user.officer_profile.profile_image.url }}" class="rounded-circle elevation-3" alt="User Image"
+                     style="width: 50px; height: 50px; border: 2px solid #007bff; padding: 3px; box-shadow: 0 10px 20px rgba(0, 0, 0, .19), 0 6px 6px rgba(0, 0, 0, .23) !important">
+            {% else %}
+                <img src="{% static 'images/user-placeholder.png' %}" class="rounded-circle elevation-3" alt="User Image"
+                     style="width: 50px; height: 50px; border: 2px solid #007bff; padding: 3px; box-shadow: 0 10px 20px rgba(0, 0, 0, .19), 0 6px 6px rgba(0, 0, 0, .23) !important">
+            {% endif %}
+        </div>
+    
+        <div class="info me-auto">
+            <span class="text-bold d-block" style="font-size: 14px; color: #6c757d;">المستخدم الآن</span>
+            <a href="{% url 'profile_view'%}" class="d-block" style="font-size: 18px; font-weight: bold; color: #007bff; text-decoration: none;">
+              {{ request.user.officer_profile.rank }}/{{ request.user.officer_profile.full_name }}
+            </a>
+        </div>
+    </div>
+    
+    
+    <button id="colorChangeButton" class="btn border-0">تشغيل تجريبي</button>
+
+    
+    
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <!-- Date and Time -->
+        <nav class="d-flex flex-column align-items-center me-auto">
+            <span id="current-date" style="font-size: 14px; color: #6c757d;"></span>
+            <span id="current-time" style="font-size: 14px; color: #6c757d;"></span>
+        </nav>
+        
+        <!-- Logout Button -->
+        <form method="post" action="{% url 'logout' %}" class="ms-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary">تسجيل الخروج</button>
+        </form>
+    </div>
+    
+    
 
   </div> 
 </nav> 
@@ -51,3 +109,111 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 });
 </script>
+
+<!-- JavaScript for real-time Arabic Date and Time in 12-hour format -->
+<script>
+  function updateDateTime() {
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'Africa/Cairo' };
+    const optionsTime = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, timeZone: 'Africa/Cairo' };
+    
+    const now = new Date();
+    const date = now.toLocaleDateString('ar-EG', optionsDate);
+    const time = now.toLocaleTimeString('ar-EG', optionsTime);
+
+    document.getElementById('current-date').textContent = date;
+    document.getElementById('current-time').textContent = time;
+  }
+
+  // Update date and time every second
+  setInterval(updateDateTime, 1000);
+
+  // Initial call to set the time immediately
+  updateDateTime();
+
+
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+      const button = document.getElementById('colorChangeButton');
+      
+      // Colors for the background and text
+      let colors = [
+          { background: 'black', text: 'white' },
+          { background: 'white', text: 'black' }
+      ];
+      let colorIndex = 0;
+
+      // Function to change color
+      function changeColor() {
+          button.style.backgroundColor = colors[colorIndex].background;
+          button.style.color = colors[colorIndex].text; // Change text color based on background
+          colorIndex = (colorIndex + 1) % colors.length; // Cycle through colors
+      }
+
+      // Change color every 500 milliseconds
+      setInterval(changeColor, 500);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const notificationItems = document.querySelectorAll('.notification-item');
+      const unreadCount = document.getElementById('unreadCount');
+      const notificationSound = document.getElementById('notificationSound');
+  
+      notificationItems.forEach(item => {
+          item.addEventListener('click', function(event) {
+              event.preventDefault();
+              const notificationId = this.getAttribute('data-id');
+              const link = this.getAttribute('data-link');
+  
+              // Make an AJAX request to mark the notification as read
+              $.ajax({
+                  url: "{% url 'mark_notification_read' '0' %}".replace('0', notificationId),
+                  method: "POST",
+                  data: {
+                      'csrfmiddlewaretoken': '{{ csrf_token }}',  // Include CSRF token
+                  },
+                  success: function(response) {
+                      if (response.success) {
+                          // Remove the notification from the list
+                          document.getElementById(`notification-${notificationId}`).remove();
+                          item.closest('li').remove();
+                          // Decrement unread count
+                          const currentCount = parseInt(unreadCount.textContent);
+                          unreadCount.textContent = currentCount - 1;
+                          // Redirect the user to the link based on the notification
+                          window.location.href = link;
+                      } else {
+                          console.error('Failed to mark notification as read:', response.error);
+                      }
+                  },
+                  error: function(xhr, status, error) {
+                      console.error('AJAX error:', status, error);
+                  }
+              });
+          });
+      });
+  
+      // Function to check for new notifications
+      function checkNewNotifications() {
+          $.ajax({
+              url: "{% url 'check_new_notifications' %}",  // Use the correct URL for checking new notifications
+              method: "GET",
+              success: function(response) {
+                  if (response.unread_count > 0) {
+                      unreadCount.textContent = response.unread_count;
+                      // Play notification sound
+                      notificationSound.play();
+                  }
+              },
+              error: function(xhr, status, error) {
+                  console.error('Error fetching new notifications:', status, error);
+              }
+          });
+      }
+  
+       //Check for new notifications every 30 seconds
+       setInterval(checkNewNotifications, 10000);
+  });
+  </script>

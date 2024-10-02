@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="leave-request-container">
+  <h2 class=" mb-4 section-title text-center">طلبات إجازة </h2><br><h3  >{{ request.user.officer_profile.rank }} / {{  request.user.officer_profile.full_name }}</h3>
+
+  <div class="table-responsive">
+    <table class="table" style="border-collapse: collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th>نوع الإجازة</th>
+          <th>تاريخ البدء</th>
+          <th>تاريخ الانتهاء</th>
+          <th>الحالة</th>
+            <th>المصــدق الأن</th>
+          <th>عدد الأيام</th>
+          <th>الأيام المتبقية</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in requests %}
+          <tr>
+            <td>{{ request.get_leave_type_display }}</td>
+            <td>{{ request.start_date|date:"Y/m/d"|arabic_numbers }}</td>
+            <td>{{ request.end_date|date:"Y/m/d"|arabic_numbers }}</td>
+            <td>
+              {% if request.status == 'pending' %}
+                <span class="badge bg-warning" style="color: black;">جاري التصديق</span>
+              {% elif request.status == 'approved' %}
+                <span class="badge bg-success" style="color: black;">تصـدق</span>
+              {% elif request.status == 'rejected' %}
+                <span class="badge bg-danger" style="color: black;">مرفوض</span>
+              {% endif %}
+            </td>
+            <td>{{ request.approver.officer_profile.full_name }}</td>
+            <td>{{ request.days_taken }}</td>
+            {%if request.remaining_days%}
+            <td>{{ request.remaining_days }}</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center bg-success">لا توجد طلبات إجازة في الوقت الحالي</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

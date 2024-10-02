@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+{% load django_bootstrap5 %}
+{% load custom_filters %}
 
     <!-- Content Wrapper. Contains page content -->
     
@@ -9,75 +11,119 @@
               <div class="row mb-2">
                 <div class="col-sm-6">
                   <h1>الضباط</h1>
+
                 </div>
  
               </div>
-          </section>
-      
-          <!-- Main content -->
-          <section class="content">                  
-            <!-- Default box -->
-            <div class="card card-solid">
-              <div class="card-body pb-0">
-                <div class="row d-flex align-items-stretch">
-                {% for officer in officers %}
-                  <!-- بداية الضابط -->
-                  <div   class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch ">
-                    <div  id="" class="card ">
-                      <div  class="card-header text-muted border-bottom-0">
-                        {{officer.rank}}
-                      </div>
-                      <div class="card-body pt-0">
-                        <div class="row">
-                          <div class="col-7">
-                            <h2 class="lead"><b>{{ officer.full_name }}</b></h2>
-                            <ul class="  fa-ul text-muted">
-                              <li class="small"><span class="fa-li"></span>الحالة: {{officer.unit_status}}</li>
-                              <li class="small"><span class="fa-li"></span>{{officer.get_status_display}}</li>
-                            </ul>
-                          </div>
-                 
-                          <div class="col-5 text-center">
-                          {% if officer.profile_image %}
-                            <img style="height: 120px; width: 120px;" class="img-circle elevation-2" src="{{ officer.profile_image.url }}" alt="" class="img-circle img-fluid">
-                          {% else %}
-                            <img style="height: 120px; width: 120px;" class="img-circle elevation-2" src="{% static 'images/user-avatar.png' %}" alt="" class="img-circle img-fluid">
-          
-                          {% endif %}
-                              
-                          </div>
-                        </div>
-                      </div>
-                      <div class="card-footer">
-                        <div class="text-right">
-                          <a href="#" class="btn btn-sm bg-danger">
-                            <i class="fas fa-trash"></i>
-                          </a>
-                          <a href="#" class="btn btn-sm btn-primary">
-                            <i class="fas fa-book"></i> تعديل
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                    
-                  </div>
-                   <!-- نهاية الكتاب -->
-                {% endfor %}
-                </div>
-              </div>
-              <!-- /.card-body -->
+              
 
-              <!-- /.card-footer -->
-            </div>
-            <!-- /.card -->
-      
+
+              {% include "officers_affairs/partial_officers.html" %}
           </section>
-          <!-- /.content -->
+          
+           
+          
+         
+
+          <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if officers.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ officers.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
         
+                    {% for num in officers.paginator.page_range %}
+                        {% if officers.number == num %}
+                            <li class="page-item active">
+                                <a class="page-link" href="#">{{ num }}</a>
+                            </li>
+                        {% elif num > officers.number|add:'-3' and num < officers.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+        
+                    {% if officers.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ officers.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ officers.paginator.num_pages }}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        
+        
+        <!-- Modal Placeholder -->
+<div id="modal" class="modal fade">
+  <div id="dialog" class="modal-dialog" hx-target="this"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container position-fixed top-0 start-0 p-3">
+  <div id="toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+  <div class="d-flex">
+      <div id="toast-body" class="toast-body"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+      aria-label="Close"></button>
+  </div>
+  </div>
+
+<script>
+const modal = new bootstrap.Modal(document.getElementById("modal"))
+
+htmx.on("htmx:afterSwap", (e) => {
+  // Response targeting #dialog => show the modal
+  if (e.detail.target.id == "dialog") {
+    modal.show()
+  }
+})
+
+htmx.on("htmx:beforeSwap", (e) => {
+  // Empty response targeting #dialog => hide the modal
+  if (e.detail.target.id == "dialog" && !e.detail.xhr.response) {
+    modal.hide()
+    e.detail.shouldSwap = false
+  }
+})
+
+htmx.on("hidden.bs.modal", () => {
+  // Remove dialog content after hiding
+  document.getElementById("dialog").innerHTML = ""
+})
+
+const toastElement = document.getElementById("toast")
+const toastBody = document.getElementById("toast-body")
+const toast = new bootstrap.Toast(toastElement, { delay: 2000 })
+
+htmx.on("showMessage", (e) => {
+  toastBody.innerText = e.detail.value
+  toast.show()
+})
+
+
+</script>
+
         <!-- /.content-wrapper -->
       
     
     <!-- /.content-wrapper -->
  
-
+    
 {% endblock %}

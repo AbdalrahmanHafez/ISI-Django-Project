@@ -1,4 +1,4 @@
-from .models import Officer, Rank
+from .models import Officer, OfficerStatus, Rank, UnitStatus
 from django import forms
 import django_filters
 from django.urls import reverse_lazy
@@ -44,17 +44,22 @@ class OfficerFilter(django_filters.FilterSet):
         widget=forms.Select,  
     )
     
-    # rank = django_filters.ModelMultipleChoiceFilter(
-    #     field_name='rank',
-    #     queryset=Rank.objects.all(),
-    #     widget=forms.CheckboxSelectMultiple,
-    # )
+    status = django_filters.ModelMultipleChoiceFilter(
+        field_name='status',
+        queryset=OfficerStatus.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+    )
 
 
+    
     class Meta:
         model = Officer
         # fields = {"full_name": ['icontains']}
         # fields = ["rank"]
         fields = {}
 
-
+    @property
+    def qs(self):
+        # Get the base queryset and apply the ordering by rank_id
+        queryset = super().qs
+        return queryset.order_by('rank_id')

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Leave Request Details</h3>
+<div class="leave-request-details">
+    <p><strong>Officer:</strong> {{ leave_request.officer.full_name }}</p>
+    <p><strong>Leave Type:</strong> {{ leave_request.leave_type }}</p>
+    <p><strong>Dates:</strong> {{ leave_request.start_date }} to {{ leave_request.end_date }}</p>
+</div>
+
+<form method="POST" class="leave-request-form">
+    {% csrf_token %}
+    <div class="form-actions">
+        <button class="btn btn-success" name="decision" value="accept">Accept</button>
+        <button class="btn btn-danger" name="decision" value="reject">Reject</button>
+    </div>
+</form>
+
+{% endblock %}

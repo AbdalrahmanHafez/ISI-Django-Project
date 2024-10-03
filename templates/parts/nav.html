@@ -26,24 +26,25 @@
 
       </ul>
 
+      
       <a class="nav-link dropdown-toggle" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fas fa-bell"></i>
         <span class="badge bg-danger" id="unreadCount">{{ unread_notifications_count }}</span>
-    </a>
+        </a>
     <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
-        {% for notification in request.user.notification_set.all %}
+        {% comment %} {% for notification in request.user.notification_set.all %}
             <li>
-                <a class="dropdown-item notification-item d-flex" data-id="{{ notification.id }}" data-link="{{ notification.link }}" href="#">
+                <a id="notification-{{notification.id}}" class="dropdown-item notification-item d-flex" data-id="{{ notification.id }}" data-link="{{ notification.link }}" href="#">
                     {{ notification.message }}
                     <small class="text-muted">{{ notification.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</small>
                 </a>
             </li>
         {% empty %}
             <li><a class="dropdown-item" href="#">لا توجد إشعارات</a></li>
-        {% endfor %}
+        {% endfor %} {% endcomment %}
     </ul>
     
-    <audio id="notificationSound" src="#" preload="auto"></audio>
+    <audio id="notificationSound" src="{% static "audio/notification.mp3" %}" preload="auto"></audio>
     
     
 
@@ -156,16 +157,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
   });
 </script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+    function setNotificationCallbacks(){
       const notificationItems = document.querySelectorAll('.notification-item');
       const unreadCount = document.getElementById('unreadCount');
       const notificationSound = document.getElementById('notificationSound');
-  
+
       notificationItems.forEach(item => {
           item.addEventListener('click', function(event) {
               event.preventDefault();
               const notificationId = this.getAttribute('data-id');
               const link = this.getAttribute('data-link');
+              
   
               // Make an AJAX request to mark the notification as read
               $.ajax({
@@ -177,8 +179,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
                   success: function(response) {
                       if (response.success) {
                           // Remove the notification from the list
-                          document.getElementById(`notification-${notificationId}`).remove();
-                          item.closest('li').remove();
+                           // document.getElementById(`notification-${notificationId}`).remove();
+                          // this.target.remove();
+                          // item.closest('li').remove();
                           // Decrement unread count
                           const currentCount = parseInt(unreadCount.textContent);
                           unreadCount.textContent = currentCount - 1;
@@ -194,18 +197,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
               });
           });
       });
-  
+    }
+
+
+    function updateNotificationList(cb) {
+        $.ajax({
+            url: "{% url 'notification_list' %}",  // Use the correct URL for checking new notifications
+            method: "GET",
+            success: function(response) {
+            
+            document.getElementById("notificationList").innerHTML = response
+            setNotificationCallbacks();
+            if (cb) cb();
+            }});
+    }
+
+  document.addEventListener('DOMContentLoaded', () => {
       // Function to check for new notifications
-      function checkNewNotifications() {
+      let prev_unread_count = 0;
+      function checkNewNotifications(isFirstCall) {
           $.ajax({
               url: "{% url 'check_new_notifications' %}",  // Use the correct URL for checking new notifications
               method: "GET",
               success: function(response) {
-                  if (response.unread_count > 0) {
-                      unreadCount.textContent = response.unread_count;
-                      // Play notification sound
-                      notificationSound.play();
-                  }
+                if (response.unread_count > 0) {
+                    updateNotificationList(()=>{
+                            if (!isFirstCall && prev_unread_count !== response.unread_count){
+                                notificationSound.play();
+                            }
+                            unreadCount.textContent = response.unread_count;
+                            prev_unread_count = response.unread_count
+                    })
+                }
+
               },
               error: function(xhr, status, error) {
                   console.error('Error fetching new notifications:', status, error);
@@ -214,6 +238,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
       }
   
        //Check for new notifications every 30 seconds
+       updateNotificationList();
+       checkNewNotifications(true);
        setInterval(checkNewNotifications, 10000);
   });
+
   </script>

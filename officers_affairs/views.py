@@ -605,7 +605,9 @@ def leave_requests_list(request):
         leave_requests = LeaveRequest.objects.all()
     elif user_officer.role == 'المدير':
         # 'المدير' sees only pending requests that need their approval
-        leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver='70').filter( final_approver='70',officer__is_leader=True )
+
+        # if current approvar == final aproval or
+        leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True, officer__role__isnull=False) | Q(approver=get_final_approver()))
     
     elif  user_officer.role in approver_roles:
         # Leaders or approvers see only pending requests from their branch that need their approval
@@ -696,6 +698,8 @@ def create_notification(recipient_user, message, is_current_approver=False, is_f
         link = reverse('leave_requests_list')
     elif is_current_approver:  # The current approver gets a notification with the same link.
         link = reverse('leave_requests_list')
+    elif recipient_user == get_head_of_branch():
+        link = reverse('leave_requests_list')
     else:
         link = reverse('leave_requests')  # Officers or others get a general notification link.
 
@@ -737,3 +741,8 @@ def check_new_notifications(request):
 
     # Return the count as a JSON response
     return JsonResponse({'unread_count': unread_count})
+
+@login_required
+def notification_list(request):
+    notifications = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
+    return render(request, 'officers_affairs/notification_list.html', {'notifications': notifications})

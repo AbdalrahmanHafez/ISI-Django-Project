@@ -1,0 +1,11 @@
+{% load custom_filters %}
+{% for notification in notifications %}
+<li>
+    <a id="notification-{{notification.id}}" class="dropdown-item notification-item d-flex" data-id="{{ notification.id }}" data-link="{{ notification.link }}" href="#">
+            {{ notification.message }}
+            <small class="text-muted">{{ notification.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</small>
+        </a>
+    </li>
+{% empty %}
+    <li><a class="dropdown-item" href="#">لا توجد إشعارات</a></li>
+{% endfor %}

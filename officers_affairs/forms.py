@@ -5,9 +5,9 @@ from django.contrib.auth.models import User,Group
 
 
 class OfficerForm(LoginRequiredMixin, forms.ModelForm):
-    
     create_user = forms.BooleanField(required=False, label="إنشاء مستخدم للضابط")
-    
+    is_active = forms.BooleanField(initial=True, required=False, label="المستخدم نشط")
+
     class Meta:
         model = Officer
         exclude = ("created_by", "updated_by", "created_at", "updated_at","user")
@@ -47,7 +47,8 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         #             if officer.branch:
         #                 new_group, created = Group.objects.get_or_create(name=officer.branch.name)
         #                 officer.user.groups.add(new_group)
-            # Handle updating user branch if the branch has changed
+
+        # Handle updating user branch if the branch has changed
         if officer.user:
             if officer.pk:  # Check if officer is being updated
                 original_officer = Officer.objects.get(pk=officer.pk)
@@ -71,6 +72,9 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
                     officer.user.groups.clear()  # Clear any existing groups to ensure only one branch
                     officer.user.groups.add(new_branch)
 
+            officer.user.is_active = self.cleaned_data.get('is_active', True) 
+            officer.user.save()
+
 
         if commit:
             officer.save()
@@ -80,6 +84,11 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Set default value for is_active field based on current user's status
+        if self.instance and self.instance.user:
+            self.fields['is_active'].initial = self.instance.user.is_active  # Set to the current user's is_active state
+
         for field_name, field in self.fields.items():
                     if isinstance(field, forms.DateField):
                         field.widget.attrs.update({

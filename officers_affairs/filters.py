@@ -1,12 +1,6 @@
-from .models import Officer, OfficerStatus, Rank, UnitStatus
-from django import forms
 import django_filters
-from django.urls import reverse_lazy
-
-    
-
-# class CheckboxSelectMultiple(forms.CheckboxSelectMultiple):
-#     template_name = "test.html"
+from django import forms
+from .models import Officer, Rank, OfficerStatus
 
 class OfficerFilter(django_filters.FilterSet):
     full_name = django_filters.CharFilter(
@@ -37,25 +31,27 @@ class OfficerFilter(django_filters.FilterSet):
         label="الرقم القومي"
     )
 
-
     rank = django_filters.ModelChoiceFilter(
         field_name='rank',
         queryset=Rank.objects.all(),
         widget=forms.Select,  
     )
-    
+
     status = django_filters.ModelMultipleChoiceFilter(
         field_name='status',
         queryset=OfficerStatus.objects.all(),
         widget=forms.CheckboxSelectMultiple,
     )
 
+    is_active = django_filters.BooleanFilter(
+        field_name='user__is_active',
+        widget=forms.CheckboxInput(),
+        label="مستخدم غير نشط",
+        exclude=True
+    )
 
-    
     class Meta:
         model = Officer
-        # fields = {"full_name": ['icontains']}
-        # fields = ["rank"]
         fields = {}
 
     @property

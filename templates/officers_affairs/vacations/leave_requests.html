@@ -13,9 +13,10 @@
           <th>تاريخ البدء</th>
           <th>تاريخ الانتهاء</th>
           <th>الحالة</th>
-            <th>المصــدق الأن</th>
+          <th>المصــدق الأن</th>
           <th>عدد الأيام</th>
           <th>الأيام المتبقية</th>
+          <th>خيارات</th>
         </tr>
       </thead>
       <tbody>
@@ -35,15 +36,22 @@
             </td>
             <td>{{ request.approver.officer_profile.full_name }}</td>
             <td>{{ request.days_taken }}</td>
-            {%if request.remaining_days%}
+            {%if request.remaining_days >= 0%}
             <td>{{ request.remaining_days }}</td>
             {% else %}
             <td>-</td>
             {% endif %}
+            <td class="d-flex justify-content-center">
+              {% if request.can_edit %}
+              <a href="{% url 'update_leave_request' request.pk %}">
+                <i class="fas fa-edit"></i>
+                </a>
+              {% else %}-{% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="7" class="text-center bg-success">لا توجد طلبات إجازة في الوقت الحالي</td>
+            <td colspan="8" class="text-center bg-success">لا توجد طلبات إجازة في الوقت الحالي</td>
           </tr>
         {% endfor %}
       </tbody>

@@ -14,7 +14,10 @@
     <div class="col-md-40">
       <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
-          <h4 class="mb-0">طلب اجازة<br>{{request.user.officer_profile.rank}}/{{request.user.officer_profile.full_name}}</h4>
+          <h4 class="mb-0">
+            {% if form.instance.pk %} تعديل {% endif %}
+            طلب اجازة
+            <br>{{request.user.officer_profile.rank}}/{{request.user.officer_profile.full_name}}</h4>
         </div>
         <div class="card-body">
           <form method="POST" id="leave-request-form">
@@ -46,7 +49,10 @@
               </div>
               
 
-            <button type="submit" class="btn btn-success w-100">تقديم الطلب</button>
+            <button type="submit" class="btn btn-success w-100">
+              {% if form.instance.pk %} تعديل {% else %} تقديم {% endif %}
+              الطلب
+            </button>
           </form>
 
           <div id="loading-indicator" style="display: none;">جاري...</div>
@@ -118,6 +124,11 @@ $(document).ready(function() {
             $("#id_remaining_days").text(rem_days > 0 ? rem_days : 0)
         }
         else if (leave_type){
+          var start = new Date(startDate);
+          var end = new Date(endDate);
+            
+          const rem_days = remaining_days_per_type[leave_type] - days_between_dates(start, end)
+
           $("#id_remaining_days").text(remaining_days_per_type[leave_type])
           if(rem_days===undefined)
             $("#id_remaining_days").text('-')

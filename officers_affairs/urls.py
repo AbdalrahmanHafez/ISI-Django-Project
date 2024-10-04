@@ -16,7 +16,8 @@ urlpatterns = [
     path('officers_add/<int:pk>', views.officers_add, name="officers_add" ),
     path('officers_delete/<int:pk>', views.officers_delete.as_view(), name="officers_delete" ),
     
-    path('leave/create/', views.create_leave_request, name='create_leave_request'),
+    path('leave/create/', views.create_update_leave_request, name='create_leave_request'),
+    path('leave/update/<int:pk>', views.create_update_leave_request, name='update_leave_request'),
     path('leave/requests/', views.leave_requests_list, name='leave_requests_list'),  # For leaders to see all requests
     path('leave/my-requests/', views.leave_requests, name='leave_requests'),  # For users to see only their requests
     path('leave/approve/<int:pk>/', views.approve_leave_request, name='approve_leave_request'),

@@ -172,7 +172,7 @@ class LeaveRequest(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.officer.username} - {self.get_leave_type_display()}"
+        return f"{self.officer.user.username} - {self.get_leave_type_display()}"
 
 
 class Notification(models.Model):

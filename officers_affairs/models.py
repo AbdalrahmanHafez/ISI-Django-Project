@@ -83,7 +83,7 @@ class Officer(models.Model):
     ]
     
     is_leader = models.BooleanField(default=False, verbose_name="قائد الفرع")
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES, null=True, blank=True, verbose_name="الوظيفة")
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, null=True, blank=True, verbose_name="الوظيفة الادارية")
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='officer_profile', null=True,blank=True)
     full_name = models.CharField(max_length=255, verbose_name="اسم الضابط")
     rank = models.ForeignKey(Rank, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الرتبة")

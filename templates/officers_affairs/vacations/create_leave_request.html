@@ -7,6 +7,10 @@
 
 <div class="container mt-5">
   <div class="row">
+
+
+
+    
     <div class="col-md-40">
       <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
@@ -46,10 +50,36 @@
           </form>
 
           <div id="loading-indicator" style="display: none;">جاري...</div>
+
         </div>
       </div>
     </div>
 
+
+      <div class="col-md-40">
+        <div class="card mt-4">
+        
+          <div class="card-header bg-primary text-white">
+            <h4>الرصيد</h4>
+          </div>
+        <div class="card-footer" style="box-sizing: border-box; display: block;">
+        <div class="row">
+          <div class="col">
+              <div class="text-center border-end">
+                  <h5 class="fw-bold mb-0">{{remaining_days_per_type.annual}} <span class="fw-normal fs-6">/15</span></h5>
+                  <span class="text-uppercase">سنوية</span>
+              </div>
+          </div>
+          <div class="col">
+              <div class="text-center border-end">
+                  <h5 class="fw-bold mb-0">{{remaining_days_per_type.casual}} <span class="fw-normal fs-6">/7</span></h5>
+                  <span class="text-uppercase">عارضة</span>
+              </div>
+          </div>
+        </div>
+        </div>
+        </div>
+      </div>
 
     
   </div>

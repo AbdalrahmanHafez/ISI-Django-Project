@@ -336,6 +336,13 @@ def create_leave_request(request):
             'error_message': "لا يوجد لديك ملف ضابط مرتبط بحسابك."
         })
 
+
+    remaining_days_per_type = {}
+    for (leave_type, display_name) in LeaveRequest.LEAVE_TYPES:
+        v = get_remaining_days(officer_profile, leave_type)
+        if v == None: continue
+        remaining_days_per_type[leave_type] = v
+
     if request.method == 'POST':
         form = LeaveRequestForm(request.POST)
         if form.is_valid():
@@ -343,18 +350,30 @@ def create_leave_request(request):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             days_taken = (end_date - start_date).days + 1
-            
+           
+            # Don't add two leave requests of the same type if one is still PENDING.
+            existing_pending_request = LeaveRequest.objects.filter(
+                officer=officer_profile,
+                leave_type=leave_type,
+                status=LeaveRequest.PENDING
+            ).exists()
+
+            if existing_pending_request:
+                form.add_error(None, "لا يمكنك تقديم طلب إجازة من نفس النوع في حين أن هناك طلب معلق.")
+                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
+
+
             # استرجاع الأيام المتبقية من وظيفة get_remaining_days
             remaining_days = get_remaining_days(officer_profile, leave_type)
 
             if remaining_days is not None and days_taken > remaining_days:
                 form.add_error(None, "عدد الأيام المطلوبة يتجاوز الرصيد المتبقي.")
-                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form})
+                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
 
             # Validate the dates
             if end_date < start_date:
                 form.add_error('end_date', "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء.")
-                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form})
+                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
             
          
 
@@ -412,11 +431,6 @@ def create_leave_request(request):
     else:
         form = LeaveRequestForm()
 
-    remaining_days_per_type = {}
-    for (leave_type, display_name) in LeaveRequest.LEAVE_TYPES:
-        v = get_remaining_days(officer_profile, leave_type)
-        if v == None: continue
-        remaining_days_per_type[leave_type] = v
 
 
     return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type}) 

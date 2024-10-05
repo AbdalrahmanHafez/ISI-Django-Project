@@ -8,7 +8,7 @@ from django.db.models import Case, When, Value, IntegerField
 
 from .models import *
 from .forms import BranchForm, JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.views import generic
 from django.urls import reverse_lazy, reverse
 import json
@@ -328,7 +328,7 @@ def get_remaining_days(officer, leave_type):
     return remaining_days
 
 
-def create_leave_request(request):
+def create_update_leave_request(request, pk=None):
     try:
         officer_profile = request.user.officer_profile
     except Officer.DoesNotExist:
@@ -336,87 +336,124 @@ def create_leave_request(request):
             'error_message': "لا يوجد لديك ملف ضابط مرتبط بحسابك."
         })
 
-    if request.method == 'POST':
-        form = LeaveRequestForm(request.POST)
-        if form.is_valid():
-            leave_type = form.cleaned_data['leave_type']
-            start_date = form.cleaned_data['start_date']
-            end_date = form.cleaned_data['end_date']
-            days_taken = (end_date - start_date).days + 1
-            
-            # استرجاع الأيام المتبقية من وظيفة get_remaining_days
-            remaining_days = get_remaining_days(officer_profile, leave_type)
-
-            if remaining_days is not None and days_taken > remaining_days:
-                form.add_error(None, "عدد الأيام المطلوبة يتجاوز الرصيد المتبقي.")
-                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form})
-
-            # Validate the dates
-            if end_date < start_date:
-                form.add_error('end_date', "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء.")
-                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form})
-            
-         
-
-            
-                
-            initial_approver = get_initial_approver(officer_profile)
-            
-            # Check if the current officer is the initial approver
-            if request.user == initial_approver:
-                # Automatically go to the next approver
-                next_approver = get_next_approver(initial_approver, None)
-                if not next_approver:
-                    return render(request, 'officers_affairs/error.html', {
-                        'error_message': "لا يوجد مصدق لاحق."
-                    })
-            else:
-                next_approver = initial_approver
-
-            # Create the leave request
-            leave_request = LeaveRequest(
-                officer=officer_profile,
-                leave_type=leave_type,
-                start_date=start_date,
-                end_date=end_date,
-                days_taken=days_taken,
-                remaining_days=remaining_days - days_taken if remaining_days is not None else None,
-                
-                status=LeaveRequest.PENDING,
-                approver=next_approver,
-                final_approver=get_final_approver()
-            )
-            leave_request.save()
-            
-            
-             # Notify the next approver
-            create_notification(
-                recipient_user=next_approver, 
-                message=f"طلب إجازة جديد من {officer_profile.rank} / {officer_profile.full_name} يحتاج موافقتك.",
-                is_current_approver=True
-            )
-
-            # # Notify the final approver, but only if they are not the same as the next approver
-            # final_approver = get_final_approver()
-            # if final_approver != next_approver:
-            #     create_notification(
-            #         recipient_user=final_approver, 
-            #         message=f"طلب إجازة جديد من {officer_profile.full_name} يحتاج موافقتك النهائية.",
-            #         is_final_approver=True
-            #     )
-
-
-            
-            return redirect('leave_requests')
-
-    else:
-        form = LeaveRequestForm()
 
     remaining_days_per_type = {}
     for (leave_type, display_name) in LeaveRequest.LEAVE_TYPES:
         v = get_remaining_days(officer_profile, leave_type)
         if v == None: continue
         remaining_days_per_type[leave_type] = v
+
+    # GET or UPDATE LeaveRequest
+    if pk != None and not can_officer_edit_leave_request(officer_profile, get_object_or_404(LeaveRequest, pk= pk)):
+        return HttpResponseForbidden("ليس لديك صلاحية تعديل هذا الطلب")
+
+    if request.method == 'POST':
+        if pk != None: # update
+            form = LeaveRequestForm(request.POST, instance= get_object_or_404(LeaveRequest, pk= pk))
+
+        else: # create
+            form = LeaveRequestForm(request.POST)
+
+        if form.is_valid():
+            leave_type = form.cleaned_data['leave_type']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            days_taken = (end_date - start_date).days + 1
+           
+            # Don't add two leave requests of the same type if one is still PENDING.
+            if pk == None: # Create
+                existing_pending_request = LeaveRequest.objects.filter(
+                    officer=officer_profile,
+                    leave_type=leave_type,
+                    status=LeaveRequest.PENDING
+                ).exists()
+
+                if existing_pending_request:
+                    form.add_error(None, "لا يمكنك تقديم طلب إجازة من نفس النوع في حين أن هناك طلب معلق.")
+                    return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
+            else:
+                # Update
+                # check if any other request has the same type of new request, then reject change
+                originalLeaveRequest = get_object_or_404(LeaveRequest, pk= pk)
+                target_type = form.cleaned_data['leave_type']
+                if target_type != originalLeaveRequest.leave_type:
+                    for leave_request in LeaveRequest.objects.filter(officer= officer_profile, status= LeaveRequest.PENDING):
+                        if leave_request.leave_type == target_type:
+                            form.add_error(None, "لا يمكنك تعديل نوع طلب اجازة ولديك طلب بنفس النوع")
+                            return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
+                        
+
+            # استرجاع الأيام المتبقية من وظيفة get_remaining_days
+            remaining_days = get_remaining_days(officer_profile, leave_type)
+
+            if remaining_days is not None and days_taken > remaining_days:
+                form.add_error(None, "عدد الأيام المطلوبة يتجاوز الرصيد المتبقي.")
+                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
+
+            # Validate the dates
+            if end_date < start_date:
+                form.add_error('end_date', "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء.")
+                return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type})
+            
+                
+            if pk == None: # Create
+                initial_approver = get_initial_approver(officer_profile)
+                
+                # Check if the current officer is the initial approver
+                if request.user == initial_approver:
+                    # Automatically go to the next approver
+                    next_approver = get_next_approver(initial_approver, None)
+                    if not next_approver:
+                        return render(request, 'officers_affairs/error.html', {
+                            'error_message': "لا يوجد مصدق لاحق."
+                        })
+                else:
+                    next_approver = initial_approver
+
+                # Create the leave request
+                leave_request = LeaveRequest(
+                    officer=officer_profile,
+                    leave_type=leave_type,
+                    start_date=start_date,
+                    end_date=end_date,
+                    days_taken=days_taken,
+                    remaining_days=remaining_days - days_taken if remaining_days is not None else None,
+                    
+                    status=LeaveRequest.PENDING,
+                    approver=next_approver,
+                    final_approver=get_final_approver()
+                )
+                leave_request.save()
+            
+            
+                # Notify the next approver
+                create_notification(
+                    recipient_user=next_approver, 
+                    message=f"طلب إجازة جديد من {officer_profile.rank} / {officer_profile.full_name} يحتاج موافقتك.",
+                    is_current_approver=True
+                )
+
+                # # Notify the final approver, but only if they are not the same as the next approver
+                # final_approver = get_final_approver()
+                # if final_approver != next_approver:
+                #     create_notification(
+                #         recipient_user=final_approver, 
+                #         message=f"طلب إجازة جديد من {officer_profile.full_name} يحتاج موافقتك النهائية.",
+                #         is_final_approver=True
+                #     )
+            else:
+                # Update
+                form.instance.remaining_days = remaining_days - days_taken if remaining_days is not None else None
+                form.save()
+
+
+            return redirect('leave_requests')
+
+    elif pk != None: # Update GET
+        form = LeaveRequestForm(instance= get_object_or_404(LeaveRequest, pk= pk))
+    else: # Create GET
+        form = LeaveRequestForm()
+
 
 
     return render(request, 'officers_affairs/vacations/create_leave_request.html', {'form': form, 'remaining_days_per_type': remaining_days_per_type}) 
@@ -680,12 +717,30 @@ def leave_requests_list(request):
 
 
 
+def can_officer_edit_leave_request(officer, leaveRequest):
+    if leaveRequest.status != leaveRequest.PENDING:
+        return False
 
+    leader = get_initial_approver(officer)
+
+    if officer.is_leader:
+        next_approver = get_next_approver(officer.user, None)
+        if not next_approver:
+            return False
+    else:
+        next_approver = leader
+    
+    return leaveRequest.approver == next_approver
 
 @login_required
 def leave_requests(request):
-    requests = LeaveRequest.objects.filter(officer=request.user.officer_profile)  # Only show the current user's requests
-    return render(request, 'officers_affairs/vacations/leave_requests.html', {'requests': requests})
+    officer = request.user.officer_profile
+    leave_requests = LeaveRequest.objects.filter(officer=officer)  # Only show the current user's requests
+
+    for leave_request in leave_requests:
+        leave_request.can_edit = can_officer_edit_leave_request(officer, leave_request)
+
+    return render(request, 'officers_affairs/vacations/leave_requests.html', {'requests': leave_requests})
 
 
 

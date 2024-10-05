@@ -1,13 +1,13 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Branch, Job, LeaveRequest, Officer, OfficerStatus , Rank, Section, Unit, UnitStatus, Weapon
+from .models import Job, LeaveRequest, Officer, OfficerStatus , Rank, Section, Unit, UnitStatus, Weapon
 from django.contrib.auth.models import User,Group
 
 
 class OfficerForm(LoginRequiredMixin, forms.ModelForm):
-    
     create_user = forms.BooleanField(required=False, label="إنشاء مستخدم للضابط")
-    
+    is_active = forms.BooleanField(initial=True, required=False, label="المستخدم نشط")
+
     class Meta:
         model = Officer
         exclude = ("created_by", "updated_by", "created_at", "updated_at","user")
@@ -25,28 +25,57 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
                 officer.user = user
                  
                 # Assign user to group based on branch
-                if officer.branch:
-                    group, created = Group.objects.get_or_create(name=officer.branch.name)
-                    user.groups.add(group)
+                # if officer.branch:
+                #     group, created = Group.objects.get_or_create(name=officer.branch.name)
+                #     user.groups.add(group)
                 
                 
             else:
                 self.add_error('create_user', "هناك مستخدم له نفس اسم المستخدم بالفعل !!!")
                 
         # Handle updating user group if the branch has changed
+        # if officer.user:
+        #     if officer.pk:  # Check if officer is being updated
+        #         original_officer = Officer.objects.get(pk=officer.pk)
+        #         if original_officer.branch != officer.branch:
+        #             # Remove user from the old branch group
+        #             if original_officer.branch:
+        #                 old_group, created = Group.objects.get_or_create(name=original_officer.branch.name)
+        #                 officer.user.groups.remove(old_group)
+
+        #             # Add user to the new branch group
+        #             if officer.branch:
+        #                 new_group, created = Group.objects.get_or_create(name=officer.branch.name)
+        #                 officer.user.groups.add(new_group)
+
+        # Handle updating user branch if the branch has changed
         if officer.user:
             if officer.pk:  # Check if officer is being updated
                 original_officer = Officer.objects.get(pk=officer.pk)
+                
+                # If the user's branch has changed
                 if original_officer.branch != officer.branch:
-                    # Remove user from the old branch group
+                    # Remove user from the old branch
                     if original_officer.branch:
-                        old_group, created = Group.objects.get_or_create(name=original_officer.branch.name)
-                        officer.user.groups.remove(old_group)
+                        officer.user.groups.remove(original_officer.branch)
 
-                    # Add user to the new branch group
+                    # Add user to the new branch
                     if officer.branch:
-                        new_group, created = Group.objects.get_or_create(name=officer.branch.name)
-                        officer.user.groups.add(new_group)
+                        new_branch = officer.branch
+                        officer.user.groups.clear()  # Clear any existing groups to ensure only one branch
+                        officer.user.groups.add(new_branch)
+
+            else:
+                # If the officer is being created, assign the branch directly
+                if officer.branch:
+                    new_branch = officer.branch
+                    officer.user.groups.clear()  # Clear any existing groups to ensure only one branch
+                    officer.user.groups.add(new_branch)
+
+            officer.user.is_active = self.cleaned_data.get('is_active', True) 
+            officer.user.save()
+
+
         if commit:
             officer.save()
 
@@ -55,6 +84,11 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Set default value for is_active field based on current user's status
+        if self.instance and self.instance.user:
+            self.fields['is_active'].initial = self.instance.user.is_active  # Set to the current user's is_active state
+
         for field_name, field in self.fields.items():
                     if isinstance(field, forms.DateField):
                         field.widget.attrs.update({
@@ -83,7 +117,7 @@ class UnitForm(forms.ModelForm):
         
 class BranchForm(forms.ModelForm):
     class Meta:
-        model = Branch
+        model = Group
         fields = ['name']
         widgets = {
             'name' : forms.TextInput(attrs={'class':'form-control'}),

@@ -1,7 +1,7 @@
 # models.py
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
@@ -35,14 +35,10 @@ class Unit(models.Model):
     def __str__(self):
         return self.name
 
-class Branch(models.Model):
-    name = models.CharField(max_length=100, unique=True,verbose_name="الـفرع")
-    def __str__(self):
-        return self.name
 
 class Section(models.Model):
     name = models.CharField(max_length=100, unique=True,verbose_name="الـقسم")
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True, blank=True, related_name='sections',verbose_name="الـفرع")
+    branch = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, related_name='sections',verbose_name="الـفرع")
     def __str__(self):
         return self.name
 
@@ -86,7 +82,7 @@ class Officer(models.Model):
     ]
     
     is_leader = models.BooleanField(default=False, verbose_name="قائد الفرع")
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES, null=True, blank=True, verbose_name="الوظيفة")
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, null=True, blank=True, verbose_name="الوظيفة الادارية")
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='officer_profile', null=True,blank=True)
     full_name = models.CharField(max_length=255, verbose_name="اسم الضابط")
     rank = models.ForeignKey(Rank, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الرتبة")
@@ -113,7 +109,7 @@ class Officer(models.Model):
     previous_unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_units', verbose_name="الوحدة السابقة")
     status = models.ForeignKey(OfficerStatus, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الحالة")
     unit_status = models.ForeignKey(UnitStatus, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الحالة بالوحدة")
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الفرع")
+    branch = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الفرع")
     section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="القسم")
     job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الوظيفه")
     batch_number = models.CharField(max_length=40, blank=True, null=True, verbose_name="رقم الدفعة")
@@ -175,7 +171,7 @@ class LeaveRequest(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.officer.username} - {self.get_leave_type_display()}"
+        return f"{self.officer.user.username} - {self.get_leave_type_display()}"
 
 
 class Notification(models.Model):

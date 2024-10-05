@@ -287,20 +287,13 @@
                                       <button id="backoffstatus" type="button" class="btn btn-primary">تراجع</button>
                                   </form>
                               </li>
+                            </ul>
+                        </li>
             {% endif %}
-              
-
-            
-                              
-          
-                          </ul>
-                      </li>
-
-            
-        
+    
             <!-- Filter Section -->
-            
-            
+            {% comment %} <li class="nav-header">الحاله</li>
+            <li class="nav-item">
                 <a id="statusActive" class="nav-link" hx-get="{% url 'officers_list' %}?status=1" hx-target="#officers_list">
                     <i class="nav-icon fas fa-circle text-danger"></i>
                     <p>خدمه</p>
@@ -309,33 +302,33 @@
                     <i class="nav-icon fas fa-circle text-warning"></i>
                      <p>معاش</p>
                 </a>
-            
-              
-              
-              
-            
-              {% if request.user.officer_profile.role != 'المدير' %}
-              
+              </li> {% endcomment %}
+
+            <li class="nav-header">اجازة</li>
+            {% if request.user.officer_profile.role != 'المدير' %}
+              <li class="nav-item">
                 <a href="{% url 'create_leave_request' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
                     <i class="nav-icon fas fa-hand-holding"></i>
                     <p>طلب اجازة</p>
                 </a>
-            
+                </li>
             {% endif %}
 
             <!-- Change Password Link -->
+
             {% if request.user.officer_profile.is_leader or request.user.officer_profile.role %}
             
                 <a href="{% url 'leave_requests_list' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                    <i class="nav-icon fas fa-calendar-check"></i>
+                    <i class="nav-icon fas fa-users"></i>
                     <p>طلبات الاجازة</p>
                 </a>
             
             {% endif %}
+
             {% if request.user.officer_profile.role != 'المدير' %}
             
                 <a href="{% url 'leave_requests' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                    <i class="nav-icon fas fa-hand-holding"></i>
+                    <i class="nav-icon fas fa-mug-hot"></i>
                     <p>طلباتي للاجازة  </p>
                 </a>
             
@@ -343,7 +336,8 @@
 
             
             
-            
+            <li class="nav-header">الحساب</li>
+            <li class="nav-item">
                 <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
                     <i class="nav-icon fas fa-key"></i>
                     <p>تغيير كلمة المرور</p>

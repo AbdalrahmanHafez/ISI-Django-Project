@@ -7,10 +7,17 @@
 
 <div class="container mt-5">
   <div class="row">
+
+
+
+    
     <div class="col-md-40">
       <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
-          <h4 class="mb-0">طلب اجازة<br>{{request.user.officer_profile.rank}}/{{request.user.officer_profile.full_name}}</h4>
+          <h4 class="mb-0">
+            {% if form.instance.pk %} تعديل {% endif %}
+            طلب اجازة
+            <br>{{request.user.officer_profile.rank}}/{{request.user.officer_profile.full_name}}</h4>
         </div>
         <div class="card-body">
           <form method="POST" id="leave-request-form">
@@ -42,14 +49,43 @@
               </div>
               
 
-            <button type="submit" class="btn btn-success w-100">تقديم الطلب</button>
+            <button type="submit" class="btn btn-success w-100">
+              {% if form.instance.pk %} تعديل {% else %} تقديم {% endif %}
+              الطلب
+            </button>
           </form>
 
           <div id="loading-indicator" style="display: none;">جاري...</div>
+
         </div>
       </div>
     </div>
 
+
+      <div class="col-md-40">
+        <div class="card mt-4">
+        
+          <div class="card-header bg-primary text-white">
+            <h4>الرصيد</h4>
+          </div>
+        <div class="card-footer" style="box-sizing: border-box; display: block;">
+        <div class="row">
+          <div class="col">
+              <div class="text-center border-end">
+                  <h5 class="fw-bold mb-0">{{remaining_days_per_type.annual}} <span class="fw-normal fs-6">/15</span></h5>
+                  <span class="text-uppercase">سنوية</span>
+              </div>
+          </div>
+          <div class="col">
+              <div class="text-center border-end">
+                  <h5 class="fw-bold mb-0">{{remaining_days_per_type.casual}} <span class="fw-normal fs-6">/7</span></h5>
+                  <span class="text-uppercase">عارضة</span>
+              </div>
+          </div>
+        </div>
+        </div>
+        </div>
+      </div>
 
     
   </div>
@@ -57,9 +93,6 @@
   
 </div>
 
-  <div class="w-100 mt-5">
-    <div class="row" id="chartContainer"></div>
-  </div>
 </div>
 
 
@@ -71,94 +104,34 @@
 <script>
 $(document).ready(function() {
 
-  const remainingDays = {{ remaining_days_per_type|safe }};
-  const chartContainer = document.getElementById('chartContainer');
-
-  Object.entries(remainingDays).forEach(([leave_type, remaining]) => {
-    const colDiv = document.createElement('div');
-    colDiv.className = 'col-md-4 mb-4';
-    
-    const canvasElement = document.createElement('canvas');
-    canvasElement.id = `chart-${leave_type}`;
-    
-    colDiv.appendChild(canvasElement);
-    chartContainer.appendChild(colDiv);
-
-    const ctx = canvasElement.getContext('2d');
-
-
-    const getLabelColor = () => document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#fff' : '#000';
-
-    let used = 0;
-    if(leave_type == "annual"){
-      used = 15 - remaining;
-    }else if(leave_type == "casual"){
-      used = 7 - remaining;
-    }else{
-      alert("something is wrong")
-    }
-
-    new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: ['استهلك', 'المتبقي'],
-        datasets: [{
-          data: [used, remaining], // Assuming all days are remaining initially
-          backgroundColor: ['#FF6384', '#36A2EB'],
-          hoverBackgroundColor: ['#FF6384', '#36A2EB']
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: "white"
-            }
-          },
-          title: {
-            display: true,
-            text: leave_type,
-            labels: {
-              color: "white"
-            }
-          }
-        }
-      }
-    });
-});
-
 
     const update_state = () =>{
         const startDate = $('#id_start_date').val();
         const endDate = $('#id_end_date').val();
         const leave_type = $("#id_leave_type").val();
-        const all = {{remaining_days_per_type|safe}};
+        const remaining_days_per_type = {{remaining_days_per_type|safe}};
 
         if (leave_type && startDate && endDate) {
-            var start = new Date(startDate);
-            var end = new Date(endDate);
+          var start = new Date(startDate);
+          var end = new Date(endDate);
             
+          const rem_days = remaining_days_per_type[leave_type] - days_between_dates(start, end)
           
-          const rem_days = all[leave_type] - days_between_dates(start, end)
-          
-          let display;
-          if (rem_days > 0) 
-            display = rem_days
-          else
-            display = 0
-          
-          $("#id_remaining_days").text(display)
-        }
-        if (leave_type){
-          const rem_days = all[leave_type]
-          console.log(rem_days)
-          $("#id_remaining_days").text(rem_days)
-          if(rem_days===undefined){
-            $("#id_remaining_days").text('-')
-          }
+          if (end < start){
+            $("#id_remaining_days").text("تاريخ الانتهاء قبل البدء")
 
+          }else
+            $("#id_remaining_days").text(rem_days > 0 ? rem_days : 0)
+        }
+        else if (leave_type){
+          var start = new Date(startDate);
+          var end = new Date(endDate);
+            
+          const rem_days = remaining_days_per_type[leave_type] - days_between_dates(start, end)
+
+          $("#id_remaining_days").text(remaining_days_per_type[leave_type])
+          if(rem_days===undefined)
+            $("#id_remaining_days").text('-')
         }
          
     }

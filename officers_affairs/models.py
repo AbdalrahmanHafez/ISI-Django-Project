@@ -76,7 +76,6 @@ class OfficerStatus(models.Model):
 
 
 
-
 class Officer(models.Model):
     
     ROLE_CHOICES = [

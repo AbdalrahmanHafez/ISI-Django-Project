@@ -5,12 +5,26 @@ from django.contrib.auth.models import User,Group
 
 
 class OfficerForm(LoginRequiredMixin, forms.ModelForm):
-    create_user = forms.BooleanField(required=False, label="إنشاء مستخدم للضابط")
+    create_user = forms.BooleanField(initial=True, required=False, label="إنشاء مستخدم للضابط")
     is_active = forms.BooleanField(initial=True, required=False, label="المستخدم نشط")
 
     class Meta:
         model = Officer
         exclude = ("created_by", "updated_by", "created_at", "updated_at","user")
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        create_user = cleaned_data.get('create_user')
+        full_name = cleaned_data.get('full_name')
+
+        if create_user:
+            username = full_name.lower().replace(" ", "_")
+
+            if User.objects.filter(username=username).exists():
+                self.add_error('full_name', "هناك مستخدم له نفس اسم المستخدم بالفعل ")
+        
+        return cleaned_data
     
     def save(self, commit=True):
         officer = super().save(commit=False)
@@ -18,35 +32,9 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         # Check if we need to create a user
         if self.cleaned_data.get('create_user') and not officer.user:
             username = officer.full_name.lower().replace(" ", "_")
-
-            # Ensure username uniqueness before creating the user
-            if not User.objects.filter(username=username).exists():
-                user = User.objects.create_user(username=username, password='123')
-                officer.user = user
+            user = User.objects.create_user(username=username, password='123')
+            officer.user = user
                  
-                # Assign user to group based on branch
-                # if officer.branch:
-                #     group, created = Group.objects.get_or_create(name=officer.branch.name)
-                #     user.groups.add(group)
-                
-                
-            else:
-                self.add_error('create_user', "هناك مستخدم له نفس اسم المستخدم بالفعل !!!")
-                
-        # Handle updating user group if the branch has changed
-        # if officer.user:
-        #     if officer.pk:  # Check if officer is being updated
-        #         original_officer = Officer.objects.get(pk=officer.pk)
-        #         if original_officer.branch != officer.branch:
-        #             # Remove user from the old branch group
-        #             if original_officer.branch:
-        #                 old_group, created = Group.objects.get_or_create(name=original_officer.branch.name)
-        #                 officer.user.groups.remove(old_group)
-
-        #             # Add user to the new branch group
-        #             if officer.branch:
-        #                 new_group, created = Group.objects.get_or_create(name=officer.branch.name)
-        #                 officer.user.groups.add(new_group)
 
         # Handle updating user branch if the branch has changed
         if officer.user:
@@ -85,9 +73,15 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Set default value for is_active field based on current user's status
-        if self.instance and self.instance.user:
-            self.fields['is_active'].initial = self.instance.user.is_active  # Set to the current user's is_active state
+        if self.instance.pk != None: # Update Officer
+            if self.instance.user:
+                self.fields['is_active'].initial = self.instance.user.is_active  
+                del self.fields['create_user']
+            else:
+                self.fields['create_user'].initial = False
+        
+
+
 
         for field_name, field in self.fields.items():
                     if isinstance(field, forms.DateField):

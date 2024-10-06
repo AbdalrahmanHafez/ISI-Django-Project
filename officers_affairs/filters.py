@@ -43,7 +43,7 @@ class OfficerFilter(django_filters.FilterSet):
         widget=forms.CheckboxSelectMultiple,
     )
 
-    is_active = django_filters.BooleanFilter(
+    is_user_active = django_filters.BooleanFilter(
         field_name='user__is_active',
         widget=forms.CheckboxInput(),
         label="مستخدم غير نشط",

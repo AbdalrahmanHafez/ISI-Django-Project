@@ -16,7 +16,6 @@
 
     <div class="modal-body">
         {% bootstrap_form form %}
-        <!-- Add the create_user checkbox -->
      
     </div>
 
@@ -27,7 +26,25 @@
     </div>
 </form>
 
-<script type="text/javascript">
+<script >
+  htmx.on("htmx:afterSwap", (e) => {
+    const create_user = document.getElementById('id_create_user');
+    const is_active = document.getElementById('id_is_active');
+    
+    if (create_user === null || is_active === null) return; 
+
+    const update_state = () => {
+      if (create_user.checked) 
+        is_active.disabled = false;
+       else 
+        is_active.disabled = true;
+    };
+
+    create_user.addEventListener("click", update_state);
+    
+    update_state();
+  });
+  
   // {% comment %} DATE PICKER {% endcomment %}
     $( function initDefault() {
         // https://www.jqueryscript.net/time-clock/hijri-date-picker-bootstrap.html 

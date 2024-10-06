@@ -298,9 +298,7 @@
                     <i class="nav-icon fas fa-circle text-danger"></i>
                     <p>خدمه</p>
                   </a>
-              </li>
-              <li class="nav-item">
-                <a id="statusRetired" class="nav-link" hx-get="{% url 'officers_list' %}?status=2" hx-target="#officers_list">
+                  <a id="statusRetired" class="nav-link" hx-get="{% url 'officers_list' %}?status=2" hx-target="#officers_list">
                     <i class="nav-icon fas fa-circle text-warning"></i>
                      <p>معاش</p>
                 </a>
@@ -319,21 +317,21 @@
             <!-- Change Password Link -->
 
             {% if request.user.officer_profile.is_leader or request.user.officer_profile.role %}
-            <li class="nav-item">
+            
                 <a href="{% url 'leave_requests_list' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
                     <i class="nav-icon fas fa-users"></i>
                     <p>طلبات الاجازة</p>
                 </a>
-            </li>
+            
             {% endif %}
 
             {% if request.user.officer_profile.role != 'المدير' %}
-            <li class="nav-item">
+            
                 <a href="{% url 'leave_requests' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
                     <i class="nav-icon fas fa-mug-hot"></i>
                     <p>طلباتي للاجازة  </p>
                 </a>
-            </li>
+            
             {% endif %}
 
             
@@ -344,8 +342,8 @@
                     <i class="nav-icon fas fa-key"></i>
                     <p>تغيير كلمة المرور</p>
                 </a>
-            </li>
             
+   
         </ul>
     </nav>
       <!-- /.sidebar-menu -->

@@ -518,13 +518,13 @@ def approve_leave_request(request, pk):
                 # Notify the officer and 'رئيس فرع شئون ضباط' about the rejection
                 create_notification(
                     leave_request.officer.user, 
-                    f"تم رفض طلب إجازتك من {request.user.username}."
+                    f"تم رفض طلب إجازتك من {request.user.officer_profile.role}."
                 )
                 head_of_branch = get_head_of_branch()
                 if head_of_branch:
                     create_notification(
                         head_of_branch, 
-                        f"تم رفض طلب إجازة من {leave_request.officer.full_name}."
+                        f"تم رفض طلب إجازة  {leave_request.officer.rank} / {leave_request.officer.full_name}."
                     )
                 
             return JsonResponse({'success': True})

@@ -895,7 +895,7 @@ def attendance_list(request):
     attendance_records = DailyAttendance.objects.filter(date=date_value).select_related('officer')
     today = timezone.localtime().date()
     # Count officers with the status 'موجود', currently outside, and with a different status
-    total_officers = Officer.objects.filter(status__name='قوة').count()
+    total_officers = DailyAttendance.objects.filter(date=today).count()
     inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
     outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
     outside_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية',date=today).count()

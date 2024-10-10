@@ -6,7 +6,7 @@
       <ul class="navbar-nav">
   
         <li class="nav-item"> <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> <i class="fas fa-bars"></i> </a> </li>
-        <li class="nav-item d-none d-sm-inline-block"> <a href="{% url 'home' %}" class="nav-link">الرئيسية</a> </li>
+        <li class="nav-item d-none d-sm-inline-block"> <a href="{% url 'home' %}" class="nav-link text-bold">الرئيسية</a> </li>
         
         <ul class="nav-item d-none d-md-block">
           <form method="GET" action="{% url 'officers' %}" class="form-inline ml-3">
@@ -22,10 +22,12 @@
         </ul>
               
 
-        <button class="theme-toggle-button" id='darkModeButton'> <i class="fas fa-moon"></i> </button>
 
       </ul>
+      <div>
+      <button class="theme-toggle-button" id='darkModeButton'> <i class="fas fa-moon"></i> </button></div>
 
+      
       
       <a class="nav-link dropdown-toggle" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fas fa-bell"></i>
@@ -45,7 +47,7 @@
     </ul>
     
     <audio id="notificationSound" src="{% static "audio/notification.mp3" %}" preload="auto"></audio>
-    
+   
     
 
       <div class="d-flex align-items-center">

@@ -60,9 +60,9 @@
                         <th>الي</th>
                         <th>تاريخ تقديم الطلب</th>
                         <th>عدد الايام</th>
+                        <th>عدد الايام المتبقية</th>
                         <th>الحالة</th>
                         <th>المصــدق الأن</th>
-                        <th>عدد الايام المتبقية</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -78,6 +78,11 @@
                             <td>{{ request.end_date|date:"d-m-Y"|arabic_numbers }}</td>
                             <td>{{ request.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</td> 
                             <td> {{ request.days_taken|arabic_numbers}}</td>
+                            {%if request.remaining_days  %}
+                            <td> {{ request.remaining_days|arabic_numbers}}</td>
+                            {% else %}
+                            <td>-</td>
+                            {% endif %}
                             <td>
                                 {% if request.status == 'approved' %}
                                     <span class="badge bg-success">{{ request.get_status_display }}</span>
@@ -87,13 +92,11 @@
                                     <span class="badge bg-warning">{{ request.get_status_display }}</span>
                                 {% endif %}
                             </td>
-                            <td>{{ request.approver.officer_profile.full_name }}</td>
-                            {%if request.remaining_days  %}
-                            <td> {{ request.remaining_days|arabic_numbers}}</td>
+                            {% if request.approver.officer_profile.role %}
+                            <td>{{ request.approver.officer_profile.role }}</td>
                             {% else %}
-                            <td>-</td>
+                            <td>{{ request.approver.officer_profile.branch }}</td>
                             {% endif %}
-
                             <td>
                             <!-- If the current user is the approver -->
                             

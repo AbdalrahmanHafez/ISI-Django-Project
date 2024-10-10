@@ -46,9 +46,10 @@
   <body dir="rtl" class="layout-fixed sidebar-expand-lg sidebar-mini bg-body-tertiary" >
 
     <div class="app-wrapper"> <!--begin::Header-->
-      {% include 'parts/nav.html' %}
+      
       {% include 'parts/sidebar.html' %}
-
+     
+      {% include 'parts/nav.html' %}
       
       <main class="app-main">
         {% block content %} {% endblock %}
@@ -56,6 +57,8 @@
       </main>
       
       {% include 'parts/footer.html' %}
+      
+      
     </div>
 
 

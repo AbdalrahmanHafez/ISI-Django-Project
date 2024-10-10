@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}معلومات الضابط{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header text-center text-white" 
+     style="background-image: url('{{ officer.rank.image.url }}'); background-size: cover; background-position: center;">
+    <div style="background-color: rgba(0, 0, 0, 0.151); padding: 20px; border-radius: 10px;">
+        {% if officer.profile_image %}
+            <img class="rounded-circle border border-white" style="width: 150px; height: 150px;" src="{{ officer.profile_image.url }}" alt="صورة الضابط">
+        {% else %}
+            <img class="rounded-circle border border-white" style="width: 150px; height: 150px;" src="{% static 'images/user-avatar.png' %}" alt="User Avatar">
+        {% endif %}
+        
+        <h3 class="mt-3">{{ officer.rank }} / {{ officer.full_name }}</h3>
+    </div>
+</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">الرتبة: {{ officer.rank.name }}</li>
+                        <li class="list-group-item">الرقم العسكري: {{ officer.military_number }}</li>
+                        <li class="list-group-item">الفرع: {{ officer.branch.name }}</li>
+                        <li class="list-group-item">رقم الهاتف: {{ officer.phone }}</li>
+                        <li class="list-group-item">رقم الهاتف: {{ officer.phone }}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">الاسم: {{ officer.full_name }}</li>
+                        <li class="list-group-item">رقم الأقدمية: {{ officer.seniority_number }}</li>
+                        <li class="list-group-item">القسم: {{ officer.section.name }}</li>
+                        <li class="list-group-item">العنوان: {{ officer.address }}</li>
+                        <li class="list-group-item">السلاح: {{ officer.weapon.name }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,12 +1,13 @@
 {% load static %}
 
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
-    <div class="sidebar-brand">
-       <a href="{% url "home" %}" class="brand-link"> 
-        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width:60px; height:60px;" class="me-1">
-        <span class="brand-text fw-light">منظومة شئون ضباط</span>
-      </a>
-    </div>
+    <div class="sidebar-brand text-center">
+        <a href="{% url 'home' %}" class="brand-link d-block">
+           <img src="{% static 'images/logo.png' %}" alt="Logo" class="brand-logo">
+           <span class="brand-text fw-bold mt-2">منظومة شئون ضباط</span>
+        </a>
+     </div>
+     
        
     <div class="sidebar-wrapper">
 
@@ -259,38 +260,7 @@
                       </li>            
             {% endif %}
 
-            <!-- offstatus Section -->
-            {% if perms.officers_affairs.add_officerstatus %}
-                        <li class="nav-item has-treeview">
-                          <a href="#" class="nav-link active">
-                              <i class="nav-icon  fas fa-chevron-up"></i>
-                              <p> الحاله <i class="fas fa-angle-left right"></i> </p>
-                          </a>
-              
-                          <ul class="nav nav-treeview">
-                              
-                              <!-- Add offstatus Form Trigger -->
-                              <li class="nav-item">
-                                  <a id="addoffstatus" href="#" class="nav-link">
-                                      <i class="fa fa-plus "></i>
-                                      <p class="text-light"> إضافة </p>
-                                  </a>
-                              </li>
-              
-                              <!-- Hidden offstatus Add Form -->
-                              <li id="offstatusinput" class="nav-item" style="display: none;">
-                                  <form id="" method="POST"  data-bs-theme="dark">
-                                      {% csrf_token %}
-                                      {{ formoffstat.as_p }}
-              
-                                      <button type="submit" name="add_off_status" class="btn btn-success">حفظ</button>
-                                      <button id="backoffstatus" type="button" class="btn btn-primary">تراجع</button>
-                                  </form>
-                              </li>
-                            </ul>
-                        </li>
-            {% endif %}
-    
+            
             <!-- Filter Section -->
             {% comment %} <li class="nav-header">الحاله</li>
             <li class="nav-item">
@@ -303,8 +273,28 @@
                      <p>معاش</p>
                 </a>
               </li> {% endcomment %}
-
-            <li class="nav-header">اجازة</li>
+              
+              <li class="nav-header">التمامات اليومية</li>
+              <li class="nav-item">
+                <a href="{% url 'attendance_list' %}" class="nav-link">
+                    <i class="nav-icon fas fa-list"></i>
+                    <p>عرض التمام اليومي</p>
+                </a>
+            </li>
+             {% comment %} {% if request.user.officer_profile.role or  request.user.officer_profile.is_leader   %}
+              {% endif %}{% endcomment %}
+              {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch_id == 8 %}
+              <li class="nav-item">
+                <a href="{% url 'record_attendance' %}" class="nav-link">
+                    <i class="nav-icon fas fa-edit"></i>
+                    <p>تسجيل التمام اليومي</p>
+                </a>
+            </li>
+            {% endif %}
+            
+            
+            
+            <li class="nav-header">الأجازات</li>
             {% if request.user.officer_profile.role != 'المدير' %}
               <li class="nav-item">
                 <a href="{% url 'create_leave_request' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">

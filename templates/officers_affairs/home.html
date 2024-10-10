@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load custom_filters %}
 {% block title %}منظومة شئون ضباط{% endblock %}
 
 {% block content %}
@@ -48,7 +48,7 @@
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span class="fw-bold fs-4">{{count_officers_total}}</span>
+                      <span class="fw-bold fs-4">{{total_officers|arabic_numbers}}</span>
                       <span>اجمالي عدد الضباط</span>
                     </p>  
                   </div>
@@ -67,7 +67,7 @@
               <div class="card">
                 <div class="card-header border-0">
                   <div class="d-flex justify-content-between">
-                    <h3 class="card-title">إحصائيات</h3>   
+                    <h3 class="card-title">طاقم النوبطچية عن اليوم  {{ today|date:"d-m-Y"|arabic_numbers }} </h3>   
                   </div>
                 </div>    
                 <div class="card-body">
@@ -83,25 +83,21 @@
                                         <tbody>
                                             <tr>
                                                 <td> قائد منوب </td>
-                                                <td>مقدم شريف شكري</td>
+                                                <td>مقدم / شريف شكري</td>
                                                 <td> 01234567899 </td>
                                             </tr>
 
                                             <tr>
-                                                <td> ضابط نبطشي </td>
-                                                <td>ملازم يحيى عبدالله</td>
+                                                <td> ضابط نبطچي </td>
+                                                <td>ملازم / يحيى عبدالله</td>
                                                 <td> 01234567899 </td>
                                             </tr>
 
-                                            <tr>
-                                                <td> مساعد ضابط نبطشي</td>
-                                                <td>مساعد اول هاني فوزي</td>
-                                                <td> 01234567899 </td>
-                                              </tr>
+                                            
 
                                                 <tr>
                                                     <td>ضابط الخفيفة</td>
-                                                    <td>النقيب عبدالوهاب محمد</td>
+                                                    <td>نقيب / عبدالوهاب محمد</td>
                                                 <td> 01234567899 </td>
                                             </tr>
 
@@ -113,6 +109,44 @@
               </div>
             </div>
               </div>
+
+              <!-- Attendance Status Card -->
+                        <div class="row mt-3">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-header border-0">
+                                        <h3 class="card-title">تمام الضباط اليوم  {{ today|date:"d-m-Y"|arabic_numbers }}</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive p-0">
+                                          <table class="table table-bordered table-hover text-center">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th scope="col">القوة </th>
+                                                    <th scope="col">موجود </th>
+                                                    <th scope="col">خارج </th>
+                                                   
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>{{ total_officers|arabic_numbers }}</td>
+                                                    <td>{{ inside_officers|arabic_numbers }}</td>
+                                                    <td>{{ outside_officers|arabic_numbers }}</td>
+                                                    
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        </div>
+                                        <div class="text-end">
+                                            <a href="{% url 'attendance_list' %}" class="btn btn-info">الذهاب للتمام التفصيلي</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
             </div>
             {% comment %} <div class="card-footer" style="box-sizing: border-box; display: none;">Footer</div> <!-- /.card-footer--> {% endcomment %}
             </div>
@@ -319,12 +353,12 @@
       type: 'pie',
       data: {
         datasets: [{
-          data: [{{count_officers_availble}}, {{count_officers_total|sub:count_officers_availble}}],
-          backgroundColor :["#27c100","#f3545d","#fdaf4b"],
-          borderWidth: 10,
+          data: [{{total_officers|sub:inside_officers}},{{inside_officers}}, ],
+          backgroundColor :["#f3545d","blue"],
+          borderWidth: 3,
           
         }],
-        labels: ['موجود', 'خارج'] 
+        labels: [ 'خارج','موجود'] 
       },
       options : {
         responsive: true, 
@@ -332,8 +366,8 @@
         legend: {
           position : 'bottom',
           labels : {
-            fontColor: '#000',
-            fontSize: 15,
+            fontColor: 'gray',
+            fontSize: 19,
             usePointStyle : true,
             padding:30
           }

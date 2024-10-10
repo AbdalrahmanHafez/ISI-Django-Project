@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load custom_filters %}
+<h2 class="text-center mb-4 section-title">تسجيل التمام اليومي - {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+
+<div class="container">
+    <form method="post" id="attendanceForm">
+        {% csrf_token %}
+        <table class="table table-bordered table-hover text-center">
+            <thead>
+                <tr>
+                    <th>م</th>
+                    <th>الرتبة</th>
+                    <th>الأسم</th>
+                    <th>الفرع</th>
+                    <th>التمام</th>
+                    <th>ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for officer in officers %}
+                <tr>
+                    <td>{{ forloop.counter|arabic_numbers }}</td>
+                    <td>{{ officer.rank }}</td>
+                    <td>{{ officer.full_name }}</td>
+                    <td>{{ officer.branch }}</td>
+                    <td>
+                        <select name="status_{{ officer.id }}" class="form-control">
+                            <option value="">اختر التمام</option> <!-- Placeholder -->
+                            {% for status in unit_statuses %}
+                            <option value="{{ status.name }}"
+                                {% if officer.unit_status and officer.unit_status.id == status.id %}selected{% endif %}>
+                                {{ status.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="notes_{{ officer.id }}" class="form-control" placeholder="أضف ملاحظة (اختياري)">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">حفظ التمام</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('attendanceForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+    
+    const formData = new FormData(this);
+    
+    fetch("{% url 'record_attendance' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': "{{ csrf_token }}"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('تم حفظ التمام بنجاح');
+        } else {
+            alert('حدث خطأ أثناء الحفظ');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+function updateDate() {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    document.getElementById('currentDate').textContent = `${year}-${month}-${day}`;
+}
+
+window.onload = updateDate;
+</script>
+{% endblock %}

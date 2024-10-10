@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Job, LeaveRequest, Officer, OfficerStatus , Rank, Section, Unit, UnitStatus, Weapon
+from .models import  Job, LeaveRequest, Officer, OfficerStatus , Rank, Section, Unit, UnitStatus, Weapon
 from django.contrib.auth.models import User,Group
 
 
@@ -202,3 +202,25 @@ class LeaveRequestForm(forms.ModelForm):
             'remaining_days': forms.HiddenInput(),  # حقل مخفي
         }
         exclude = ('created_by',)
+        
+        
+        
+        
+        
+        
+        
+# class DailyAttendanceForm(forms.ModelForm):
+#     class Meta:
+#         model = DailyAttendance
+#         fields = ['officer', 'date', 'status', 'leave_type', 'mission_details']
+#         widgets = {
+#             'date': forms.DateInput(attrs={'class': 'hijri-picker', 'placeholder': 'تاريخ'}),
+#             'mission_details': forms.Textarea(attrs={'rows': 2}),
+#         }
+#         labels = {
+#             'officer': 'الضابط',
+#             'date': 'تاريخ',
+#             'status': 'الحالة',
+#             'leave_type': 'نوع الإجازة',
+#             'mission_details': 'تفاصيل المأمورية',
+#         }

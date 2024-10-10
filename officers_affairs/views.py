@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from django.contrib import messages
 from venv import logger
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import permission_required, login_required
@@ -7,7 +8,7 @@ from django.db.models import Case, When, Value, IntegerField
 
 
 from .models import *
-from .forms import BranchForm, JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
+from .forms import BranchForm,  JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.views import generic
 from django.urls import reverse_lazy, reverse
@@ -22,6 +23,11 @@ from django.utils import timezone
 
 @permission_required('officers_affairs.view_rank', raise_exception=True)
 def officers_home_view(request):
+    today = timezone.localtime().date()
+    # Count officers with the status 'موجود', currently outside, and with a different status
+    total_officers = Officer.objects.filter(status__name='قوة').count()
+    inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
+    outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
     if request.method == 'POST':
         # Check which form was submitted
@@ -91,10 +97,18 @@ def officers_home_view(request):
         'formoffstat':OfficerStatusForm(),
         
         'unread_notifications': unread_notifications,
-        
+        'today':today,
+        'total_officers':total_officers,
+        'inside_officers':inside_officers,
+        'outside_officers': outside_officers,
     }
 
     return render(request, 'officers_affairs/home.html', context)
+
+
+def officer_detail(request, pk):
+    officer = get_object_or_404(Officer, pk=pk)
+    return render(request, 'officers_affairs/officer_detail.html', {'officer': officer})
 
 
 @login_required
@@ -433,14 +447,14 @@ def create_update_leave_request(request, pk=None):
                     is_current_approver=True
                 )
 
-                # # Notify the final approver, but only if they are not the same as the next approver
-                # final_approver = get_final_approver()
-                # if final_approver != next_approver:
-                #     create_notification(
-                #         recipient_user=final_approver, 
-                #         message=f"طلب إجازة جديد من {officer_profile.full_name} يحتاج موافقتك النهائية.",
-                #         is_final_approver=True
-                #     )
+                # Notify the final approver, but only if they are not the same as the next approver
+                final_approver = get_final_approver()
+                if officer_profile.is_leader or officer_profile.role :
+                    create_notification(
+                        recipient_user=final_approver, 
+                        message=f"طلب إجازة جديد من {officer_profile.rank} / {officer_profile.full_name} يحتاج موافقتك النهائية.",
+                        is_final_approver=True
+                    )
             else:
                 # Update
                 form.instance.remaining_days = remaining_days - days_taken if remaining_days is not None else None
@@ -518,7 +532,7 @@ def approve_leave_request(request, pk):
                 # Notify the officer and 'رئيس فرع شئون ضباط' about the rejection
                 create_notification(
                     leave_request.officer.user, 
-                    f"تم رفض طلب إجازتك من {request.user.officer_profile.role}."
+                    f"تم رفض طلب إجازتك من السيد / {request.user.officer_profile.role}."
                 )
                 head_of_branch = get_head_of_branch()
                 if head_of_branch:
@@ -542,7 +556,7 @@ def approve_leave_request(request, pk):
                 # Notify the next approver
                 create_notification(
                     next_approver, 
-                    f"طلب إجازة من {leave_request.officer.full_name} يحتاج موافقتك.",
+                    f"طلب إجازة من {leave_request.officer.rank} / {leave_request.officer.full_name} يحتاج موافقتك.",
                     is_current_approver=True
                 )
                 
@@ -554,7 +568,7 @@ def approve_leave_request(request, pk):
                 # Notify the officer about the approval
                 create_notification(
                     leave_request.officer.user, 
-                    f"تم قبول طلب إجازتك من {request.user.username}."
+                    f"تم قبول طلب إجازتك من {request.user.officer_profile.rank} / {request.user.officer_profile.full_name}."
                 )
                 
                 
@@ -565,7 +579,7 @@ def approve_leave_request(request, pk):
             # Notify the officer about the rejection
             create_notification(
                 leave_request.officer.user, 
-                f"تم رفض طلب إجازتك من {request.user.username}."
+                f"تم رفض طلب إجازتك من {request.user.officer_profile.rank} / {request.user.officer_profile.full_name}."
             )
         # PRG pattern: Return a JSON response after processing the request
         return JsonResponse({'success': True})
@@ -644,7 +658,7 @@ def leave_requests_list(request):
         # 'المدير' sees only pending requests that need their approval
 
         # if current approvar == final aproval or
-        leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True, officer__role__isnull=False) | Q(approver=get_final_approver()))
+        leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True) | Q(officer__role__isnull=False) | Q(approver=get_final_approver()))
     
     elif  user_officer.role in approver_roles:
         # Leaders or approvers see only pending requests from their branch that need their approval
@@ -801,3 +815,115 @@ def check_new_notifications(request):
 def notification_list(request):
     notifications = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
     return render(request, 'officers_affairs/notification_list.html', {'notifications': notifications})
+
+
+
+from django.utils.dateparse import parse_date
+from django.utils import timezone
+from django.http import JsonResponse
+from django.shortcuts import render
+from .models import Officer, UnitStatus, DailyAttendance
+
+# View to record attendance
+def record_attendance(request):
+    date_str = request.GET.get('date', None)
+    
+    if date_str:
+        try:
+            # التحقق من أن التاريخ الذي تم تمريره هو سلسلة نصية صحيحة
+            date_value = parse_date(date_str)
+        except ValueError:
+            # في حالة حدوث خطأ في التحويل
+            date_value = None
+    else:
+        # استخدام التاريخ الحالي إذا لم يتم تمرير تاريخ في الطلب
+        date_value = timezone.localtime().date()
+
+    if request.method == 'POST':
+        officers = Officer.objects.filter(status__name='قوة')  # Officers currently in the unit
+        
+        for officer in officers:
+            status = request.POST.get(f'status_{officer.id}')
+            notes = request.POST.get(f'notes_{officer.id}', '')
+
+            if status:
+                # Retrieve or create the UnitStatus instance
+                unit_status_instance, created = UnitStatus.objects.get_or_create(name=status)
+
+                # Check if there's an existing attendance record for today
+                existing_attendance = DailyAttendance.objects.filter(officer=officer, date=date_value).first()
+
+                if existing_attendance:
+                    # If there is already an attendance record, update it if the status has changed
+                    if existing_attendance.status != unit_status_instance or existing_attendance.notes != notes:
+                        existing_attendance.status = unit_status_instance
+                        existing_attendance.notes = notes
+                        existing_attendance.save()
+                else:
+                    # If there's no attendance record for today, create a new one
+                    DailyAttendance.objects.create(
+                        officer=officer,
+                        date=date_value,
+                        status=unit_status_instance,
+                        notes=notes,
+                    )
+        
+        return JsonResponse({'success': True})
+
+    # GET request: Fetch officers with status "موجود"
+    officers = Officer.objects.filter(status__name='قوة')
+    unit_statuses = UnitStatus.objects.all()
+
+    context = {
+        'officers': officers,
+        'unit_statuses': unit_statuses,
+        'today': date_value,
+    }
+    return render(request, 'officers_affairs/attendance/record_attendance.html', context)
+
+
+# View to display daily attendance
+def attendance_list(request):
+    date_str = request.GET.get('date', None)  # افترض أن التاريخ يأتي من طلب GET
+    if date_str:
+        try:
+            date_value = parse_date(date_str)  # تأكد أن date_str هو نصي
+        except ValueError:
+            date_value = None  # في حالة حدوث خطأ في التحويل
+    else:
+        date_value = timezone.localtime().date()  # تاريخ اليوم الافتراضي
+    attendance_records = DailyAttendance.objects.filter(date=date_value).select_related('officer')
+    today = timezone.localtime().date()
+    # Count officers with the status 'موجود', currently outside, and with a different status
+    total_officers = Officer.objects.filter(status__name='قوة').count()
+    inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
+    outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
+    outside_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية',date=today).count()
+    outside_hospital_officers = DailyAttendance.objects.filter(status__name='مست',date=today).count()
+    outside_open_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية مفتوحة',date=today).count()
+    outside_annual_officers = DailyAttendance.objects.filter(status__name='سنوية',date=today).count()
+    outside_casual_officers = DailyAttendance.objects.filter(status__name='عارضة',date=today).count()
+    outside_instead_of_rest_officers = DailyAttendance.objects.filter(status__name='بدل راحة',date=today).count()
+    outside_rest_officers = DailyAttendance.objects.filter(status__name='راحة',date=today).count()
+    outside_leader_grant_officers = DailyAttendance.objects.filter(status__name='منحة قائد',date=today).count()
+    outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=today).count()
+    outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=today).count()
+
+    context = {
+        'attendance_records': attendance_records,
+        'today': date_value,
+        'total_officers': total_officers,
+        'outside_officers': outside_officers,
+        'inside_officers': inside_officers,
+        'outside_mission_officers':outside_mission_officers,
+        'outside_hospital_officers':outside_hospital_officers,
+        'outside_open_mission_officers':outside_open_mission_officers,
+        'outside_annual_officers':outside_annual_officers,
+        'outside_casual_officers':outside_casual_officers,
+        'outside_instead_of_rest_officers':outside_instead_of_rest_officers,
+        'outside_rest_officers':outside_rest_officers,
+        'outside_leader_grant_officers':outside_leader_grant_officers,
+        'outside_grant_officers':outside_grant_officers,
+        'outside_travel_officers':outside_travel_officers,
+    }
+    return render(request, 'officers_affairs/attendance/attendance_list.html', context)

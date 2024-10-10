@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User,Group
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
-
+from django.utils import timezone
 
 
 
@@ -183,3 +183,18 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
+    
+    
+class DailyAttendance(models.Model):
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, verbose_name="الضابط")
+    date = models.DateField(default=timezone.now, verbose_name="التاريخ")
+    status = models.ForeignKey(UnitStatus, on_delete=models.SET_NULL, null=True, verbose_name="الحالة اليومية")
+    notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات")
+
+    class Meta:
+        unique_together = ('officer', 'date')
+        verbose_name = 'تمام يومي'
+        verbose_name_plural = 'تمامات يومية'
+
+    def __str__(self):
+        return f"{self.officer.full_name} - {self.date} - {self.status.name}"  

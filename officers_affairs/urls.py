@@ -15,6 +15,7 @@ urlpatterns = [
     path('officers_add/', views.officers_add, name="officers_add" ),
     path('officers_add/<int:pk>', views.officers_add, name="officers_add" ),
     path('officers_delete/<int:pk>', views.officers_delete.as_view(), name="officers_delete" ),
+     path('officer/<int:pk>/', views.officer_detail, name='officer_detail'),
     
     path('leave/create/', views.create_update_leave_request, name='create_leave_request'),
     path('leave/update/<int:pk>', views.create_update_leave_request, name='update_leave_request'),
@@ -28,4 +29,7 @@ urlpatterns = [
     path('notifications/check-new/', views.check_new_notifications, name='check_new_notifications'),
     
     path('notification_list/', views.notification_list, name='notification_list'),
+    
+    path('record_attendance/', views.record_attendance, name='record_attendance'),
+    path('attendance_list/', views.attendance_list, name='attendance_list'),
 ]

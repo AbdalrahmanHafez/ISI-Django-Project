@@ -1,5 +1,4 @@
 # models.py
-
 from django.db import models
 from django.contrib.auth.models import User,Group
 from django.core.validators import MinLengthValidator
@@ -162,8 +161,8 @@ class LeaveRequest(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_leave_request')
     days_taken = models.PositiveIntegerField(default=0, verbose_name="عدد الأيام المأخوذة")
     remaining_days = models.IntegerField(null=True, blank=True ,  verbose_name="عدد الأيام المتبقية")  # الأيام المتبقية
+    compensation_date = models.DateField(null=True, blank=True, verbose_name="بدل عن ترايخ")
 
-    
 
     def save(self, *args, **kwargs):
         if self.start_date and self.end_date:

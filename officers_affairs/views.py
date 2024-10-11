@@ -380,7 +380,10 @@ def create_update_leave_request(request, pk=None):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             days_taken = (end_date - start_date).days + 1
-           
+
+            if leave_type != LeaveRequest.INSTEAD_OF_REST:
+                form.cleaned_data['compensation_date'] = None
+
             # Don't add two leave requests of the same type if one is still PENDING.
             if pk == None: # Create
                 existing_pending_request = LeaveRequest.objects.filter(
@@ -439,7 +442,7 @@ def create_update_leave_request(request, pk=None):
                     end_date=end_date,
                     days_taken=days_taken,
                     remaining_days=remaining_days - days_taken if remaining_days is not None else None,
-                    
+                    compensation_date = form.cleaned_data['compensation_date'],
                     status=LeaveRequest.PENDING,
                     approver=next_approver,
                     final_approver=get_final_approver()

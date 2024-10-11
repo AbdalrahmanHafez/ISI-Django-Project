@@ -1,216 +1,223 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 {% load django_bootstrap5 %}
-
-
 {% block content %}
-<h2 class="text-center mb-4 section-title">طلبات الأجازة</h2>
-
-<form method="GET" action="{% url 'leave_requests_list' %}" class="row g-3 mb-3">
-    <div class="col-auto">
-        <label for="status" class="form-label">تصفية حسب الحالة</label>
-        <select name="status" id="status" class="form-select">
-            <option value="" {% if not selected_status %}selected{% endif %}>الكل</option>
-            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>جاري التصديق</option>
-            <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>تصـدق</option>
-            <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>لم يتصدق</option>
-        </select>
-    </div>
-
-    <div class="col-auto">
-        <label for="created_at" class="form-label"> بتاريخ تقديم الطلب </label>
-        <input type="date" name="created_at" id="created_at" class="hijri-picker form-control">
-    </div>
-
-    <div class="col-auto">
-        <label for="officer_name" class="form-label">اسم الضابط</label>
-        <input type="text" name="officer_name" id="officer_name" class="form-control" value="{{ officer_name }}">
-    </div>
-    
-    <div class="col-auto">
-        <label for="branch" class="form-label">اختر الفرع</label>
-        <select name="branch" id="branch" class="form-select">
-            <option value="">جميع الأفرع</option>
-            {% for branch in branches %}
-                <option value="{{ branch.id }}" {% if branch.id == selected_branch_id %}selected{% endif %}>{{ branch.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary mt-4">بحث</button>
-    </div>
-</form>
-
-
-
-
-
-    
-         <!-- Adjust width as necessary -->
-            <table class="table table-bordered table-hover text-center">
-                <thead>
-                    <tr>
-                        <th>م</th>
-                        <th>الرتبـه</th>
-                        <th>الاســم</th>
-                        <th>الفــرع</th>
-                        <th>نوع الإجازة</th>
-                        <th>من</th>
-                        <th>الي</th>
-                        <th>تاريخ تقديم الطلب</th>
-                        <th>عدد الايام</th>
-                        <th>عدد الايام المتبقية</th>
-                        <th>الحالة</th>
-                        <th>المصــدق الأن</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for request in leave_requests %}
-                        <tr>
-                            <td>{{ forloop.counter|arabic_numbers }}</td>
-                            <td>{{ request.officer.rank }}</td>
-                            <td>{{ request.officer.full_name }}</td>
-                            <td>{{ request.officer.branch }}</td>
-                            <td>{{ request.get_leave_type_display }}</td>
-                            <td>{{ request.start_date|date:"d-m-Y"|arabic_numbers }}</td>
-                            <td>{{ request.end_date|date:"d-m-Y"|arabic_numbers }}</td>
-                            <td>{{ request.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</td> 
-                            <td> {{ request.days_taken|arabic_numbers}}</td>
-                            {%if request.remaining_days  %}
-                            <td> {{ request.remaining_days|arabic_numbers}}</td>
-                            {% else %}
-                            <td>-</td>
-                            {% endif %}
-                            <td>
-                                {% if request.status == 'approved' %}
-                                    <span class="badge bg-success">{{ request.get_status_display }}</span>
-                                {% elif request.status == 'rejected' %}
-                                    <span class="badge bg-danger">{{ request.get_status_display }}</span>
-                                {% else %}
-                                    <span class="badge bg-warning">{{ request.get_status_display }}</span>
-                                {% endif %}
-                            </td>
-                            {% if request.approver.officer_profile.role %}
-                            <td>{{ request.approver.officer_profile.role }}</td>
-                            {% else %}
-                            <td>{{ request.approver.officer_profile.branch }}</td>
-                            {% endif %}
-                            <td>
-                            <!-- If the current user is the approver -->
-                            
-                            {% if request.approver == user and user.officer_profile.role != 'المدير' %}
-                                
-                                       
-                                       <!-- Show إبداء الرأي button for other approvers -->
-                                       {% if request.status != 'rejected' and request.status != 'approved'  %}
-                                           <a href="#" class="btn btn-primary" data-bs-toggle="modal" 
-                                              data-bs-target="#approveModal2" data-id="{{ request.id }}">ابداء الرأي</a>
-                                       {% else %}
-                                           <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
-                                       {% endif %}
-                                
-                            {% endif %}
-
-                            {% if  user.officer_profile.role == 'المدير' %}
-                            <a href="#" class="btn btn-primary" data-bs-toggle="modal" 
-                            data-bs-target="#approveModal" data-id="{{ request.id }}">التصديق</a>
-                            {% endif %}
-
-                        
-                            <!-- If the user is not the approver but is رئيس فرع شئون ضباط -->
-                            {% if request.approver != user and user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
-                                {% if request.status == 'approved' %}
-                                    <button class="btn btn-outline-secondary" disabled>تم التصديق</button>
-                                {% elif request.status == 'pending' %}
-                                    <button class="btn btn-outline-secondary" disabled>قيد الانتظار</button>
-                                {% elif request.status == 'rejected' %}
-                                    <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
-                       
-                            {% endif %}
-                
+    <h2 class="text-center mb-4 section-title">طلبات الأجازة</h2>
+    <form method="GET"
+          action="{% url 'leave_requests_list' %}"
+          class="row g-3 mb-3">
+        <div class="col-auto">
+            <label for="status" class="form-label">تصفية حسب الحالة</label>
+            <select name="status" id="status" class="form-select">
+                <option value="" {% if not selected_status %}selected{% endif %}>الكل</option>
+                <option value="pending"
+                        {% if selected_status == 'pending' %}selected{% endif %}>جاري التصديق</option>
+                <option value="approved"
+                        {% if selected_status == 'approved' %}selected{% endif %}>تصـدق</option>
+                <option value="rejected"
+                        {% if selected_status == 'rejected' %}selected{% endif %}>لم يتصدق</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="created_at" class="form-label">بتاريخ تقديم الطلب</label>
+            <input type="date"
+                   name="created_at"
+                   id="created_at"
+                   class="hijri-picker form-control">
+        </div>
+        <div class="col-auto">
+            <label for="officer_name" class="form-label">اسم الضابط</label>
+            <input type="text"
+                   name="officer_name"
+                   id="officer_name"
+                   class="form-control"
+                   value="{{ officer_name }}">
+        </div>
+        <div class="col-auto">
+            <label for="branch" class="form-label">اختر الفرع</label>
+            <select name="branch" id="branch" class="form-select">
+                <option value="">جميع الأفرع</option>
+                {% for branch in branches %}
+                    <option value="{{ branch.id }}"
+                            {% if branch.id == selected_branch_id %}selected{% endif %}>{{ branch.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary mt-4">بحث</button>
+        </div>
+    </form>
+    <!-- Adjust width as necessary -->
+    <table class="table table-bordered table-hover text-center">
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>الرتبـه</th>
+                <th>الاســم</th>
+                <th>الفــرع</th>
+                <th>نوع الإجازة</th>
+                <th>من</th>
+                <th>الي</th>
+                <th>تاريخ تقديم الطلب</th>
+                <th>عدد الايام</th>
+                <th>عدد الايام المتبقية</th>
+                <th>بدل عن يوم</th>
+                <th>الحالة</th>
+                <th>المصــدق الأن</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in leave_requests %}
+                <tr>
+                    <td>{{ forloop.counter|arabic_numbers }}</td>
+                    <td>{{ request.officer.rank }}</td>
+                    <td>{{ request.officer.full_name }}</td>
+                    <td>{{ request.officer.branch }}</td>
+                    <td>{{ request.get_leave_type_display }}</td>
+                    <td>{{ request.start_date|date:"d-m-Y"|arabic_numbers }}</td>
+                    <td>{{ request.end_date|date:"d-m-Y"|arabic_numbers }}</td>
+                    <td>{{ request.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</td>
+                    <td>{{ request.days_taken|arabic_numbers }}</td>
+                    {% if request.remaining_days %}
+                        <td>{{ request.remaining_days|arabic_numbers }}</td>
+                    {% else %}
+                        <td>-</td>
+                    {% endif %}
+                    <td>
+                        {% if request.compensation_date %}
+                            {{ request.compensation_date|arabic_numbers }}
+                        {% else %}
+                            -
                         {% endif %}
-                        
-                        </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="13" class="text-center bg-success">لا توجد طلبات إجازة في الوقت الحالي</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Pagination Controls -->
-            <div class="pagination d-flex justify-content-center">
-                <span class="step-links">
-                    {% if page_obj.has_previous %}
-                        <a href="?page=1">&laquo; الأولي</a>--
-                        <a href="?page={{ page_obj.previous_page_number }}">السابق</a>
+                    </td>
+                    <td>
+                        {% if request.status == 'approved' %}
+                            <span class="badge bg-success">{{ request.get_status_display }}</span>
+                        {% elif request.status == 'rejected' %}
+                            <span class="badge bg-danger">{{ request.get_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning">{{ request.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    {% if request.approver.officer_profile.role %}
+                        <td>{{ request.approver.officer_profile.role }}</td>
+                    {% else %}
+                        <td>{{ request.approver.officer_profile.branch }}</td>
                     {% endif %}
-
-                    
-
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">التالي</a>---
-                        <a href="?page={{ page_obj.paginator.num_pages }}">الأخيره &raquo;</a>
-                    {% endif %}
-                </span>
-            </div>
-            <div class="pagination d-flex justify-content-center">
-                <span class="current">
-                    صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
-                </span>
-            </div>
-           
-        
-    
-
-
-<!-- Approval Modal -->
-<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="approveModalLabel"> تصدقي على الأجازة</h5>
-                <button type="button" class="close" style="margin-right: auto" data-bs-dismiss="modal" aria-label="Close">
-                    <strong><span aria-hidden="true">&times;</span></strong>
-                  </button>
-            </div>
-            <div class="modal-body">
-                <p>   قرار التصديق ؟  </p>
-                <div class="form-actions">
-                    <button class="btn btn-success" id="acceptBtn">تصدق</button>
-                    <button class="btn btn-danger" id="rejectBtn">لم يتصدق</button>
+                    <td>
+                        <!-- If the current user is the approver -->
+                        {% if request.approver == user and user.officer_profile.role != 'المدير' %}
+                            <!-- Show إبداء الرأي button for other approvers -->
+                            {% if request.status != 'rejected' and request.status != 'approved' %}
+                                <a href="#"
+                                   class="btn btn-primary"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#approveModal2"
+                                   data-id="{{ request.id }}">ابداء الرأي</a>
+                            {% else %}
+                                <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
+                            {% endif %}
+                        {% endif %}
+                        {% if  user.officer_profile.role == 'المدير' %}
+                            <a href="#"
+                               class="btn btn-primary"
+                               data-bs-toggle="modal"
+                               data-bs-target="#approveModal"
+                               data-id="{{ request.id }}">التصديق</a>
+                        {% endif %}
+                        <!-- If the user is not the approver but is رئيس فرع شئون ضباط -->
+                        {% if request.approver != user and user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                            {% if request.status == 'approved' %}
+                                <button class="btn btn-outline-secondary" disabled>تم التصديق</button>
+                            {% elif request.status == 'pending' %}
+                                <button class="btn btn-outline-secondary" disabled>قيد الانتظار</button>
+                            {% elif request.status == 'rejected' %}
+                                <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="13" class="text-center bg-success">لا توجد طلبات إجازة في الوقت الحالي</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Pagination Controls -->
+    <div class="pagination d-flex justify-content-center">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; الأولي</a>--
+                <a href="?page={{ page_obj.previous_page_number }}">السابق</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">التالي</a>---
+                <a href="?page={{ page_obj.paginator.num_pages }}">الأخيره &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    <div class="pagination d-flex justify-content-center">
+        <span class="current">صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
+    </div>
+    <!-- Approval Modal -->
+    <div class="modal fade"
+         id="approveModal"
+         tabindex="-1"
+         aria-labelledby="approveModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">تصدقي على الأجازة</h5>
+                    <button type="button"
+                            class="close"
+                            style="margin-right: auto"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        <strong><span aria-hidden="true">&times;</span></strong>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>قرار التصديق ؟</p>
+                    <div class="form-actions">
+                        <button class="btn btn-success" id="acceptBtn">تصدق</button>
+                        <button class="btn btn-danger" id="rejectBtn">لم يتصدق</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Approval Modal 2 -->
-<div class="modal fade" id="approveModal2" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="approveModalLabel"> إبداء الرأي  </h5>
-                <button type="button" class="close" style="margin-right: auto" data-bs-dismiss="modal" aria-label="Close">
-                    <strong><span aria-hidden="true">&times;</span></strong>
-                  </button>
-            </div>
-            <div class="modal-body">
-                <p>   الرأي </p>
-                <div class="form-actions">
-                    <button class="btn btn-success" id="acceptBtn2">اوافق</button>
-                    <button class="btn btn-danger" id="rejectBtn2">لا اوافق</button>
+    <!-- Approval Modal 2 -->
+    <div class="modal fade"
+         id="approveModal2"
+         tabindex="-1"
+         aria-labelledby="approveModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">إبداء الرأي</h5>
+                    <button type="button"
+                            class="close"
+                            style="margin-right: auto"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        <strong><span aria-hidden="true">&times;</span></strong>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>الرأي</p>
+                    <div class="form-actions">
+                        <button class="btn btn-success" id="acceptBtn2">اوافق</button>
+                        <button class="btn btn-danger" id="rejectBtn2">لا اوافق</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<script>
+    <script>
     let selectedRequestId;
 
     $('#approveModal').on('show.bs.modal', function (event) {
@@ -235,10 +242,8 @@
             location.reload(); // Reload the page to reflect the new status
         });
     });
-</script>
-
-
-<script>
+    </script>
+    <script>
     let selectedRequestId2;
 
     $('#approveModal2').on('show.bs.modal', function (event) {
@@ -263,8 +268,5 @@
             location.reload(); // Reload the page to reflect the new status
         });
     });
-</script>
-
-
-
+    </script>
 {% endblock %}

@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import  Job, LeaveRequest, Officer, OfficerStatus , Rank, Section, Unit, UnitStatus, Weapon
 from django.contrib.auth.models import User,Group
@@ -181,24 +182,43 @@ class OfficerStatusForm(forms.ModelForm):
 class LeaveRequestForm(forms.ModelForm):
     class Meta:
         model = LeaveRequest
-        fields = ['leave_type', 'start_date', 'end_date',]
+        fields = ['leave_type', 'start_date', 'end_date', 'compensation_date']
         labels = {
             'leave_type': 'نوع الإجازة',
             'start_date': 'تاريخ البدء',
             'end_date': 'تاريخ الانتهاء',
-            
+            'compensation_date': "بدل عن يوم",
         }
         widgets = {
             'leave_type': forms.Select(attrs={'class': 'form-control'}),
             'start_date': forms.DateInput(attrs={'class': 'hijri-picker form-control', 'placeholder': 'اختر تاريخ البدء'}),
             'end_date': forms.DateInput(attrs={'class': 'hijri-picker form-control', 'placeholder': 'اختر تاريخ الانتهاء'}),
             'days_taken': forms.HiddenInput(),  # حقل مخفي
-            'remaining_days': forms.HiddenInput(),  # حقل مخفي
+            'remaining_days': forms.HiddenInput(),
+            'compensation_date': forms.DateInput(attrs={'class': 'hijri-picker form-control', 'placeholder': 'اختر تاريخ'}),
         }
         exclude = ('created_by',)
         
+    def clean(self):
+        cleaned_data = super().clean()
+        leave_type = cleaned_data.get('leave_type')
+        compensation_date = cleaned_data.get('compensation_date')
+
+        # Check if leave_type is 'instead_of_rest' and compensation_date is not provided
+        if leave_type == LeaveRequest.INSTEAD_OF_REST and not compensation_date:
+            self.add_error('compensation_date', 'تاريخ البدل مطلوب لنوع اجازة بدل راحة')
+
+        return cleaned_data
+
+    # if in model
+    # def clean(self):
+    #     super().clean()
         
-        
+    #     # Check if leave_type is 'instead_of_rest' and compensation_date is not provided
+    #     if self.leave_type == self.INSTEAD_OF_REST and not self.compensation_date:
+    #         raise ValidationError({
+    #             'compensation_date': 'تاريخ البدل مطلوب لنوع اجازة بدل راحة'
+    #         })
         
         
         

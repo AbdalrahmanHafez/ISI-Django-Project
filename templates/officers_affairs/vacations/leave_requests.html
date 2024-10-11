@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
-
 {% block content %}
-
-  <h2 class=" mb-4 section-title text-center">طلبات إجازة </h2><br><h3 class=" mb-4 section-title text-center"  >{{ request.user.officer_profile.rank }} / {{  request.user.officer_profile.full_name }}</h3>
-
+  <h2 class=" mb-4 section-title text-center">طلبات إجازة</h2>
+  <br>
+  <h3 class=" mb-4 section-title text-center">
+    {{ request.user.officer_profile.rank }} / {{ request.user.officer_profile.full_name }}
+  </h3>
   <div class="table-responsive">
     <table class="table" style="border-collapse: collapse; width: 100%;">
       <thead>
@@ -16,6 +17,7 @@
           <th>المصــدق الأن</th>
           <th>عدد الأيام</th>
           <th>الأيام المتبقية</th>
+          <th>بدل عن يوم</th>
           <th>خيارات</th>
         </tr>
       </thead>
@@ -35,22 +37,29 @@
               {% endif %}
             </td>
             {% if request.approver.officer_profile.role %}
-                            <td>{{ request.approver.officer_profile.role }}</td>
-                            {% else %}
-                            <td>{{ request.approver.officer_profile.branch }}</td>
-                            {% endif %}
-            <td>{{ request.days_taken|arabic_numbers }}</td>
-            {%if request.remaining_days >= 0%}
-            <td>{{ request.remaining_days|arabic_numbers }}</td>
+              <td>{{ request.approver.officer_profile.role }}</td>
             {% else %}
-            <td>-</td>
+              <td>{{ request.approver.officer_profile.branch }}</td>
             {% endif %}
+            <td>{{ request.days_taken|arabic_numbers }}</td>
+            {% if request.remaining_days >= 0 %}
+              <td>{{ request.remaining_days|arabic_numbers }}</td>
+            {% else %}
+              <td>-</td>
+            {% endif %}
+            <td>
+              {% if request.compensation_date %}
+              {{ request.compensation_date|arabic_numbers }}
+              {% else %}-{% endif %}
+            </td>
             <td class="d-flex justify-content-center">
               {% if request.can_edit %}
-              <a href="{% url 'update_leave_request' request.pk %}">
-                <i class="fas fa-edit">تعديل الطلب</i>
+                <a href="{% url 'update_leave_request' request.pk %}">
+                  <i class="fas fa-edit"> تعديل الطلب</i>
                 </a>
-              {% else %}-{% endif %}
+              {% else %}
+                -
+              {% endif %}
             </td>
           </tr>
         {% empty %}
@@ -61,5 +70,4 @@
       </tbody>
     </table>
   </div>
-
 {% endblock %}

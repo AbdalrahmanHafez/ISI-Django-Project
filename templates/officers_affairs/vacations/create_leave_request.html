@@ -2,108 +2,100 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% block content %}
-
-
-
-
-<div class="container mt-5">
-  <div class="row">
-
-
-
-    
-    <div class="col-md-40">
-      <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-          <h4 class="mb-0">
-            {% if form.instance.pk %} تعديل {% endif %}
-            طلب اجازة
-            <br>{{request.user.officer_profile.rank}}/{{request.user.officer_profile.full_name}}</h4>
-        </div>
-        <div class="card-body">
-          <form method="POST" id="leave-request-form">
-            {% csrf_token %}
-            {% if form.non_field_errors %}
-              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-            {% endif %}
-
-            {% for field in form %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-40">
+        <div class="card shadow-lg">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+              {% if form.instance.pk %}تعديل{% endif %}
+              طلب اجازة
+              <br>
+              {{ request.user.officer_profile.rank }}/{{ request.user.officer_profile.full_name }}
+            </h4>
+          </div>
+          <div class="card-body">
+            <form method="POST" id="leave-request-form">
+              {% csrf_token %}
+              {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+              {% for field in form %}
+                <div class="form-group mb-3">
+                  <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}<div class="alert alert-danger">{{ field.errors }}</div>{% endif %}
+                </div>
+              {% endfor %}
               <div class="form-group mb-3">
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                  <div class="alert alert-danger">{{ field.errors }}</div>
-                {% endif %}
+                <label>عدد الأيام المطلوبة:</label>
+                <p id="id_taken_days">-</p>
               </div>
-            {% endfor %}
-
-            <div class="form-group mb-3">
-              <label>عدد الأيام المطلوبة:</label>
-              <p id="id_taken_days">-</p>
-            </div>
-           
-             
-            
               <div>
-                <label>عدد الأيام المتبقية: </label>
+                <label>عدد الأيام المتبقية:</label>
                 <p id="id_remaining_days">-</p>
               </div>
-              
-
-            <button type="submit" class="btn btn-success w-100">
-              {% if form.instance.pk %} تعديل {% else %} تقديم {% endif %}
-              الطلب
-            </button>
-          </form>
-
-          <div id="loading-indicator" style="display: none;">جاري...</div>
-
+              <button type="submit" class="btn btn-success w-100">
+                {% if form.instance.pk %}
+                  تعديل
+                {% else %}
+                  تقديم
+                {% endif %}
+                الطلب
+              </button>
+            </form>
+            <div id="loading-indicator" style="display: none;">جاري...</div>
+          </div>
         </div>
       </div>
-    </div>
-
-   
       <div class="col-md-40">
         <div class="card mt-4">
-        
           <div class="card-header bg-primary text-white">
             <h4>الرصيد</h4>
           </div>
-        <div class="card-footer" style="box-sizing: border-box; display: block;">
-        <div class="row">
-          <div class="col">
-              <div class="text-center border-end">
-                  <h5 class="fw-bold mb-0">{{remaining_days_per_type.annual}} <span class="fw-normal fs-6">/15</span></h5>
+          <div class="card-footer" style="box-sizing: border-box; display: block;">
+            <div class="row">
+              <div class="col">
+                <div class="text-center border-end">
+                  <h5 class="fw-bold mb-0">
+                    {{ remaining_days_per_type.annual }} <span class="fw-normal fs-6">/15</span>
+                  </h5>
                   <span class="text-uppercase">سنوية</span>
+                </div>
               </div>
-          </div>
-          <div class="col">
-              <div class="text-center border-end">
-                  <h5 class="fw-bold mb-0">{{remaining_days_per_type.casual}} <span class="fw-normal fs-6">/7</span></h5>
+              <div class="col">
+                <div class="text-center border-end">
+                  <h5 class="fw-bold mb-0">
+                    {{ remaining_days_per_type.casual }} <span class="fw-normal fs-6">/7</span>
+                  </h5>
                   <span class="text-uppercase">عارضة</span>
+                </div>
               </div>
+            </div>
           </div>
-        </div>
-        </div>
         </div>
       </div>
-
-    
+    </div>
   </div>
-
-  
 </div>
-
-</div>
-
-
-
-
-    
-  
-
 <script>
 $(document).ready(function() {
+
+
+  // Show compensation_date only if بدل راحة is slected
+  const leave_type = $('#id_leave_type');
+  const compensation_date = $('#id_compensation_date');
+  function update_state_compensation() {
+      if (leave_type.val() === "instead_of_rest") {
+          compensation_date.show();
+      } else {
+          compensation_date.hide();
+      }
+  }
+
+  update_state_compensation();
+  leave_type.change(update_state_compensation);
+        
+
+
 
 
     const update_state = () =>{
@@ -163,5 +155,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
 {% endblock %}

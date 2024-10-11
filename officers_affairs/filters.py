@@ -3,6 +3,10 @@ from django import forms
 from .models import Officer, Rank, OfficerStatus
 
 class OfficerFilter(django_filters.FilterSet):
+    class Meta:
+        model = Officer
+        fields = {}
+
     full_name = django_filters.CharFilter(
         field_name='full_name',
         lookup_expr='icontains',
@@ -50,9 +54,13 @@ class OfficerFilter(django_filters.FilterSet):
         exclude=True
     )
 
-    class Meta:
-        model = Officer
-        fields = {}
+    no_user = django_filters.BooleanFilter(
+        field_name='user',
+        lookup_expr='isnull',
+        widget=forms.CheckboxInput(),
+        label="بدون مستخدم",
+    )
+
 
     @property
     def qs(self):

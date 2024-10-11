@@ -146,24 +146,25 @@
             {% endfor %}
         </tbody>
     </table>
-
     <!-- Pagination Controls -->
-        <div class="pagination-container">
+    <div class="pagination-container">
         <nav aria-label="Page navigation " class="d-flex justify-content-center">
             <ul class="pagination">
                 {% if leave_requests.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1" aria-label="First">
+                        <a class="page-link" href="#" onclick="navigateAddParam('page', 1)" aria-label="First">
                             <span aria-hidden="true">&laquo;&laquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ leave_requests.previous_page_number }}" aria-label="Previous">
+                        <a class="page-link"
+                            href="#"
+                            onclick="navigateAddParam('page', {{ leave_requests.previous_page_number }})"
+                           aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                 {% endif %}
-    
                 {% for num in leave_requests.paginator.page_range %}
                     {% if leave_requests.number == num %}
                         <li class="page-item active">
@@ -171,19 +172,26 @@
                         </li>
                     {% elif num > leave_requests.number|add:'-3' and num < leave_requests.number|add:'3' %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            <a class="page-link"
+                               href="#"
+                               onclick="navigateAddParam('page', {{ num }})">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
-    
                 {% if leave_requests.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ leave_requests.next_page_number }}" aria-label="Next">
+                        <a class="page-link"
+                           href="#"
+                           onclick="navigateAddParam('page', {{ leave_requests.next_page_number }})"
+                           aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ leave_requests.paginator.num_pages }}" aria-label="Last">
+                        <a class="page-link"
+                           href="#"
+                           onclick="navigateAddParam('page', {{ leave_requests.paginator.num_pages }})"
+                           aria-label="Last">
                             <span aria-hidden="true">&raquo;&raquo;</span>
                         </a>
                     </li>
@@ -206,7 +214,6 @@
     <div class="pagination d-flex justify-content-center">
         <span class="current">صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
     </div> {% endcomment %}
-
     <!-- Approval Modal -->
     <div class="modal fade"
          id="approveModal"
@@ -264,6 +271,12 @@
         </div>
     </div>
     <script>
+    function navigateAddParam(param, value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set(param, value);
+        window.location.href = url; 
+    }
+
     let selectedRequestId;
 
     $('#approveModal').on('show.bs.modal', function (event) {

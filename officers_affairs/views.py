@@ -80,11 +80,14 @@ def officers_home_view(request):
                 add_off_status.save() 
                 return redirect('home')  # Redirect after form submission           
             
+    officerFilterDefault = {
+        'status': OfficerStatus.objects.filter(name="قوة"),
+    }
 
     context= {
         'ranks':Rank.objects.all(),
         'form': OfficerForm(),
-        'officers_filter': filters.OfficerFilter(request.GET),
+        'officers_filter': filters.OfficerFilter(request.GET or officerFilterDefault),
         'count_officers_total': Officer.objects.count(),
         'count_officers_availble': Officer.objects.filter(unit_status__name="موجود").count(),
         'formweapon':WeaponForm(),
@@ -268,9 +271,13 @@ class officers_delete(PermissionRequiredMixin, generic.DeleteView):
 
 def officers_list(request):
     
+    officerFilterDefault = {
+        'status': OfficerStatus.objects.filter(name="قوة"),
+    }
+
     ctx={
         'ranks':Rank.objects.all(),
-        'officers_filter': filters.OfficerFilter(request.GET),
+        'officers_filter': filters.OfficerFilter(request.GET or officerFilterDefault),
     }
     return render(request, 'officers_affairs/officer_list.html', ctx)
 

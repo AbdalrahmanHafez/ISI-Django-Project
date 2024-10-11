@@ -3,6 +3,15 @@
 {% block content %}
 
     <h2  class="text-center mb-4 section-title">تمام الضباط عن اليوم {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+
+    <form method="GET" action="{% url 'attendance_list' %}" class="d-flex justify-content-center align-items-center mb-3">
+        <div class="form-group">
+            <label for="date">اختر التاريخ:</label>
+            <input name="date" class="hijri-picker form-control" value="{{ today|date:'Y-m-d'}}" required>
+        </div>
+        <button type="submit" class="btn btn-primary align-self-end" style="margin-right: 0.5rem">عرض الحضور</button>
+    </form>
+
     
 <div>
     <table class="table table-bordered table-hover text-center">

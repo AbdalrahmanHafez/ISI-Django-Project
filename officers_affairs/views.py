@@ -10,7 +10,7 @@ from django.db.models.functions import Cast
 
 from .models import *
 from .forms import BranchForm,  JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
-from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse_lazy, reverse
 import json
@@ -884,7 +884,12 @@ def record_attendance(request):
                         notes=notes,
                     )
         
-        return JsonResponse({'success': True})
+        return HttpResponseRedirect(reverse('attendance_list'))
+                    # headers={
+                    #     'HX-Trigger': json.dumps({
+                    #         "showMessage": "تم اضافة ضابط",
+                    #     })
+                    # })
 
     # GET request: Fetch officers with status "موجود"
     officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number')
@@ -911,21 +916,23 @@ def attendance_list(request):
     else:
         date_value = timezone.localtime().date()  # تاريخ اليوم الافتراضي
     attendance_records = DailyAttendance.objects.filter(date=date_value).select_related('officer')
+
     today = timezone.localtime().date()
+
     # Count officers with the status 'موجود', currently outside, and with a different status
-    total_officers = DailyAttendance.objects.filter(date=today).count()
-    inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
-    outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
-    outside_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية',date=today).count()
-    outside_hospital_officers = DailyAttendance.objects.filter(status__name='مست',date=today).count()
-    outside_open_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية مفتوحة',date=today).count()
-    outside_annual_officers = DailyAttendance.objects.filter(status__name='سنوية',date=today).count()
-    outside_casual_officers = DailyAttendance.objects.filter(status__name='عارضة',date=today).count()
-    outside_instead_of_rest_officers = DailyAttendance.objects.filter(status__name='بدل راحة',date=today).count()
-    outside_rest_officers = DailyAttendance.objects.filter(status__name='راحة',date=today).count()
-    outside_leader_grant_officers = DailyAttendance.objects.filter(status__name='منحة قائد',date=today).count()
-    outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=today).count()
-    outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=today).count()
+    total_officers = DailyAttendance.objects.filter(date=date_value).count()
+    inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=date_value).count()
+    outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=date_value).count()
+    outside_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية',date=date_value).count()
+    outside_hospital_officers = DailyAttendance.objects.filter(status__name='مست',date=date_value).count()
+    outside_open_mission_officers = DailyAttendance.objects.filter(status__name='مأمورية مفتوحة',date=date_value).count()
+    outside_annual_officers = DailyAttendance.objects.filter(status__name='سنوية',date=date_value).count()
+    outside_casual_officers = DailyAttendance.objects.filter(status__name='عارضة',date=date_value).count()
+    outside_instead_of_rest_officers = DailyAttendance.objects.filter(status__name='بدل راحة',date=date_value).count()
+    outside_rest_officers = DailyAttendance.objects.filter(status__name='راحة',date=date_value).count()
+    outside_leader_grant_officers = DailyAttendance.objects.filter(status__name='منحة قائد',date=date_value).count()
+    outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=date_value).count()
+    outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=date_value).count()
 
     
     attendance_records = sorted(attendance_records, key=lambda record: extract_numeric(record.officer.seniority_number))

@@ -49,7 +49,7 @@
 </div>
 
 <script>
-document.getElementById('attendanceForm').addEventListener('submit', function(event) {
+{% comment %} document.getElementById('attendanceForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent default form submission
     
     const formData = new FormData(this);
@@ -70,16 +70,7 @@ document.getElementById('attendanceForm').addEventListener('submit', function(ev
         }
     })
     .catch(error => console.error('Error:', error));
-});
+}); {% endcomment %}
 
-function updateDate() {
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    document.getElementById('currentDate').textContent = `${year}-${month}-${day}`;
-}
-
-window.onload = updateDate;
 </script>
 {% endblock %}

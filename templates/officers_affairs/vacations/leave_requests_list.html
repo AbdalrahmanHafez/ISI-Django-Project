@@ -70,7 +70,8 @@
         <tbody>
             {% for request in leave_requests %}
                 <tr>
-                    <td>{{ forloop.counter|arabic_numbers }}</td>
+                    <td>{{ leave_requests.start_index|add:forloop.counter0|arabic_numbers }}</td>
+                    {% comment %} <td>{{ forloop.counter|arabic_numbers }}</td> {% endcomment %}
                     <td>{{ request.officer.rank }}</td>
                     <td>{{ request.officer.full_name }}</td>
                     <td>{{ request.officer.branch }}</td>
@@ -145,8 +146,52 @@
             {% endfor %}
         </tbody>
     </table>
+
     <!-- Pagination Controls -->
-    <div class="pagination d-flex justify-content-center">
+        <div class="pagination-container">
+        <nav aria-label="Page navigation " class="d-flex justify-content-center">
+            <ul class="pagination">
+                {% if leave_requests.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ leave_requests.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+    
+                {% for num in leave_requests.paginator.page_range %}
+                    {% if leave_requests.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="#">{{ num }}</a>
+                        </li>
+                    {% elif num > leave_requests.number|add:'-3' and num < leave_requests.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if leave_requests.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ leave_requests.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ leave_requests.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% comment %} <div class="pagination d-flex justify-content-center">
         <span class="step-links">
             {% if page_obj.has_previous %}
                 <a href="?page=1">&laquo; الأولي</a>--
@@ -160,7 +205,8 @@
     </div>
     <div class="pagination d-flex justify-content-center">
         <span class="current">صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
-    </div>
+    </div> {% endcomment %}
+
     <!-- Approval Modal -->
     <div class="modal fade"
          id="approveModal"

@@ -729,9 +729,13 @@ def leave_requests_list(request):
     
    
     paginator = Paginator(leave_requests, 10)  # Show 10 requests per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
+    page_number = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)  # If page is not an integer, deliver first page
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
       
     # Prepare context
     context = {

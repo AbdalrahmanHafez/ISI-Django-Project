@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_bootstrap5',
     'django_filters',
-    'mathfilters'
+    'mathfilters',
 ]
 SITE_ID = 2
 

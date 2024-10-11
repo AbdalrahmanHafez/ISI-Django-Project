@@ -97,11 +97,12 @@
 document.addEventListener('DOMContentLoaded', (event) => {
   const htmlElement = document.documentElement;
 
-  const currentTheme = localStorage.getItem('bsTheme') || 'light';
+  // assume darkmode initaliity
+  const currentTheme = localStorage.getItem('bsTheme') || 'dark';
   htmlElement.setAttribute('data-bs-theme', currentTheme);
 
   document.getElementById('darkModeButton').addEventListener('click',()=>{
-    if ((localStorage.getItem('bsTheme') || 'light') == 'light') {
+    if ((localStorage.getItem('bsTheme') || 'dark') == 'light') {
           document.documentElement.setAttribute('data-bs-theme', 'dark');
           localStorage.setItem('bsTheme', 'dark');
       } else {

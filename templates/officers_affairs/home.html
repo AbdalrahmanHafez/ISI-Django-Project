@@ -1,208 +1,175 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load custom_filters %}
-{% block title %}منظومة شئون ضباط{% endblock %}
-
+{% block title %}
+  منظومة شئون ضباط
+{% endblock title %}
 {% block content %}
-
-{% load static %}
-{% load mathfilters %}
-
-  
+  {% load static %}
+  {% load mathfilters %}
   <!-- Content Wrapper. Contains page content -->
-  
-    <!-- Content Header (Page header) -->
-
-   
-      <div>
-        <div class="container-fluid">
+  <!-- Content Header (Page header) -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        {% comment %} <div class="card collapsed-card"> {% endcomment %}
+        <div class="card-header">
+          <h3 class="card-title">معلومات</h3>
+          <div class="card-tools">
+            <button type="button"
+                    class="btn btn-tool"
+                    data-lte-toggle="card-collapse"
+                    title="Collapse">
+              <i data-lte-icon="expand" class="fas fa-plus"></i>
+              <i data-lte-icon="collapse" class="fas fa-minus"></i>
+            </button>
+            {% comment %} <button type="button" class="btn btn-tool" data-lte-toggle="card-remove" title="Remove"> <i class="bi bi-x-lg"></i> </button> {% endcomment %}
+          </div>
+        </div>
+        <div class="card-body" style="box-sizing: border-box; display: block;">
+          {% comment %} <div class="card-body" style="box-sizing: border-box; display: none;"> {% endcomment %}
           <div class="row">
-
-        <div class="col-12">
-          <div class="card">
-          {% comment %} <div class="card collapsed-card"> {% endcomment %}
-            
-          <div class="card-header">
-                <h3 class="card-title">معلومات</h3>
-                <div class="card-tools">
-                  <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse" title="Collapse">
-                    <i data-lte-icon="expand" class="fas fa-plus"></i>
-                    <i data-lte-icon="collapse" class="fas fa-minus"></i>
-                  </button>
-          
-                  {% comment %} <button type="button" class="btn btn-tool" data-lte-toggle="card-remove" title="Remove"> <i class="bi bi-x-lg"></i> </button> {% endcomment %}
-                </div>
-            </div>
-            <div class="card-body" style="box-sizing: border-box; display: block;">
-            {% comment %} <div class="card-body" style="box-sizing: border-box; display: none;"> {% endcomment %}
-              <div class="row">
-                
-
-
-             <div class="col-lg-6">
+            <div class="col-lg-6">
               <div class="card">
                 <div class="card-header border-0">
                   <div class="d-flex justify-content-between">
-                    <h3 class="card-title">اجمالي عدد الضباط</h3>                    
+                    <h3 class="card-title">اجمالي عدد الضباط</h3>
                   </div>
                 </div>
                 <div class="card-body">
                   <div class="d-flex">
                     <p class="d-flex flex-column">
-                      <span class="fw-bold fs-4">{{total_officers|arabic_numbers}}</span>
+                      <span class="fw-bold fs-4">{{ total_officers|arabic_numbers }}</span>
                       <span>اجمالي عدد الضباط</span>
-                    </p>  
+                    </p>
                   </div>
                   <!-- /.d-flex -->
-
                   <div class="position-relative mb-4">
                     <canvas id="visitors-chart" height="200"></canvas>
-                  </div>  
+                  </div>
                 </div>
               </div>
               <!-- /.card -->
             </div>
             <!-- /.col-md-6 -->
-            
             <div class="col-lg-6">
               <div class="card">
                 <div class="card-header border-0">
                   <div class="d-flex justify-content-between">
-                    <h3 class="card-title">طاقم النوبطچية عن اليوم  {{ today|date:"d-m-Y"|arabic_numbers }} </h3>   
+                    <h3 class="card-title">طاقم النوبطچية عن اليوم  {{ today|date:"d-m-Y"|arabic_numbers }}</h3>
                   </div>
-                </div>    
+                </div>
                 <div class="card-body">
                   <div class="table-responsive p-0">
-                                    <table class="table table-striped align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th>الوظيفة</th>
-                                                <th>الاسم</th>
-                                                <th>رقم التيليفون</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td> قائد منوب </td>
-                                                <td>مقدم / شريف شكري</td>
-                                                <td> 01234567899 </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td> ضابط نبطچي </td>
-                                                <td>ملازم / يحيى عبدالله</td>
-                                                <td> 01234567899 </td>
-                                            </tr>
-
-                                            
-
-                                                <tr>
-                                                    <td>ضابط الخفيفة</td>
-                                                    <td>نقيب / عبدالوهاب محمد</td>
-                                                <td> 01234567899 </td>
-                                            </tr>
-
-
-                                        </tbody>
-                                    </table>
-                                </div>
+                    <table class="table table-striped align-middle">
+                      <thead>
+                        <tr>
+                          <th>الوظيفة</th>
+                          <th>الاسم</th>
+                          <th>رقم التيليفون</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>قائد منوب</td>
+                          <td>مقدم / شريف شكري</td>
+                          <td>01234567899</td>
+                        </tr>
+                        <tr>
+                          <td>ضابط نبطچي</td>
+                          <td>ملازم / يحيى عبدالله</td>
+                          <td>01234567899</td>
+                        </tr>
+                        <tr>
+                          <td>ضابط الخفيفة</td>
+                          <td>نقيب / عبدالوهاب محمد</td>
+                          <td>01234567899</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+          <!-- Attendance Status Card -->
+          <div class="row mt-3">
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-header border-0">
+                  <h3 class="card-title">تمام الضباط اليوم  {{ today|date:"d-m-Y"|arabic_numbers }}</h3>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive p-0">
+                    <table class="table table-bordered table-hover text-center">
+                      <thead class="thead-dark">
+                        <tr>
+                          <th scope="col">القوة</th>
+                          <th scope="col">موجود</th>
+                          <th scope="col">خارج</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{{ total_officers|arabic_numbers }}</td>
+                          <td>{{ inside_officers|arabic_numbers }}</td>
+                          <td>{{ outside_officers|arabic_numbers }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="text-end">
+                    <a href="{% url 'attendance_list' %}" class="btn btn-info">الذهاب للتمام التفصيلي</a>
+                  </div>
+                </div>
               </div>
-
-              <!-- Attendance Status Card -->
-                        <div class="row mt-3">
-                            <div class="col-lg-12">
-                                <div class="card">
-                                    <div class="card-header border-0">
-                                        <h3 class="card-title">تمام الضباط اليوم  {{ today|date:"d-m-Y"|arabic_numbers }}</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive p-0">
-                                          <table class="table table-bordered table-hover text-center">
-                                            <thead class="thead-dark">
-                                                <tr>
-                                                    <th scope="col">القوة </th>
-                                                    <th scope="col">موجود </th>
-                                                    <th scope="col">خارج </th>
-                                                   
-                                                    
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>{{ total_officers|arabic_numbers }}</td>
-                                                    <td>{{ inside_officers|arabic_numbers }}</td>
-                                                    <td>{{ outside_officers|arabic_numbers }}</td>
-                                                    
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        </div>
-                                        <div class="text-end">
-                                            <a href="{% url 'attendance_list' %}" class="btn btn-info">الذهاب للتمام التفصيلي</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
             </div>
-            {% comment %} <div class="card-footer" style="box-sizing: border-box; display: none;">Footer</div> <!-- /.card-footer--> {% endcomment %}
-            </div>
+          </div>
         </div>
-
-          </div>
-  
-
-          <div class="d-flex gap-2 mb-2 mt-3">
-
-            {% if perms.officers_affairs.add_officer %}
-            <button class="btn btn-primary mb-3" hx-get="{% url "officers_add" %}" hx-target="#dialog" class="btn btn-primary"> اضافة ضابط</button>
-            {% endif %}
-            
-            <!-- Filter options -->
-            <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
-              خيارات بحث متقدمة
-            </button>
-          </div>
-  
-          <!-- تصنيفات-->
-             
-                  
-                  
-                  
-            {% include "officers_affairs/officer_list.html" %}
-
-             
-
-
+        {% comment %} <div class="card-footer" style="box-sizing: border-box; display: none;">Footer</div> <!-- /.card-footer--> {% endcomment %}
       </div>
-        <!-- /.container-fluid -->
-  
-      <!-- /.content -->
+    </div>
+  </div>
+  <div class="d-flex gap-2 mb-2 mt-3">
+    {% if perms.officers_affairs.add_officer %}
+      <button class="btn btn-primary mb-3"
+              hx-get="{% url "officers_add" %}"
+              hx-target="#dialog">اضافة ضابط</button>
+    {% endif %}
+    <!-- Filter options -->
+    <button class="btn btn-secondary mb-3"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseFilter"
+            aria-expanded="false"
+            aria-controls="collapseFilter">خيارات بحث متقدمة</button>
+  </div>
+  <!-- تصنيفات-->
+  {% include "officers_affairs/officer_list.html" %}
 </div>
-    <!-- /.content-wrapper -->
-
+<!-- /.container-fluid -->
+<!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
 <!-- Modal Placeholder -->
 <div id="modal" class="modal fade">
-    <div id="dialog" class="modal-dialog" hx-target="this"></div>
+  <div id="dialog" class="modal-dialog" hx-target="this"></div>
 </div>
-
 <!-- Toast -->
 <div class="toast-container position-fixed top-0 start-0 p-3">
-    <div id="toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+  <div id="toast"
+       class="toast align-items-center text-white bg-success border-0"
+       role="alert"
+       aria-live="assertive"
+       aria-atomic="true">
     <div class="d-flex">
-        <div id="toast-body" class="toast-body"></div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-        aria-label="Close"></button>
+      <div id="toast-body" class="toast-body"></div>
+      <button type="button"
+              class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"
+              aria-label="Close"></button>
     </div>
-    </div>
-
-
-
-
-
+  </div>
+</div>
 <script>
   const modal = new bootstrap.Modal(document.getElementById("modal"))
 
@@ -237,7 +204,6 @@
 
 
 </script>
-
 <script>
   $(document).ready(function(){
     $('#myModal').on('shown.bs.modal', function () {
@@ -386,5 +352,4 @@
 
 
 </script>
-
-{% endblock %}
+{% endblock content %}

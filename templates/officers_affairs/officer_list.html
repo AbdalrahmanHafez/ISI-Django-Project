@@ -1,127 +1,141 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load custom_filters %}
-
-
-
-
-<div class="row" id="officers_list" hx-trigger="officer_list_changed from:body" hx-get="{% url 'officers_list' %}" hx-target="this">
-  <form hx-get="{% url "officers_list" %}" hx-target="#officers_list" class="mb-3">
-
+<div id="officers_list"
+     hx-trigger="officer_list_changed from:body"
+     hx-get="{% url 'officers_list' %}"
+     hx-target="this">
+  <form hx-get="{% url "officers_list" %}"
+        hx-target="#officers_list"
+        class="mb-3">
     <!-- Rank Filter buttons -->
-
-    <div class="btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-      <input type="radio" class="btn-check" id="rank-null" autocomplete="off"
-          {% if officers_filter.form.rank.value == None %} checked {% endif %}
-          hx-on:click="this.closest('form').querySelector('[name=rank]').value = undefined; document.getElementById('filterSubmitBtn').click()"
-          href="javascript:void(0)"
-      >
+    <div class="btn-group-sm"
+         role="group"
+         aria-label="Basic radio toggle button group">
+      <input type="radio"
+             class="btn-check"
+             id="rank-null"
+             autocomplete="off"
+             {% if officers_filter.form.rank.value == None %}checked{% endif %}
+             hx-on:click="this.closest('form').querySelector('[name=rank]').value = undefined; document.getElementById('filterSubmitBtn').click()">
       <label class="btn btn-outline-secondary" for="rank-null">الكل</label>
-
       {% for rank in ranks %}
-      <input type="radio" class="btn-check" id="rank-{{rank.id}}" autocomplete="off"
-          {% if officers_filter.form.rank.value == rank.id|to_string %} checked {% endif %}
-          hx-on:click="this.closest('form').querySelector('[name=rank]').value = {{rank.id}}; document.getElementById('filterSubmitBtn').click()"
-          href="javascript:void(0)"
-      >
-      <label class="btn btn-outline-primary dark-mode" for="rank-{{rank.id}}">{{rank.name}}</label>
+        <input type="radio"
+               class="btn-check"
+               id="rank-{{ rank.id }}"
+               autocomplete="off"
+               {% if officers_filter.form.rank.value == rank.id|to_string %}checked{% endif %}
+               hx-on:click="this.closest('form').querySelector('[name=rank]').value = {{ rank.id }}; document.getElementById('filterSubmitBtn').click()">
+        <label class="btn btn-outline-primary dark-mode" for="rank-{{ rank.id }}">{{ rank.name }}</label>
       {% endfor %}
     </div>
-          
-
-     
-
-
-  <div class="collapse" id="collapseFilter">
+    <div class="collapse" id="collapseFilter">
       <div class="card card-body">
-          {% for field in officers_filter.form.visible_fields %}
+        {% for field in officers_filter.form.visible_fields %}
           <div class="form-group mb-2">
-              <label>{{ field.label }}</label>
-              {{ field }}
-              {% for error in field.errors %}
-              <span class="help-block text-danger">{{ error }}</span>
-              {% endfor %}
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<span class="help-block text-danger">{{ error }}</span>{% endfor %}
           </div>
-          {% endfor %}
-          <button type="submit" class="btn btn-primary shadow" id="filterSubmitBtn">بحث</button>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary shadow" id="filterSubmitBtn">بحث</button>
       </div>
-  </div>
-  
+    </div>
   </form>
-
-
   <!-- Officers List -->
-<div class="row" id="officers_list" hx-trigger="officer_list_changed from:body" hx-get="{% url 'officers_list' %}" hx-target="this">
-  {% for officer in officers_filter.qs %}
-  
-  {% if perms.officers_affairs.view_officer %}
-  <!-- Officer Card -->
-  <div class="col-md-4 mb-4">
-    
-      <div class="card card-widget widget-user">
-          <!-- Officer Card Dropdown (if permitted) -->
-          {% if perms.officers_affairs.change_officer or perms.officers_affairs.delete_officer %}
-          <div class="position-absolute top-0 end-0">
-            <button type="button" class="btn dropdown-toggle btn-outline-secondary" data-bs-toggle="dropdown" >
-                <span class="sr-only">Toggle Dropdown</span>
-            </button>
-              <ul class="dropdown-menu">
+  <div class="row"
+       id="officers_list"
+       hx-trigger="officer_list_changed from:body"
+       hx-get="{% url 'officers_list' %}"
+       hx-target="this">
+    {% for officer in officers_filter.qs %}
+      {% if perms.officers_affairs.view_officer %}
+        <!-- Officer Card -->
+        <div class="col-md-4 mb-4">
+          <div class="card card-widget widget-user">
+            <!-- Officer Card Dropdown (if permitted) -->
+            {% if perms.officers_affairs.change_officer or perms.officers_affairs.delete_officer %}
+              <div class="position-absolute top-0 end-0">
+                <button type="button"
+                        class="btn dropdown-toggle btn-outline-secondary"
+                        data-bs-toggle="dropdown">
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
                   {% if perms.officers_affairs.change_officer %}
-                  <li><a class="dropdown-item edit-item" hx-get="{% url 'officers_add' pk=officer.pk %}" hx-target="#dialog">تعديل</a></li>
+                    <li>
+                      <a class="dropdown-item edit-item"
+                         hx-get="{% url 'officers_add' pk=officer.pk %}"
+                         hx-target="#dialog">تعديل</a>
+                    </li>
                   {% endif %}
                   {% if perms.officers_affairs.delete_officer %}
-                  <li><a class="dropdown-item delete-item" hx-get="{% url 'officers_delete' pk=officer.pk %}" hx-target="#dialog">حذف</a></li>
+                    <li>
+                      <a class="dropdown-item delete-item"
+                         hx-get="{% url 'officers_delete' pk=officer.pk %}"
+                         hx-target="#dialog">حذف</a>
+                    </li>
                   {% endif %}
-              </ul>
-          </div>
-          {% endif %}
-          
-          <!-- Officer Header with Rank -->
-          {% if officer.rank.image %}
-          <div class="widget-user-header text-white" style="background-image: url('{{ officer.rank.image.url }}'); background-size: cover;">
-            {% else %}
-            <div class="widget-user-header text-white" style="background-image: url('{{ officer.rank }}'); background-size: cover;">
-          {% endif %}   
-              <h3 class="widget-user-username">{{ officer.rank.name }}</h3>
-              <h4 class="widget-user-desc" style="text-shadow:1px 1px black">{{ officer.full_name }}</h4>
-          </div>
-          <a href="{% url 'officer_detail' officer.pk %}">
-
-          <!-- Officer Image -->
-          <div class="widget-user-image">
-              {% if officer.profile_image %}
-              <img class="rounded-circle elevation-2" style="width:100px; height:100px; box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)!important" src="{{ officer.profile_image.url }}" alt="Officer Image">
+                </ul>
+              </div>
+            {% endif %}
+            <!-- Officer Header with Rank -->
+            {% if officer.rank.image %}
+              <div class="widget-user-header text-white"
+                   style="background-image: url('{{ officer.rank.image.url }}');
+                          background-size: cover">
               {% else %}
-              <img class="rounded-circle elevation-2" style="width:100px; height:100px; box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)!important" src="{% static 'images/user-avatar.png' %}" alt="User Avatar">
-              {% endif %}
-          </div>
-</a>
-          <!-- Officer Details -->
-          <div class="card-footer">
-              <div class="text-end">
-                  <h5 class="description-header">الوحدة: {{ officer.unit.name }}</h5>
+                <div class="widget-user-header text-white"
+                     style="background-image: url('{{ officer.rank }}');
+                            background-size: cover">
+                {% endif %}
+                <h3 class="widget-user-username">{{ officer.rank.name }}</h3>
+                <h4 class="widget-user-desc" style="text-shadow:1px 1px black">{{ officer.full_name }}</h4>
+              </div>
+              <a href="{% url 'officer_detail' officer.pk %}">
+                <!-- Officer Image -->
+                <div class="widget-user-image">
+                  {% if officer.profile_image %}
+                    <img class="rounded-circle elevation-2"
+                         style="width:100px;
+                                height:100px;
+                                box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)!important"
+                         src="{{ officer.profile_image.url }}"
+                         alt="Officer Image">
+                  {% else %}
+                    <img class="rounded-circle elevation-2"
+                         style="width:100px;
+                                height:100px;
+                                box-shadow:0 3px 6px rgba(0,0,0,.16),0 3px 6px rgba(0,0,0,.23)!important"
+                         src="{% static 'images/user-avatar.png' %}"
+                         alt="User Avatar">
+                  {% endif %}
+                </div>
+              </a>
+              <!-- Officer Details -->
+              <div class="card-body">
+                <div class="text-end mt-5">
+                  <h5 class="description-header">الرقم العسكري: {{ officer.military_number }}</h5>
+                  <h5 class="description-header">رقم الاقدمية {{ officer.seniority_number }}</h5>
                   <h5 class="description-header">الفرع: {{ officer.branch.name }}</h5>
                   <h5 class="description-header">القسم: {{ officer.section.name }}</h5>
-                  <h5 class="description-header">الوظيفة: {{ officer.job.name }}</h5>
-                  <h5 class="description-header">الرقم العسكري: {{ officer.military_number }}</h5>
                   <h5 class="description-header">رقم الهاتف: {{ officer.phone1 }}</h5>
-                  {% if officer.phone2 %}
-                  <h5 class="description-header">رقم الهاتف 2: {{ officer.phone2 }}</h5>
-                  {% endif %}
-                  {% if officer.home_phone %}
-                  <h5 class="description-header">رقم الهاتف المنزلي: {{ officer.home_phone }}</h5>
-                  {% endif %}
+                  {% comment %}
+                    <h5 class="description-header">الوظيفة: {{ officer.job.name }}</h5>
+                   <h5 class="description-header">الوحدة: {{ officer.unit.name }}</h5>
+                  {% if officer.phone2 %}<h5 class="description-header">رقم الهاتف 2: {{ officer.phone2 }}</h5>{% endif %}
+                  {% if officer.home_phone %}<h5 class="description-header">رقم الهاتف المنزلي: {{ officer.home_phone }}</h5>{% endif %} 
+                  {% endcomment %}
+                </div>
               </div>
+              <a href="{% url 'officer_detail' officer.pk %}"
+                 class="card-footer text-center link-secondary link-underline-opacity-0 link-underline-opacity-50-hover">المزيد</a>
+            </div>
           </div>
-      </div>
-
+        {% endif %}
+      {% empty %}
+        <h3>لايوجد</h3>
+      {% endfor %}
+    </div>
   </div>
-  {% endif %}
-  
-
-  {% empty %}
-    <h3>لايوجد</h3>
-  {% endfor %}
-
 </div>
-

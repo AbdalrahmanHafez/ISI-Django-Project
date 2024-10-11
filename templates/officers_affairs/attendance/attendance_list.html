@@ -49,6 +49,7 @@
         <thead>
             <tr>
                 <th>م</th>
+                <th>رقم الاقدمية</th>
                 <th>الرتبة</th>
                 <th>الأسم</th>
                 <th>الفرع</th>
@@ -60,6 +61,7 @@
             {% for record in attendance_records %}
             <tr>
                 <td>{{ forloop.counter|arabic_numbers }}</td>
+                <td>{{ record.officer.seniority_number }}</td>
                 <td>{{ record.officer.rank }}</td>
                 <td>{{ record.officer.full_name }}</td>
                 <td>{{ record.officer.branch }}</td>

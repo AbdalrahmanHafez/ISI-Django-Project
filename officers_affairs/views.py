@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Case, When, Value, IntegerField
+from django.db.models.functions import Cast
 
 
 from .models import *
@@ -19,7 +20,12 @@ from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from django.db.models import Q
 from django.utils import timezone
+import re
 
+def extract_numeric(s):
+    # Extract the numeric part of the string using regular expressions
+    numbers = re.findall(r'\d+', s)
+    return int(numbers[0]) if numbers else float('inf')  # Return infinity if no number is found
 
 @permission_required('officers_affairs.view_rank', raise_exception=True)
 def officers_home_view(request):
@@ -881,7 +887,9 @@ def record_attendance(request):
         return JsonResponse({'success': True})
 
     # GET request: Fetch officers with status "موجود"
-    officers = Officer.objects.filter(status__name='قوة')
+    officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number')
+    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number))
+
     unit_statuses = UnitStatus.objects.all()
 
     context = {
@@ -918,6 +926,9 @@ def attendance_list(request):
     outside_leader_grant_officers = DailyAttendance.objects.filter(status__name='منحة قائد',date=today).count()
     outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=today).count()
     outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=today).count()
+
+    
+    attendance_records = sorted(attendance_records, key=lambda record: extract_numeric(record.officer.seniority_number))
 
     context = {
         'attendance_records': attendance_records,

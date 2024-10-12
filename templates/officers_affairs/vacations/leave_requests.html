@@ -53,8 +53,8 @@
         {% for request in requests %}
           <tr>
             <td>{{ request.get_leave_type_display }}</td>
-            <td>{{ request.start_date|date:"d-m-y"|arabic_numbers }}</td>
-            <td>{{ request.end_date|date:"d-m-y"|arabic_numbers }}</td>
+            <td>{{ request.start_date|date:"d-m-Y"|arabic_numbers }}</td>
+            <td>{{ request.end_date|date:"d-m-Y"|arabic_numbers }}</td>
             <td>
               {% if request.status == 'pending' %}
                 <span class="badge bg-warning" style="color: black;">جاري التصديق</span>

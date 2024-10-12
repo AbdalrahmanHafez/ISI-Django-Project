@@ -3,7 +3,7 @@
 {% load django_bootstrap5 %}
 {% block content %}
     <h2 class="text-center mb-4 section-title">طلبات الأجازة</h2>
-    <form method="GET"
+    <form method="get"
           action="{% url 'leave_requests_list' %}"
           class="row g-3 mb-3">
         <div class="col-auto">
@@ -59,7 +59,7 @@
             <button type="submit" class="btn btn-primary mt-4">بحث</button>
         </div>
     </form>
-    <!-- Adjust width as necessary -->
+    <!-- adjust width as necessary -->
     <table class="table table-bordered table-hover text-center">
         <thead>
             <tr>
@@ -88,9 +88,9 @@
                     <td>{{ request.officer.full_name }}</td>
                     <td>{{ request.officer.branch }}</td>
                     <td>{{ request.get_leave_type_display }}</td>
-                    <td>{{ request.start_date|date:"d-m-Y"|arabic_numbers }}</td>
-                    <td>{{ request.end_date|date:"d-m-Y"|arabic_numbers }}</td>
-                    <td>{{ request.created_at|date:"d-m-Y سعت  Hm "|arabic_numbers }}</td>
+                    <td>{{ request.start_date|date:"d-m-y"|arabic_numbers }}</td>
+                    <td>{{ request.end_date|date:"d-m-y"|arabic_numbers }}</td>
+                    <td>{{ request.created_at|date:"d-m-y سعت  hm "|arabic_numbers }}</td>
                     <td>{{ request.days_taken|arabic_numbers }}</td>
                     {% if request.remaining_days %}
                         <td>{{ request.remaining_days|arabic_numbers }}</td>
@@ -119,14 +119,14 @@
                         <td>{{ request.approver.officer_profile.branch }}</td>
                     {% endif %}
                     <td>
-                        <!-- If the current user is the approver -->
+                        <!-- if the current user is the approver -->
                         {% if request.approver == user and user.officer_profile.role != 'المدير' %}
-                            <!-- Show إبداء الرأي button for other approvers -->
+                            <!-- show إبداء الرأي button for other approvers -->
                             {% if request.status != 'rejected' and request.status != 'approved' %}
                                 <a href="#"
                                    class="btn btn-primary"
                                    data-bs-toggle="modal"
-                                   data-bs-target="#approveModal2"
+                                   data-bs-target="#approvemodal2"
                                    data-id="{{ request.id }}">ابداء الرأي</a>
                             {% else %}
                                 <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
@@ -136,10 +136,10 @@
                             <a href="#"
                                class="btn btn-primary"
                                data-bs-toggle="modal"
-                               data-bs-target="#approveModal"
+                               data-bs-target="#approvemodal"
                                data-id="{{ request.id }}">التصديق</a>
                         {% endif %}
-                        <!-- If the user is not the approver but is رئيس فرع شئون ضباط -->
+                        <!-- if the user is not the approver but is رئيس فرع شئون ضباط -->
                         {% if request.approver != user and user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
                             {% if request.status == 'approved' %}
                                 <button class="btn btn-outline-secondary" disabled>تم التصديق</button>
@@ -158,24 +158,24 @@
             {% endfor %}
         </tbody>
     </table>
-    <!-- Pagination Controls -->
+    <!-- pagination controls -->
     <div class="pagination-container">
-        <nav aria-label="Page navigation " class="d-flex justify-content-center">
+        <nav aria-label="page navigation " class="d-flex justify-content-center">
             <ul class="pagination">
                 {% if leave_requests.has_previous %}
                     <li class="page-item">
                         <a class="page-link"
                            href="#"
-                           onclick="navigateAddParam('page', 1)"
-                           aria-label="First">
+                           onclick="navigateaddparam('page', 1)"
+                           aria-label="first">
                             <span aria-hidden="true">&laquo;&laquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
                         <a class="page-link"
                            href="#"
-                           onclick="navigateAddParam('page', {{ leave_requests.previous_page_number }})"
-                           aria-label="Previous">
+                           onclick="navigateaddparam('page', {{ leave_requests.previous_page_number }})"
+                           aria-label="previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -189,7 +189,7 @@
                         <li class="page-item">
                             <a class="page-link"
                                href="#"
-                               onclick="navigateAddParam('page', {{ num }})">{{ num }}</a>
+                               onclick="navigateaddparam('page', {{ num }})">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -197,16 +197,16 @@
                     <li class="page-item">
                         <a class="page-link"
                            href="#"
-                           onclick="navigateAddParam('page', {{ leave_requests.next_page_number }})"
-                           aria-label="Next">
+                           onclick="navigateaddparam('page', {{ leave_requests.next_page_number }})"
+                           aria-label="next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
                         <a class="page-link"
                            href="#"
-                           onclick="navigateAddParam('page', {{ leave_requests.paginator.num_pages }})"
-                           aria-label="Last">
+                           onclick="navigateaddparam('page', {{ leave_requests.paginator.num_pages }})"
+                           aria-label="last">
                             <span aria-hidden="true">&raquo;&raquo;</span>
                         </a>
                     </li>
@@ -229,117 +229,117 @@
     <div class="pagination d-flex justify-content-center">
         <span class="current">صفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}</span>
     </div> {% endcomment %}
-    <!-- Approval Modal -->
+    <!-- approval modal -->
     <div class="modal fade"
-         id="approveModal"
+         id="approvemodal"
          tabindex="-1"
-         aria-labelledby="approveModalLabel"
+         aria-labelledby="approvemodallabel"
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="approveModalLabel">تصدقي على الأجازة</h5>
+                    <h5 class="modal-title" id="approvemodallabel">تصدقي على الأجازة</h5>
                     <button type="button"
                             class="close"
                             style="margin-right: auto"
                             data-bs-dismiss="modal"
-                            aria-label="Close">
+                            aria-label="close">
                         <strong><span aria-hidden="true">&times;</span></strong>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p>قرار التصديق ؟</p>
                     <div class="form-actions">
-                        <button class="btn btn-success" id="acceptBtn">تصدق</button>
-                        <button class="btn btn-danger" id="rejectBtn">لم يتصدق</button>
+                        <button class="btn btn-success" id="acceptbtn">تصدق</button>
+                        <button class="btn btn-danger" id="rejectbtn">لم يتصدق</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Approval Modal 2 -->
+    <!-- approval modal 2 -->
     <div class="modal fade"
-         id="approveModal2"
+         id="approvemodal2"
          tabindex="-1"
-         aria-labelledby="approveModalLabel"
+         aria-labelledby="approvemodallabel"
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="approveModalLabel">إبداء الرأي</h5>
+                    <h5 class="modal-title" id="approvemodallabel">إبداء الرأي</h5>
                     <button type="button"
                             class="close"
                             style="margin-right: auto"
                             data-bs-dismiss="modal"
-                            aria-label="Close">
+                            aria-label="close">
                         <strong><span aria-hidden="true">&times;</span></strong>
                     </button>
                 </div>
                 <div class="modal-body">
                     <p>الرأي</p>
                     <div class="form-actions">
-                        <button class="btn btn-success" id="acceptBtn2">اوافق</button>
-                        <button class="btn btn-danger" id="rejectBtn2">لا اوافق</button>
+                        <button class="btn btn-success" id="acceptbtn2">اوافق</button>
+                        <button class="btn btn-danger" id="rejectbtn2">لا اوافق</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-    function navigateAddParam(param, value) {
-        const url = new URL(window.location.href);
-        url.searchParams.set(param, value);
+    function navigateaddparam(param, value) {
+        const url = new url(window.location.href);
+        url.searchparams.set(param, value);
         window.location.href = url; 
     }
 
-    let selectedRequestId;
+    let selectedrequestid;
 
-    $('#approveModal').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget); // Button that triggered the modal
-        selectedRequestId = button.data('id'); // Extract info from data-* attributes
+    $('#approvemodal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedtarget); // button that triggered the modal
+        selectedrequestid = button.data('id'); // extract info from data-* attributes
     });
 
-    $('#acceptBtn').on('click', function() {
-        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedRequestId), {
+    $('#acceptbtn').on('click', function() {
+        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedrequestid), {
             decision: 'accept',
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }, function(response) {
-            location.reload(); // Reload the page to reflect the new status
+            location.reload(); // reload the page to reflect the new status
         });
     });
 
-    $('#rejectBtn').on('click', function() {
-        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedRequestId), {
+    $('#rejectbtn').on('click', function() {
+        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedrequestid), {
             decision: 'reject',
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }, function(response) {
-            location.reload(); // Reload the page to reflect the new status
+            location.reload(); // reload the page to reflect the new status
         });
     });
     </script>
     <script>
-    let selectedRequestId2;
+    let selectedrequestid2;
 
-    $('#approveModal2').on('show.bs.modal', function (event) {
-        const button = $(event.relatedTarget); // Button that triggered the modal
-        selectedRequestId2 = button.data('id'); // Extract info from data-* attributes
+    $('#approvemodal2').on('show.bs.modal', function (event) {
+        const button = $(event.relatedtarget); // button that triggered the modal
+        selectedrequestid2 = button.data('id'); // extract info from data-* attributes
     });
 
-    $('#acceptBtn2').on('click', function() {
-        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedRequestId2), {
+    $('#acceptbtn2').on('click', function() {
+        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedrequestid2), {
             decision: 'accept',
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }, function(response) {
-            location.reload(); // Reload the page to reflect the new status
+            location.reload(); // reload the page to reflect the new status
         });
     });
 
-    $('#rejectBtn2').on('click', function() {
-        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedRequestId2), {
+    $('#rejectbtn2').on('click', function() {
+        $.post("{% url 'approve_leave_request' 0 %}".replace('0', selectedrequestid2), {
             decision: 'reject',
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }, function(response) {
-            location.reload(); // Reload the page to reflect the new status
+            location.reload(); // reload the page to reflect the new status
         });
     });
     </script>

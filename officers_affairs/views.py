@@ -665,7 +665,7 @@ def leave_requests_list(request):
     officer_name = request.GET.get('officer_name', '').strip()
     selected_branch_id = request.GET.get('branch')  # Get the selected branch ID from the request
     created_at = request.GET.get('created_at')    # Default to today's date
-    half_year = request.GET.get('half_year')  # New variable for half-year filter
+    half_year = request.GET.get('half_year') 
 
     if not half_year:
         latest_date = LeaveRequest.objects.aggregate(latest=Max('created_at'))['latest']
@@ -810,12 +810,53 @@ def can_officer_edit_leave_request(officer, leaveRequest):
 @login_required
 def leave_requests(request):
     officer = request.user.officer_profile
-    leave_requests = LeaveRequest.objects.filter(officer=officer)  # Only show the current user's requests
+    leave_requests = LeaveRequest.objects.filter(officer=officer)
 
-    for leave_request in leave_requests:
-        leave_request.can_edit = can_officer_edit_leave_request(officer, leave_request)
+    half_year = request.GET.get('half_year') 
 
-    return render(request, 'officers_affairs/vacations/leave_requests.html', {'requests': leave_requests})
+
+    if not half_year:
+        latest_date = LeaveRequest.objects.aggregate(latest=Max('created_at'))['latest']
+        if latest_date:
+            year = latest_date.year
+            half = 2 if latest_date.month > 6 else 1
+            half_year = f"{half}/{year}"
+
+    if half_year:
+        half, year = map(int, half_year.split('/'))
+        start_date = datetime.date(year, 1 if half == 1 else 7, 1)
+        end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
+        leave_requests = leave_requests.filter(created_at__date__range=(start_date, end_date))
+
+    # Determine half-year options based on available data
+    date_range = leave_requests.aggregate( earliest=Min('created_at'), latest=Max('created_at'))
+    half_years = []
+    if date_range['earliest'] and date_range['latest']:
+        current_date = date_range['earliest']
+        while current_date <= date_range['latest']:
+            # Check if there are requests in the first half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 1, 1), datetime.date(current_date.year, 6, 30))
+            ).exists():
+                half_years.append((f'1/{current_date.year}', f'{current_date.year} النصف الاول'))
+            
+            # Check if there are requests in the second half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 7, 1), datetime.date(current_date.year, 12, 31))
+            ).exists():
+                half_years.append((f'2/{current_date.year}', f'{current_date.year} النصف الثاني'))
+
+            current_date = current_date.replace(year=current_date.year + 1)
+
+
+    context = {
+        'requests': leave_requests,
+        'half_year': half_year,
+        'half_years': half_years,
+    }
+
+    return render(request, 'officers_affairs/vacations/leave_requests.html', context)
+
 
 
 

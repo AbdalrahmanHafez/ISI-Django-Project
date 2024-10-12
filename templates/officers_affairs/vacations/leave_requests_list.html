@@ -45,6 +45,16 @@
                 {% endfor %}
             </select>
         </div>
+
+        <div class="col-auto">
+            <label for="half_year" class="form-label">نصف السنة</label>
+            <select name="half_year" id="half_year" class="form-select">
+                {% for value, label in half_years %}
+                    <option value="{{ value }}" {% if half_year == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
         <div class="col-auto">
             <button type="submit" class="btn btn-primary mt-4">بحث</button>
         </div>

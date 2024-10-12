@@ -19,7 +19,7 @@ from . import filters
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
-from django.db.models import Q
+from django.db.models import Q, Min, Max
 from django.utils import timezone
 import re
 
@@ -665,7 +665,15 @@ def leave_requests_list(request):
     officer_name = request.GET.get('officer_name', '').strip()
     selected_branch_id = request.GET.get('branch')  # Get the selected branch ID from the request
     created_at = request.GET.get('created_at')    # Default to today's date
-    
+    half_year = request.GET.get('half_year')  # New variable for half-year filter
+
+    if not half_year:
+        latest_date = LeaveRequest.objects.aggregate(latest=Max('created_at'))['latest']
+        if latest_date:
+            year = latest_date.year
+            half = 2 if latest_date.month > 6 else 1
+            half_year = f"{half}/{year}"
+   
     # Prepare the leave requests based on user's role
     if user_officer.role == 'رئيس فرع شئون ضباط':
         # 'رئيس فرع شئون ضباط' can view all leave requests
@@ -694,6 +702,12 @@ def leave_requests_list(request):
     else:
         # No requests for users without appropriate roles
         leave_requests = LeaveRequest.objects.none()
+    
+    if half_year:
+        half, year = map(int, half_year.split('/'))
+        start_date = datetime.date(year, 1 if half == 1 else 7, 1)
+        end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
+        leave_requests = leave_requests.filter(created_at__date__range=(start_date, end_date))
         
     # Apply date filter if a date is provided
     if created_at:
@@ -737,6 +751,30 @@ def leave_requests_list(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
       
+
+
+    # Determine half-year options based on available data
+    date_range = LeaveRequest.objects.aggregate(
+        earliest=Min('created_at'), latest=Max('created_at')
+    )
+    half_years = []
+    if date_range['earliest'] and date_range['latest']:
+        current_date = date_range['earliest']
+        while current_date <= date_range['latest']:
+            # Check if there are requests in the first half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 1, 1), datetime.date(current_date.year, 6, 30))
+            ).exists():
+                half_years.append((f'1/{current_date.year}', f'{current_date.year} النصف الاول'))
+            
+            # Check if there are requests in the second half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 7, 1), datetime.date(current_date.year, 12, 31))
+            ).exists():
+                half_years.append((f'2/{current_date.year}', f'{current_date.year} النصف الثاني'))
+
+            current_date = current_date.replace(year=current_date.year + 1)
+
     # Prepare context
     context = {
         'leave_requests': page_obj,
@@ -746,6 +784,8 @@ def leave_requests_list(request):
         'selected_branch_id': selected_branch_id,
         'page_obj': page_obj,
         'branches': branches,  
+        'half_year': half_year,
+        'half_years': half_years,
         'today': timezone.now().date().isoformat(),
     }
     return render(request, 'officers_affairs/vacations/leave_requests_list.html', context)

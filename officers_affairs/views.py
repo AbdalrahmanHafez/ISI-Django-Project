@@ -4,6 +4,7 @@ from venv import logger
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.models import User,Group
 from django.db.models import Case, When, Value, IntegerField
 from django.db.models.functions import Cast
 
@@ -654,8 +655,7 @@ def get_next_approver(current_approver, leave_request):
 @login_required
 def leave_requests_list(request):
     user_officer = request.user.officer_profile
-    
-    
+    branches = Group.objects.all()
 
     # Roles that can see the leave requests for their approval
     approver_roles = ['المدير', 'رئيس فرع شئون ضباط', 'نائب المدير', 'رئيس فرع السكرتارية']
@@ -745,6 +745,7 @@ def leave_requests_list(request):
         'officer_name': officer_name,
         'selected_branch_id': selected_branch_id,
         'page_obj': page_obj,
+        'branches': branches,  
         'today': timezone.now().date().isoformat(),
     }
     return render(request, 'officers_affairs/vacations/leave_requests_list.html', context)

@@ -8,7 +8,7 @@
         <li class="nav-item"> <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button"> <i class="fas fa-bars"></i> </a> </li>
         <li class="nav-item d-none d-sm-inline-block"> <a href="{% url 'home' %}" class="nav-link text-bold">الرئيسية</a> </li>
         
-        <ul class="nav-item d-none d-md-block">
+        <li class="nav-item d-flex flex-column justify-content-center">
           <form method="GET" action="{% url 'officers' %}" class="form-inline ml-3">
             <div class="input-group input-group-sm">
               <input class="form-control form-control-navbar" name="search_name" type="search" placeholder="بحث بالاسم" aria-label="Search">
@@ -19,7 +19,7 @@
               </div>
             </div>
           </form>
-        </ul>
+        </li>
               
 
 
@@ -29,10 +29,10 @@
 
       
       
-      <a class="nav-link dropdown-toggle" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <div class="dropdown-toggle" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fas fa-bell"></i>
         <span class="badge bg-danger" id="unreadCount">{{ unread_notifications_count }}</span>
-        </a>
+      </div>
     <ul class="dropdown-menu" aria-labelledby="notificationDropdown" id="notificationList">
         {% comment %} {% for notification in request.user.notification_set.all %}
             <li>

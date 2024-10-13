@@ -65,13 +65,9 @@ def remove_bk(input_image_path, output_image_path):
     #     print(f"Error: {e}")
 
 def testView(request):
-    original_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"original_2.png")
-    output_path = os.path.join(settings.MEDIA_ROOT, 'officers', "processed_2.png")
-    remove_bk(original_image_path, output_path)
+    error = 1/0
 
-    return render(request, "test.html", {
-        'out': output_path
-    })
+    return render(request, "test.html")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -893,6 +893,7 @@ def leave_requests(request):
     leave_requests = LeaveRequest.objects.filter(officer=officer)
 
     half_year = request.GET.get('half_year') 
+    status = request.GET.get('status') 
 
 
     if not half_year:
@@ -907,6 +908,9 @@ def leave_requests(request):
         start_date = datetime.date(year, 1 if half == 1 else 7, 1)
         end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
         leave_requests = leave_requests.filter(created_at__date__range=(start_date, end_date))
+
+    if status:
+        leave_requests = leave_requests.filter(status=status)
 
     # Determine half-year options based on available data
     date_range = leave_requests.aggregate( earliest=Min('created_at'), latest=Max('created_at'))
@@ -933,6 +937,7 @@ def leave_requests(request):
         'requests': leave_requests,
         'half_year': half_year,
         'half_years': half_years,
+        'selected_status': status,
     }
 
     return render(request, 'officers_affairs/vacations/leave_requests.html', context)

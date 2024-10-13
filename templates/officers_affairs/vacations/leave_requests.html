@@ -73,7 +73,7 @@
             </td>
             <td>{{ request.days_taken|arabic_numbers }}</td>
             <td>{{ request.remaining_days|default:"-"|arabic_numbers }}</td>
-            <td>{{ request.compensation_date|default:"-"|arabic_numbers }}</td>
+            <td>{{ request.compensation_date|date:"d-m-Y"|default:"-"|arabic_numbers }}</td>
             <td>
               {% if request.can_edit %}
                 <a href="{% url 'update_leave_request' request.pk %}">

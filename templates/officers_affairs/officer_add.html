@@ -7,24 +7,123 @@
 <script src="{% static 'js/bootstrap-hijri-datetimepickermin.js' %}"></script>
 
 <form hx-post="{{ request.path }}" class="modal-content" hx-headers='{"X-CSRFToken":"{{ csrf_token }}"}' hx-encoding="multipart/form-data">
-    <div class="modal-header">
-      <h5 class="modal-title">{% if form.instance.pk %} تعديل ضابط {% else %} اضافة ضابط {% endif %}</h5>
+  <div class="modal-header">
+      <h5 class="modal-title"> اضافة ضابط</h5>
       <button type="button" class="close" style="margin-right: auto" data-bs-dismiss="modal" aria-label="Close">
-        <strong><span aria-hidden="true">&times;</span></strong>
+          <strong><span aria-hidden="true">&times;</span></strong>
       </button>
-    </div>
+  </div>
 
-    <div class="modal-body">
-        {% bootstrap_form form %}
-     
-    </div>
+  <div class="modal-body">
+      <!-- Render all form fields except profile_image -->
+      {% bootstrap_form form exclude='profile_image' %}
 
-    <div class="modal-footer">
+      <!-- Create a flexbox container to align file input and camera button -->
+      <div class="mb-3 d-flex align-items-center">
+          <div class="flex-grow-1">
+              {% bootstrap_field form.profile_image %}
+          </div>
+          <button type="button" class="btn btn-primary ms-3" id="open-camera" style="height: 38px;">
+           الكاميرا
+          </button>
+      </div>
+
+      <!-- Video element for live camera feed -->
+      <div class="mt-3 text-center" id="video-container" style="display: none;">
+          <video id="camera-stream" width="100%" height="auto" autoplay></video>
+          <!-- Capture button below the live video -->
+          <button type="button" class="btn btn-success mt-2" id="capture-photo">التقط</button>
+      </div>
+
+      <!-- Canvas element to display the captured photo -->
+      <canvas id="camera-canvas" style="display: none; width: 100%;"></canvas>
+
+      <!-- Hidden input to store the captured image data -->
+      <input type="hidden" id="captured-image" name="captured_image">
+  </div>
+
+  <div class="modal-footer">
       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-      <button type="submit" class="btn btn-primary"> {% if form.instance.pk %} تعديل {% else %} اضافة {% endif %}
+      <button type="submit" class="btn btn-primary">
+          {% if form.instance.pk %} تعديل {% else %} اضافة {% endif %}
       </button>
-    </div>
+  </div>
 </form>
+
+
+<script type="text/javascript">
+  document.getElementById('open-camera').addEventListener('click', function () {
+      const video = document.getElementById('camera-stream');
+      const videoContainer = document.getElementById('video-container');
+      const canvas = document.getElementById('camera-canvas');
+      const captureButton = document.getElementById('capture-photo');
+      const capturedImageInput = document.getElementById('captured-image');
+      const fileInput = document.getElementById("id_profile_image");
+
+      // // Check if getUserMedia is supported
+      // if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      //     alert("Your browser does not support camera access.");
+      //     return;
+      // }
+
+      // // Check if the page is served over HTTPS (required for camera access)
+      // if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      //     alert("Camera access requires HTTPS. Please switch to a secure connection.");
+      //     return;
+      // }
+
+      // Show the video container with the capture button
+      videoContainer.style.display = 'block';
+      canvas.style.display = 'none';  // Hide canvas if it was previously shown
+
+      // Access the camera
+      navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function (stream) {
+              video.srcObject = stream;
+              video.play();
+
+              // Capture the photo when "التقط" is clicked
+              captureButton.onclick = function () {
+                  // Set canvas dimensions to match video
+                  canvas.width = video.videoWidth;
+                  canvas.height = video.videoHeight;
+
+                  // Draw the video frame to the canvas
+                  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                  // Stop the video stream
+                  const stream = video.srcObject;
+                  const tracks = stream.getTracks();
+                  tracks.forEach(track => track.stop());
+                  video.srcObject = null;
+
+                  // Hide video and show the captured image on the canvas
+                  videoContainer.style.display = 'none';
+                  canvas.style.display = 'block';
+
+                  // Save the image data in the hidden input
+                  const imageData = canvas.toDataURL('image/png');
+                  capturedImageInput.value = imageData;
+
+                  // Optionally: disable file input when camera is used
+                  fileInput.disabled = true;
+              };
+          })
+          .catch(function (error) {
+              // Handle camera errors
+              if (error.name === 'NotAllowedError') {
+                  alert("You have denied camera access. Please enable camera permissions in your browser settings.");
+              } else if (error.name === 'NotFoundError') {
+                  alert("No camera found on your device.");
+              } else {
+                  alert("An unexpected error occurred: " + error.message);
+              }
+          });
+  });
+
+
+</script>
+
 
 <script >
   htmx.on("htmx:afterSwap", (e) => {

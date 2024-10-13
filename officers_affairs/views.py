@@ -6,7 +6,14 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Case, When, Value, IntegerField
 from django.db.models.functions import Cast
+import base64
+from django.core.files.base import ContentFile
 
+import cv2
+from rembg import remove
+import numpy as np
+import os
+from django.conf import settings
 
 from .models import *
 from .forms import BranchForm,  JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
@@ -22,6 +29,55 @@ from django.db.models import Q
 from django.utils import timezone
 import re
 
+# os.environ['HTTP_PROXY'] = 'http://localhost:3129'
+# os.environ['HTTPS_PROXY'] = 'http://localhost:3129'
+
+def remove_bk(input_image_path, output_image_path):
+    try:
+        input_image = cv2.imread(input_image_path)
+
+        with open(input_image_path, 'rb') as input_file:
+            image_data = input_file.read()
+            result = remove(image_data)
+
+        np_result = np.frombuffer(result, np.uint8)
+        img_no_bg = cv2.imdecode(np_result, cv2.IMREAD_UNCHANGED)
+
+        height, width = img_no_bg.shape[:2]
+        white_background = np.ones((height, width, 3), dtype=np.uint8) * 255
+
+        if img_no_bg.shape[2] == 4:
+            alpha_channel = img_no_bg[:, :, 3]
+            rgb_img = img_no_bg[:, :, :3]
+            alpha_mask = alpha_channel / 255.0
+
+            for c in range(3):
+                white_background[:, :, c] = (alpha_mask * rgb_img[:, :, c] +
+                                             (1 - alpha_mask) * white_background[:, :, c])
+        else:
+            white_background = img_no_bg
+
+        cv2.imwrite(output_image_path, white_background)
+        print(f"Output saved successfully at {output_image_path}")
+    
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+def handle_captured_image(request, officer_instance):
+    """ Handle the captured image and save it as profile_image for the officer """
+    captured_image = request.POST.get('captured_image')
+    if captured_image:
+        # Decode the base64 image
+        format, imgstr = captured_image.split(';base64,')
+        ext = format.split('/')[-1]
+        # Create a ContentFile and save it as profile_image
+        officer_instance.profile_image.save(f'officer_{officer_instance.pk}.{ext}', ContentFile(base64.b64decode(imgstr)))
+
+
+
+
 def extract_numeric(s):
     # Extract the numeric part of the string using regular expressions
     numbers = re.findall(r'\d+', s)
@@ -31,7 +87,7 @@ def extract_numeric(s):
 def officers_home_view(request):
     today = timezone.localtime().date()
     # Count officers with the status 'موجود', currently outside, and with a different status
-    total_officers = Officer.objects.filter(status__name='قوة').count()
+    total_officers = DailyAttendance.objects.filter(date=today).count()
     inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
     outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
@@ -119,6 +175,28 @@ def officer_detail(request, pk):
     officer = get_object_or_404(Officer, pk=pk)
     return render(request, 'officers_affairs/officer_detail.html', {'officer': officer})
 
+def remove_bg_profile_pic(captured_image_data, pk, form):
+    # Process captured image (if available)
+    if captured_image_data:
+        image_data = base64.b64decode(captured_image_data.split(',')[1])
+        original_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"original_{pk}.png")
+        processed_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"processed_{pk}.png")
+
+        # Save the base64 image to a temporary file
+        with open(original_image_path, 'wb') as f:
+            f.write(image_data)
+
+        # Process the image to remove background and add white background
+        remove_bk(original_image_path, processed_image_path)
+
+        # Save processed image to officer's profile
+        with open(processed_image_path, 'rb') as f:
+            form.instance.profile_image.save(f"processed_{pk}.png", ContentFile(f.read()))
+
+        # Optionally, delete the temporary files
+        os.remove(original_image_path)
+        os.remove(processed_image_path)
+
 
 @login_required
 @permission_required('officers_affairs.add_officer', raise_exception=True)
@@ -129,6 +207,7 @@ def officers_add(request, pk= None): # creates or Updates an officer
             form = OfficerForm(request.POST, request.FILES, instance= officer)
             if form.is_valid():
                 form.instance.updated_by = request.user
+                remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
                 form.save()
                 return HttpResponse(
                     status=204,
@@ -148,6 +227,7 @@ def officers_add(request, pk= None): # creates or Updates an officer
             if form.is_valid():
                 form.instance.created_by = request.user  # Set created_by only when creating
                 form.instance.updated_by = request.user
+                remove_bg_profile_pic(request.POST.get('captured_image'), form.instance.pk, form)
                 form.save()
                 return HttpResponse(
                     status=204,

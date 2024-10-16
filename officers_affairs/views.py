@@ -1054,6 +1054,9 @@ def record_attendance(request):
                         status=unit_status_instance,
                         notes=notes,
                     )
+
+                officer.unit_status = unit_status_instance
+                officer.save()
         
         return HttpResponseRedirect(reverse('attendance_list'))
                     # headers={

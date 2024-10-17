@@ -1,6 +1,12 @@
 import django_filters
 from django import forms
 from .models import Officer, Rank, OfficerStatus
+import re
+
+def extract_numeric(s):
+    # Extract the numeric part of the string using regular expressions
+    numbers = re.findall(r'\d+', s)
+    return int(numbers[0]) if numbers else float('inf')  # Return infinity if no number is found
 
 class OfficerFilter(django_filters.FilterSet):
     class Meta:
@@ -66,4 +72,7 @@ class OfficerFilter(django_filters.FilterSet):
     def qs(self):
         # Get the base queryset and apply the ordering by rank_id
         queryset = super().qs
-        return queryset.order_by('rank_id')
+
+        queryset = sorted(queryset, key=lambda x: extract_numeric(x.seniority_number))
+        # return queryset.order_by('rank_id')
+        return queryset

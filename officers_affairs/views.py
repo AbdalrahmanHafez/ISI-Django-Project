@@ -78,7 +78,6 @@ def handle_captured_image(request, officer_instance):
 
 
 
-
 def extract_numeric(s):
     # Extract the numeric part of the string using regular expressions
     numbers = re.findall(r'\d+', s)
@@ -146,6 +145,7 @@ def officers_home_view(request):
     officerFilterDefault = {
         'status': OfficerStatus.objects.filter(name="قوة"),
     }
+
 
     context= {
         'ranks':Rank.objects.all(),

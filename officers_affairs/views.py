@@ -4,9 +4,17 @@ from venv import logger
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.models import User,Group
 from django.db.models import Case, When, Value, IntegerField
 from django.db.models.functions import Cast
+import base64
+from django.core.files.base import ContentFile
 
+import cv2
+from rembg import remove
+import numpy as np
+import os
+from django.conf import settings
 
 from .models import *
 from .forms import BranchForm,  JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
@@ -18,9 +26,58 @@ from . import filters
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
-from django.db.models import Q
+from django.db.models import Q, Min, Max
 from django.utils import timezone
 import re
+
+# os.environ['HTTP_PROXY'] = 'http://localhost:3129'
+# os.environ['HTTPS_PROXY'] = 'http://localhost:3129'
+
+def remove_bk(input_image_path, output_image_path):
+    try:
+        input_image = cv2.imread(input_image_path)
+
+        with open(input_image_path, 'rb') as input_file:
+            image_data = input_file.read()
+            result = remove(image_data)
+
+        np_result = np.frombuffer(result, np.uint8)
+        img_no_bg = cv2.imdecode(np_result, cv2.IMREAD_UNCHANGED)
+
+        height, width = img_no_bg.shape[:2]
+        white_background = np.ones((height, width, 3), dtype=np.uint8) * 255
+
+        if img_no_bg.shape[2] == 4:
+            alpha_channel = img_no_bg[:, :, 3]
+            rgb_img = img_no_bg[:, :, :3]
+            alpha_mask = alpha_channel / 255.0
+
+            for c in range(3):
+                white_background[:, :, c] = (alpha_mask * rgb_img[:, :, c] +
+                                             (1 - alpha_mask) * white_background[:, :, c])
+        else:
+            white_background = img_no_bg
+
+        cv2.imwrite(output_image_path, white_background)
+        print(f"Output saved successfully at {output_image_path}")
+    
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+def handle_captured_image(request, officer_instance):
+    """ Handle the captured image and save it as profile_image for the officer """
+    captured_image = request.POST.get('captured_image')
+    if captured_image:
+        # Decode the base64 image
+        format, imgstr = captured_image.split(';base64,')
+        ext = format.split('/')[-1]
+        # Create a ContentFile and save it as profile_image
+        officer_instance.profile_image.save(f'officer_{officer_instance.pk}.{ext}', ContentFile(base64.b64decode(imgstr)))
+
+
+
 
 def extract_numeric(s):
     # Extract the numeric part of the string using regular expressions
@@ -119,6 +176,28 @@ def officer_detail(request, pk):
     officer = get_object_or_404(Officer, pk=pk)
     return render(request, 'officers_affairs/officer_detail.html', {'officer': officer})
 
+def remove_bg_profile_pic(captured_image_data, pk, form):
+    # Process captured image (if available)
+    if captured_image_data:
+        image_data = base64.b64decode(captured_image_data.split(',')[1])
+        original_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"original_{pk}.png")
+        processed_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"processed_{pk}.png")
+
+        # Save the base64 image to a temporary file
+        with open(original_image_path, 'wb') as f:
+            f.write(image_data)
+
+        # Process the image to remove background and add white background
+        remove_bk(original_image_path, processed_image_path)
+
+        # Save processed image to officer's profile
+        with open(processed_image_path, 'rb') as f:
+            form.instance.profile_image.save(f"processed_{pk}.png", ContentFile(f.read()))
+
+        # Optionally, delete the temporary files
+        os.remove(original_image_path)
+        os.remove(processed_image_path)
+
 
 @login_required
 @permission_required('officers_affairs.add_officer', raise_exception=True)
@@ -129,6 +208,7 @@ def officers_add(request, pk= None): # creates or Updates an officer
             form = OfficerForm(request.POST, request.FILES, instance= officer)
             if form.is_valid():
                 form.instance.updated_by = request.user
+                remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
                 form.save()
                 return HttpResponse(
                     status=204,
@@ -148,6 +228,7 @@ def officers_add(request, pk= None): # creates or Updates an officer
             if form.is_valid():
                 form.instance.created_by = request.user  # Set created_by only when creating
                 form.instance.updated_by = request.user
+                remove_bg_profile_pic(request.POST.get('captured_image'), form.instance.pk, form)
                 form.save()
                 return HttpResponse(
                     status=204,
@@ -654,8 +735,7 @@ def get_next_approver(current_approver, leave_request):
 @login_required
 def leave_requests_list(request):
     user_officer = request.user.officer_profile
-    
-    
+    branches = Group.objects.all()
 
     # Roles that can see the leave requests for their approval
     approver_roles = ['المدير', 'رئيس فرع شئون ضباط', 'نائب المدير', 'رئيس فرع السكرتارية']
@@ -665,7 +745,15 @@ def leave_requests_list(request):
     officer_name = request.GET.get('officer_name', '').strip()
     selected_branch_id = request.GET.get('branch')  # Get the selected branch ID from the request
     created_at = request.GET.get('created_at')    # Default to today's date
-    
+    half_year = request.GET.get('half_year') 
+
+    if not half_year:
+        latest_date = LeaveRequest.objects.aggregate(latest=Max('created_at'))['latest']
+        if latest_date:
+            year = latest_date.year
+            half = 2 if latest_date.month > 6 else 1
+            half_year = f"{half}/{year}"
+   
     # Prepare the leave requests based on user's role
     if user_officer.role == 'رئيس فرع شئون ضباط':
         # 'رئيس فرع شئون ضباط' can view all leave requests
@@ -694,6 +782,12 @@ def leave_requests_list(request):
     else:
         # No requests for users without appropriate roles
         leave_requests = LeaveRequest.objects.none()
+    
+    if half_year:
+        half, year = map(int, half_year.split('/'))
+        start_date = datetime.date(year, 1 if half == 1 else 7, 1)
+        end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
+        leave_requests = leave_requests.filter(created_at__date__range=(start_date, end_date))
         
     # Apply date filter if a date is provided
     if created_at:
@@ -737,6 +831,30 @@ def leave_requests_list(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
       
+
+
+    # Determine half-year options based on available data
+    date_range = LeaveRequest.objects.aggregate(
+        earliest=Min('created_at'), latest=Max('created_at')
+    )
+    half_years = []
+    if date_range['earliest'] and date_range['latest']:
+        current_date = date_range['earliest']
+        while current_date <= date_range['latest']:
+            # Check if there are requests in the first half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 1, 1), datetime.date(current_date.year, 6, 30))
+            ).exists():
+                half_years.append((f'1/{current_date.year}', f'{current_date.year} النصف الاول'))
+            
+            # Check if there are requests in the second half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 7, 1), datetime.date(current_date.year, 12, 31))
+            ).exists():
+                half_years.append((f'2/{current_date.year}', f'{current_date.year} النصف الثاني'))
+
+            current_date = current_date.replace(year=current_date.year + 1)
+
     # Prepare context
     context = {
         'leave_requests': page_obj,
@@ -745,6 +863,9 @@ def leave_requests_list(request):
         'officer_name': officer_name,
         'selected_branch_id': selected_branch_id,
         'page_obj': page_obj,
+        'branches': branches,  
+        'half_year': half_year,
+        'half_years': half_years,
         'today': timezone.now().date().isoformat(),
     }
     return render(request, 'officers_affairs/vacations/leave_requests_list.html', context)
@@ -769,12 +890,58 @@ def can_officer_edit_leave_request(officer, leaveRequest):
 @login_required
 def leave_requests(request):
     officer = request.user.officer_profile
-    leave_requests = LeaveRequest.objects.filter(officer=officer)  # Only show the current user's requests
+    leave_requests = LeaveRequest.objects.filter(officer=officer)
 
-    for leave_request in leave_requests:
-        leave_request.can_edit = can_officer_edit_leave_request(officer, leave_request)
+    half_year = request.GET.get('half_year') 
+    status = request.GET.get('status') 
 
-    return render(request, 'officers_affairs/vacations/leave_requests.html', {'requests': leave_requests})
+
+    if not half_year:
+        latest_date = LeaveRequest.objects.aggregate(latest=Max('created_at'))['latest']
+        if latest_date:
+            year = latest_date.year
+            half = 2 if latest_date.month > 6 else 1
+            half_year = f"{half}/{year}"
+
+    if half_year:
+        half, year = map(int, half_year.split('/'))
+        start_date = datetime.date(year, 1 if half == 1 else 7, 1)
+        end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
+        leave_requests = leave_requests.filter(created_at__date__range=(start_date, end_date))
+
+    if status:
+        leave_requests = leave_requests.filter(status=status)
+
+    # Determine half-year options based on available data
+    date_range = leave_requests.aggregate( earliest=Min('created_at'), latest=Max('created_at'))
+    half_years = []
+    if date_range['earliest'] and date_range['latest']:
+        current_date = date_range['earliest']
+        while current_date <= date_range['latest']:
+            # Check if there are requests in the first half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 1, 1), datetime.date(current_date.year, 6, 30))
+            ).exists():
+                half_years.append((f'1/{current_date.year}', f'{current_date.year} النصف الاول'))
+            
+            # Check if there are requests in the second half
+            if LeaveRequest.objects.filter(
+                created_at__date__range=(datetime.date(current_date.year, 7, 1), datetime.date(current_date.year, 12, 31))
+            ).exists():
+                half_years.append((f'2/{current_date.year}', f'{current_date.year} النصف الثاني'))
+
+            current_date = current_date.replace(year=current_date.year + 1)
+
+
+    context = {
+        'requests': leave_requests,
+        'half_year': half_year,
+        'half_years': half_years,
+        'selected_status': status,
+    }
+
+    return render(request, 'officers_affairs/vacations/leave_requests.html', context)
+
 
 
 
@@ -887,6 +1054,9 @@ def record_attendance(request):
                         status=unit_status_instance,
                         notes=notes,
                     )
+
+                officer.unit_status = unit_status_instance
+                officer.save()
         
         return HttpResponseRedirect(reverse('attendance_list'))
                     # headers={

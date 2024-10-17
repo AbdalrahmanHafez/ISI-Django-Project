@@ -217,3 +217,12 @@ class Shift(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     is_holiday = models.BooleanField(default=False)
+
+
+class ShiftSwapRequest(models.Model):
+    requesting_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_requests')
+    target_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_targets')
+    original_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='original_shift')
+    new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)

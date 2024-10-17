@@ -2,7 +2,8 @@ from django.urls import path
 from django.views import generic
 from . import views
 from . import models
-
+from django.conf.urls.static import static
+from myproject import settings
 
 urlpatterns = [
     path('officers_home/', views.officers_home_view, name='home'),

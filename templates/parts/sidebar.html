@@ -1,268 +1,234 @@
 {% load static %}
-
-<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
+<aside class="app-sidebar bg-body-secondary shadow w-100" data-bs-theme="dark">
+    <!--begin::Sidebar Brand-->
     <div class="sidebar-brand text-center">
         <a href="{% url 'home' %}" class="brand-link d-block">
-           <img src="{% static 'images/logo.png' %}" alt="Logo" class="brand-logo">
-           <span class="brand-text fw-bold mt-2">منظومة شئون ضباط</span>
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="brand-logo">
+            <span class="brand-text">منظومة شئون ضباط</span>
         </a>
-     </div>
-     
-       
+    </div>
     <div class="sidebar-wrapper">
-
-      
-
-
-
-
-      <nav class="mt-2"> 
-        <!--begin::Sidebar Menu-->
-        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
-            
-            <!-- Officers List -->
-            <li class="nav-item">
-                <a href="{% url 'officers' %}" class="nav-link">
-                    <i class="nav-icon fas fa-th"></i>
-                    <p> قائمة جميع الضباط </p>
-                </a>
-            </li>
-
-             <!-- add_weapon Section -->
-            {% if perms.officers_affairs.add_weapon %}
-            <li class="nav-item has-treeview">
-                <a href="#" class="nav-link active">
-                    <i class="nav-icon fas  fa-shield-alt"></i>
-                    <p> الأسلحه <i class="fas fa-angle-left right"></i> </p>
-                </a>
-    
-                <ul class="nav nav-treeview">
-                   
-                    <!-- Add unit Form Trigger -->
-                    <li class="nav-item">
-                        <a id="addweapon" href="#" class="nav-link">
-                            <i class="fa fa-plus "></i>
-                            <p class="text-light"> إضافة </p>
+        <nav>
+            <!--begin::Sidebar Menu-->
+            <ul class="nav sidebar-menu flex-column"
+                data-lte-toggle="treeview"
+                role="menu"
+                data-accordion="false">
+                <!-- Officers List -->
+                <li class="nav-item">
+                    <a href="{% url 'officers' %}" class="nav-link">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>قائمة جميع الضباط</p>
+                    </a>
+                </li>
+                <!-- add_weapon Section -->
+                {% if perms.officers_affairs.add_weapon %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas  fa-shield-alt"></i>
+                            <p>
+                                الأسلحه <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add unit Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addweapon" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden weapon Add Form -->
+                            <li id="weaponinput" class="nav-item" style="display: none;">
+                                <form id="" method="POST"  data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formweapon.as_p }}
+                                    <button type="submit" name="add_weapon" class="btn btn-success">حفظ</button>
+                                    <button id="backweapon" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-    
-                    <!-- Hidden weapon Add Form -->
-                    <li id="weaponinput" class="nav-item" style="display: none;">
-                        <form id="" method="POST"  data-bs-theme="dark">
-                            {% csrf_token %}
-                            {{ formweapon.as_p }}
-    
-                            <button type="submit" name="add_weapon" class="btn btn-success">حفظ</button>
-                            <button id="backweapon" type="button" class="btn btn-primary">تراجع</button>
-                        </form>
-                    </li>
-                </ul>
-            </li>
-            {% endif %}
-
-            <!-- add_unit Section -->
-             
-            {% if perms.officers_affairs.add_unit %}
-            <li class="nav-item has-treeview">
-                <a href="#" class="nav-link active">
-                    <i class="nav-icon fas fa-home"></i>
-                    <p> الوحدات <i class="fas fa-angle-left right"></i> </p>
-                </a>
-    
-                <ul class="nav nav-treeview">
-                   
-                    <!-- Add unit Form Trigger -->
-                    <li class="nav-item">
-                        <a id="addunit" href="#" class="nav-link">
-                            <i class="fa fa-plus "></i>
-                            <p class="text-light"> إضافة </p>
+                {% endif %}
+                <!-- add_unit Section -->
+                {% if perms.officers_affairs.add_unit %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas fa-home"></i>
+                            <p>
+                                الوحدات <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add unit Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addunit" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden unit Add Form -->
+                            <li id="unitinput" class="nav-item" style="display: none;">
+                                <form id="" method="POST"  data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formunit.as_p }}
+                                    <button type="submit" name="add_unit" class="btn btn-success">حفظ</button>
+                                    <button id="backunit" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-    
-                    <!-- Hidden unit Add Form -->
-                    <li id="unitinput" class="nav-item" style="display: none;">
-                        <form id="" method="POST"  data-bs-theme="dark">
-                            {% csrf_token %}
-                            {{ formunit.as_p }}
-    
-                            <button type="submit" name="add_unit" class="btn btn-success">حفظ</button>
-                            <button id="backunit" type="button" class="btn btn-primary">تراجع</button>
-                        </form>
-                    </li>
-                </ul>
-            </li>
-            {% endif %}           
-            
-            <!-- add_branch Section -->
-            {% if perms.officers_affairs.add_branch %}
-            <li class="nav-item has-treeview">
-                <a href="#" class="nav-link active">
-                    <i class="nav-icon fas fa-code-branch"></i>
-                    <p> الأفرع <i class="fas fa-angle-left right"></i> </p>
-                </a>
-    
-                <ul class="nav nav-treeview">
-                   
-                    <!-- Add branch Form Trigger -->
-                    <li class="nav-item">
-                        <a id="addbranch" href="#" class="nav-link">
-                            <i class="fa fa-plus "></i>
-                            <p class="text-light"> إضافة </p>
+                {% endif %}
+                <!-- add_branch Section -->
+                {% if perms.officers_affairs.add_branch %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas fa-code-branch"></i>
+                            <p>
+                                الأفرع <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add branch Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addbranch" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden branch Add Form -->
+                            <li id="branchinput" class="nav-item" style="display: none;">
+                                <form id="" method="POST"  data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formbranch.as_p }}
+                                    <button type="submit" name="add_branch" class="btn btn-success">حفظ</button>
+                                    <button id="backbranch" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-    
-                    <!-- Hidden branch Add Form -->
-                    <li id="branchinput" class="nav-item" style="display: none;">
-                        <form id="" method="POST"  data-bs-theme="dark">
-                            {% csrf_token %}
-                            {{ formbranch.as_p }}
-    
-                            <button type="submit" name="add_branch" class="btn btn-success">حفظ</button>
-                            <button id="backbranch" type="button" class="btn btn-primary">تراجع</button>
-                        </form>
-                    </li>
-                </ul>
-            </li>
-            {% endif %}
-
-            <!-- add-section Section -->
-             
-            {% if perms.officers_affairs.add_section %}
-            <li class="nav-item has-treeview">
-                <a href="#" class="nav-link active">
-                    <i class="nav-icon fas fa-people-carry"></i>
-                    <p> الأقسام <i class="fas fa-angle-left right"></i> </p>
-                </a>
-    
-                <ul class="nav nav-treeview">
-                   
-                    <!-- Add section Form Trigger -->
-                    <li class="nav-item">
-                        <a id="addsection" href="#" class="nav-link">
-                            <i class="fa fa-plus "></i>
-                            <p class="text-light"> إضافة </p>
+                {% endif %}
+                <!-- add-section Section -->
+                {% if perms.officers_affairs.add_section %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas fa-people-carry"></i>
+                            <p>
+                                الأقسام <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add section Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addsection" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden section Add Form -->
+                            <li id="sectioninput" class="nav-item" style="display: none;">
+                                <form id="add_section" method="POST"  data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formsection.as_p }}
+                                    <button type="submit" name="add_section" class="btn btn-success">حفظ</button>
+                                    <button id="backsection" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-    
-                    <!-- Hidden section Add Form -->
-                    <li id="sectioninput" class="nav-item" style="display: none;">
-                        <form id="add_section" method="POST"  data-bs-theme="dark">
-                            {% csrf_token %}
-                            {{ formsection.as_p }}
-    
-                            <button type="submit" name="add_section" class="btn btn-success">حفظ</button>
-                            <button id="backsection" type="button" class="btn btn-primary">تراجع</button>
-                        </form>
-                    </li>
-                </ul>
-            </li>
-            {% endif %}
-
-
-            <!-- add-job Section -->
-             
-            {% if perms.officers_affairs.add_job %}
-            <li class="nav-item has-treeview">
-                <a href="#" class="nav-link active">
-                    <i class="nav-icon fas fa-pencil-alt"></i>
-                    <p> الوظائف <i class="fas fa-angle-left right"></i> </p>
-                </a>
-    
-                <ul class="nav nav-treeview">
-                   
-                    <!-- Add job Form Trigger -->
-                    <li class="nav-item">
-                        <a id="addjob" href="#" class="nav-link">
-                            <i class="fa fa-plus "></i>
-                            <p class="text-light"> إضافة </p>
+                {% endif %}
+                <!-- add-job Section -->
+                {% if perms.officers_affairs.add_job %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas fa-pencil-alt"></i>
+                            <p>
+                                الوظائف <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add job Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addjob" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden job Add Form -->
+                            <li id="jobinput" class="nav-item" style="display: none;">
+                                <form id="add_job" method="POST"  data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formjob.as_p }}
+                                    <button type="submit" name="add_job" class="btn btn-success">حفظ</button>
+                                    <button id="backjob" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-    
-                    <!-- Hidden job Add Form -->
-                    <li id="jobinput" class="nav-item" style="display: none;">
-                        <form id="add_job" method="POST"  data-bs-theme="dark">
-                            {% csrf_token %}
-                            {{ formjob.as_p }}
-    
-                            <button type="submit" name="add_job" class="btn btn-success">حفظ</button>
-                            <button id="backjob" type="button" class="btn btn-primary">تراجع</button>
-                        </form>
-                    </li>
-                </ul>
-            </li>
-            {% endif %}            
-
-                        <!-- Ranks Section -->
-            {% if perms.officers_affairs.add_rank %}
-            <li class="nav-item has-treeview">
-                <a href="#" class="nav-link active">
-                    <i class="nav-icon fas fa-star"></i>
-                    <p> الرتب <i class="fas fa-angle-left right"></i> </p>
-                </a>
-    
-                <ul class="nav nav-treeview">
-                   
-                    <!-- Add Rank Form Trigger -->
-                    <li class="nav-item">
-                        <a id="addrank" href="#" class="nav-link">
-                            <i class="fa fa-plus "></i>
-                            <p class="text-light"> إضافة </p>
+                {% endif %}
+                <!-- Ranks Section -->
+                {% if perms.officers_affairs.add_rank %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas fa-star"></i>
+                            <p>
+                                الرتب <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add Rank Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addrank" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden Rank Add Form -->
+                            <li id="rankinput" class="nav-item" style="display: none;">
+                                <form id=""
+                                      method="POST"
+                                      enctype="multipart/form-data"
+                                      data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formrank.as_p }}
+                                    <button type="submit" name="add_rank" class="btn btn-success">حفظ</button>
+                                    <button id="backrank" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-    
-                    <!-- Hidden Rank Add Form -->
-                    <li id="rankinput" class="nav-item" style="display: none;">
-                        <form id="" method="POST" enctype="multipart/form-data" data-bs-theme="dark">
-                            {% csrf_token %}
-                            {{ formrank.as_p }}
-    
-                            <button type="submit" name="add_rank" class="btn btn-success">حفظ</button>
-                            <button id="backrank" type="button" class="btn btn-primary">تراجع</button>
-                        </form>
+                {% endif %}
+                <!-- offunitstatus Section -->
+                {% if perms.officers_affairs.add_unitstatus %}
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fas fa-arrow-up"></i>
+                            <p>
+                                الحالة في الوحدة <i class="fas  fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <!-- Add offunitstatus Form Trigger -->
+                            <li class="nav-item">
+                                <a id="addoffunitstatus" href="#" class="nav-link">
+                                    <i class="fa fa-plus "></i>
+                                    <p class="text-light">إضافة</p>
+                                </a>
+                            </li>
+                            <!-- Hidden offunitstatus Add Form -->
+                            <li id="offunitstatusinput" class="nav-item" style="display: none;">
+                                <form id="" method="POST"  data-bs-theme="dark">
+                                    {% csrf_token %}
+                                    {{ formoffunitstat.as_p }}
+                                    <button type="submit" name="add_off_unit_status" class="btn btn-success">حفظ</button>
+                                    <button id="backoffunitstatus" type="button" class="btn btn-primary">تراجع</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
-                </ul>
-            </li>
-            {% endif %}
-
-                                    <!-- offunitstatus Section -->
-            {% if perms.officers_affairs.add_unitstatus   %}
-                        <li class="nav-item has-treeview">
-                          <a href="#" class="nav-link active">
-                              <i class="nav-icon fas fa-arrow-up"></i>
-                              <p>  الحالة في الوحدة <i class="fas  fa-angle-left"></i> </p>
-                          </a>
-              
-                          <ul class="nav nav-treeview">
-                              
-                              <!-- Add offunitstatus Form Trigger -->
-                              <li class="nav-item">
-                                  <a id="addoffunitstatus" href="#" class="nav-link">
-                                      <i class="fa fa-plus "></i>
-                                      <p class="text-light"> إضافة </p>
-                                  </a>
-                              </li>
-              
-                              <!-- Hidden offunitstatus Add Form -->
-                              <li id="offunitstatusinput" class="nav-item" style="display: none;">
-                                  <form id="" method="POST"  data-bs-theme="dark">
-                                      {% csrf_token %}
-                                      {{ formoffunitstat.as_p }}
-              
-                                      <button type="submit" name="add_off_unit_status" class="btn btn-success">حفظ</button>
-                                      <button id="backoffunitstatus" type="button" class="btn btn-primary">تراجع</button>
-                                  </form>
-                              </li>
-            
-              
-                              
-          
-                          </ul>
-                      </li>            
-            {% endif %}
-
-            
-            <!-- Filter Section -->
-            {% comment %} <li class="nav-header">الحاله</li>
+                {% endif %}
+                <!-- Filter Section -->
+                {% comment %} <li class="nav-header">الحاله</li>
             <li class="nav-item">
                 <a id="statusActive" class="nav-link" hx-get="{% url 'officers_list' %}?status=1" hx-target="#officers_list">
                     <i class="nav-icon fas fa-circle text-danger"></i>
@@ -272,86 +238,68 @@
                     <i class="nav-icon fas fa-circle text-warning"></i>
                      <p>معاش</p>
                 </a>
-              </li> {% endcomment %}
-              
-              <li class="nav-header">التمامات اليومية</li>
-              <li class="nav-item">
-                <a href="{% url 'attendance_list' %}" class="nav-link">
-                    <i class="nav-icon fas fa-list"></i>
-                    <p>عرض التمام اليومي</p>
-                </a>
-            </li>
-             {% comment %} {% if request.user.officer_profile.role or  request.user.officer_profile.is_leader   %}
-              {% endif %}{% endcomment %}
-              {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch_id == 8 %}
-              <li class="nav-item">
-                <a href="{% url 'record_attendance' %}" class="nav-link">
-                    <i class="nav-icon fas fa-edit"></i>
-                    <p>تسجيل التمام اليومي</p>
-                </a>
-            </li>
-            {% endif %}
-            
-            
-            
-            <li class="nav-header">الأجازات</li>
-            {% if request.user.officer_profile.role != 'المدير' %}
-              <li class="nav-item">
-                <a href="{% url 'create_leave_request' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                    <i class="nav-icon fas fa-hand-holding"></i>
-                    <p>طلب اجازة</p>
-                </a>
+                </li> {% endcomment %}
+                <li class="nav-header">التمامات اليومية</li>
+                <li class="nav-item">
+                    <a href="{% url 'attendance_list' %}" class="nav-link">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>عرض التمام اليومي</p>
+                    </a>
                 </li>
-            {% endif %}
-
-            <!-- Change Password Link -->
-
-            {% if request.user.officer_profile.is_leader or request.user.officer_profile.role %}
-            
-                <a href="{% url 'leave_requests_list' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                    <i class="nav-icon fas fa-users"></i>
-                    <p>طلبات الاجازة</p>
-                </a>
-            
-            {% endif %}
-
-            {% if request.user.officer_profile.role != 'المدير' %}
-            
-                <a href="{% url 'leave_requests' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                    <i class="nav-icon fas fa-mug-hot"></i>
-                    <p>طلباتي للاجازة  </p>
-                </a>
-            
-            {% endif %}
-
-            
-            
-            <li class="nav-header">الحساب</li>
-            <li class="nav-item">
-                <a href="{% url 'change_password' %}" class="nav-link" data-toggle="modal" data-target="#changePasswordModal">
-                    <i class="nav-icon fas fa-key"></i>
-                    <p>تغيير كلمة المرور</p>
-                </a>
-            
-   
-        </ul>
-    </nav>
-      <!-- /.sidebar-menu -->
+                {% comment %} {% if request.user.officer_profile.role or  request.user.officer_profile.is_leader   %}{% endif %}{% endcomment %}
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch_id == 8 %}
+                    <li class="nav-item">
+                        <a href="{% url 'record_attendance' %}" class="nav-link">
+                            <i class="nav-icon fas fa-edit"></i>
+                            <p>تسجيل التمام اليومي</p>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="nav-header">الأجازات</li>
+                {% if request.user.officer_profile.role != 'المدير' %}
+                    <li class="nav-item">
+                        <a href="{% url 'create_leave_request' %}"
+                           class="nav-link"
+                           data-toggle="modal"
+                           data-target="#changePasswordModal">
+                            <i class="nav-icon fas fa-hand-holding"></i>
+                            <p>طلب اجازة</p>
+                        </a>
+                    </li>
+                {% endif %}
+                <!-- Change Password Link -->
+                {% if request.user.officer_profile.is_leader or request.user.officer_profile.role %}
+                    <a href="{% url 'leave_requests_list' %}"
+                       class="nav-link"
+                       data-toggle="modal"
+                       data-target="#changePasswordModal">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>طلبات الاجازة</p>
+                    </a>
+                {% endif %}
+                {% if request.user.officer_profile.role != 'المدير' %}
+                    <a href="{% url 'leave_requests' %}"
+                       class="nav-link"
+                       data-toggle="modal"
+                       data-target="#changePasswordModal">
+                        <i class="nav-icon fas fa-mug-hot"></i>
+                        <p>طلباتي للاجازة</p>
+                    </a>
+                {% endif %}
+                <li class="nav-header">الحساب</li>
+                <li class="nav-item">
+                    <a href="{% url 'change_password' %}"
+                       class="nav-link"
+                       data-toggle="modal"
+                       data-target="#changePasswordModal">
+                        <i class="nav-icon fas fa-key"></i>
+                        <p>تغيير كلمة المرور</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
     </div>
-
     <!-- /.sidebar -->
-
-                  
-
-  </aside>
-
-
-
-  <!-- في المكان ده هحط المحتوى -->
-
-
-
-
-
-
-
+</aside>
+<!-- في المكان ده هحط المحتوى -->

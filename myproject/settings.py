@@ -27,14 +27,14 @@ SECRET_KEY = 'django-insecure-vu#tx$80pnhd@#o4t2qraxr4sgjb8$460#_*+-4bkoaa**3gm@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'officers_affairs',
-    'accounts',
+    
     'django.contrib.sites', 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'django_filters',
     'mathfilters',
+    'officers_affairs',
+    'accounts',
 ]
 SITE_ID = 2
 

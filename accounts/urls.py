@@ -5,7 +5,8 @@ from django import forms
 from . import views
 from . import forms
 
-
+from django.conf.urls.static import static
+from myproject import settings
 
 
 urlpatterns = [

@@ -28,12 +28,14 @@
     {% comment %} <link rel="stylesheet" href="{% static  'adminlte_3_rtl/css/custom.css' %}">  {% endcomment %}
 
     <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    {% comment %} <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet"> {% endcomment %}
+    <link href="{% static "fonts/Source_Sans_Pro.css" %}" rel="stylesheet">
 
     
     {% load django_bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
     {% comment %} <script src="{% static  'dist/js/adminlte.js' %}"></script> {% endcomment %}
     <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>

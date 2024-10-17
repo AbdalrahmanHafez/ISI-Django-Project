@@ -1,87 +1,85 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 {% block content %}
-
-    <h2  class="text-center mb-4 section-title">تمام الضباط عن اليوم {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
-
-    <form method="GET" action="{% url 'attendance_list' %}" class="d-flex justify-content-center align-items-center mb-3">
+    <h2 class="text-center mb-4 section-title">تمام الضباط عن اليوم {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+    <form method="GET"
+          action="{% url 'attendance_list' %}"
+          class="d-flex justify-content-center align-items-center mb-3">
         <div class="form-group">
             <label for="date">اختر التاريخ:</label>
-            <input name="date" class="hijri-picker form-control" value="{{ today|date:'Y-m-d'}}" required>
+            <input name="date"
+                   class="hijri-picker form-control"
+                   value="{{ today|date:'Y-m-d' }}"
+                   required>
         </div>
-        <button type="submit" class="btn btn-primary align-self-end" style="margin-right: 0.5rem">عرض الحضور</button>
+        <button type="submit"
+                class="btn btn-primary align-self-end"
+                style="margin-right: 0.5rem">عرض التمام</button>
     </form>
-
-    
-<div>
-    <table class="table table-bordered table-hover text-center">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">القوة </th>
-                <th scope="col">موجود </th>
-                <th scope="col">خارج </th>
-                <th scope="col">مأمورية </th>
-                <th scope="col">مست </th>
-                <th scope="col">مأمورية مفتوحة </th>
-                <th scope="col">سنوية </th>
-                <th scope="col">عارضة </th>
-                <th scope="col">بدل راحة </th>
-                <th scope="col"> راحة </th>
-                <th scope="col">منحة قائد </th>
-                <th scope="col">إذن</th>
-                <th scope="col"> سفر خارج البلاد</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ total_officers|arabic_numbers }}</td>
-                <td>{{ inside_officers|arabic_numbers }}</td>
-                <td>{{ outside_officers|arabic_numbers }}</td>
-                <td>{{ outside_mission_officers|arabic_numbers }}</td>
-                <td>{{ outside_hospital_officers|arabic_numbers }}</td>
-                <td>{{ outside_open_mission_officers|arabic_numbers }}</td>
-                <td>{{ outside_annual_officers|arabic_numbers }}</td>
-                <td>{{ outside_casual_officers|arabic_numbers }}</td>
-                <td>{{ outside_instead_of_rest_officers|arabic_numbers }}</td>
-                <td>{{ outside_rest_officers|arabic_numbers }}</td>
-                <td>{{ outside_leader_grant_officers|arabic_numbers }}</td>
-                <td>{{ outside_grant_officers|arabic_numbers }}</td>
-                <td>{{ outside_travel_officers|arabic_numbers }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<div class="container">
-   
-    <table class="table table-bordered table-hover text-center">
-        <thead>
-            <tr>
-                <th>م</th>
-                <th>رقم الاقدمية</th>
-                <th>الرتبة</th>
-                <th>الأسم</th>
-                <th>الفرع</th>
-                <th>التمام</th>
-                <th>ملاحظات</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in attendance_records %}
-            <tr>
-                <td>{{ forloop.counter|arabic_numbers }}</td>
-                <td>{{ record.officer.seniority_number }}</td>
-                <td>{{ record.officer.rank }}</td>
-                <td>{{ record.officer.full_name }}</td>
-                <td>{{ record.officer.branch }}</td>
-                <td>{{ record.status.name }}</td>
-                <td>{{ record.notes|default_if_none:"-" }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        
-    </table>
- 
-</div>
-
+    <div>
+        <table class="table table-bordered table-hover text-center">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">القوة</th>
+                    <th scope="col">موجود</th>
+                    <th scope="col">خارج</th>
+                    <th scope="col">مأمورية</th>
+                    <th scope="col">مست</th>
+                    <th scope="col">مأمورية مفتوحة</th>
+                    <th scope="col">سنوية</th>
+                    <th scope="col">عارضة</th>
+                    <th scope="col">بدل راحة</th>
+                    <th scope="col">راحة</th>
+                    <th scope="col">منحة قائد</th>
+                    <th scope="col">إذن</th>
+                    <th scope="col">سفر خارج البلاد</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ total_officers|arabic_numbers }}</td>
+                    <td>{{ inside_officers|arabic_numbers }}</td>
+                    <td>{{ outside_officers|arabic_numbers }}</td>
+                    <td>{{ outside_mission_officers|arabic_numbers }}</td>
+                    <td>{{ outside_hospital_officers|arabic_numbers }}</td>
+                    <td>{{ outside_open_mission_officers|arabic_numbers }}</td>
+                    <td>{{ outside_annual_officers|arabic_numbers }}</td>
+                    <td>{{ outside_casual_officers|arabic_numbers }}</td>
+                    <td>{{ outside_instead_of_rest_officers|arabic_numbers }}</td>
+                    <td>{{ outside_rest_officers|arabic_numbers }}</td>
+                    <td>{{ outside_leader_grant_officers|arabic_numbers }}</td>
+                    <td>{{ outside_grant_officers|arabic_numbers }}</td>
+                    <td>{{ outside_travel_officers|arabic_numbers }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="container">
+        <table class="table table-bordered table-hover text-center">
+            <thead>
+                <tr>
+                    <th>م</th>
+                    <th>رقم الاقدمية</th>
+                    <th>الرتبة</th>
+                    <th>الأسم</th>
+                    <th>الفرع</th>
+                    <th>التمام</th>
+                    <th>ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ forloop.counter|arabic_numbers }}</td>
+                        <td>{{ record.officer.seniority_number }}</td>
+                        <td>{{ record.officer.rank }}</td>
+                        <td>{{ record.officer.full_name }}</td>
+                        <td>{{ record.officer.branch }}</td>
+                        <td>{{ record.status.name }}</td>
+                        <td>{{ record.notes|default_if_none:"-" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

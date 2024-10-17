@@ -197,3 +197,23 @@ class DailyAttendance(models.Model):
 
     def __str__(self):
         return f"{self.officer.full_name} - {self.date} - {self.status.name}"  
+    
+# نوبطجيات 
+
+
+class ShiftTeam(models.Model):
+    TEAM_TYPE_CHOICES = [
+        ('قائد منوب', 'قائد منوب'),
+        ('ضابط نوبطچي', 'ضابط نوبطچي')
+    ]
+    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES)
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='shift_teams')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Shift(models.Model):
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE)
+    team = models.ForeignKey(ShiftTeam, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_holiday = models.BooleanField(default=False)

@@ -31,7 +31,7 @@ def extract_numeric(s):
 def officers_home_view(request):
     today = timezone.localtime().date()
     # Count officers with the status 'موجود', currently outside, and with a different status
-    total_officers = Officer.objects.filter(status__name='قوة').count()
+    total_officers = DailyAttendance.objects.filter(date=today).count()
     inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
     outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False)

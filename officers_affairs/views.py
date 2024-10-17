@@ -153,15 +153,6 @@ def officers_home_view(request):
         'officers_filter': filters.OfficerFilter(request.GET or officerFilterDefault),
         'count_officers_total': Officer.objects.count(),
         'count_officers_availble': Officer.objects.filter(unit_status__name="موجود").count(),
-        'formweapon':WeaponForm(),
-        'formunit':UnitForm(),
-        'formbranch':BranchForm(),
-        'formsection':SectionForm(),
-        'formjob':JobForm(),
-        'formrank':RankForm(),
-        'formoffunitstat':OffUnitStatusForm(),
-        'formoffstat':OfficerStatusForm(),
-        
         'unread_notifications': unread_notifications,
         'today':today,
         'total_officers':total_officers,
@@ -197,6 +188,7 @@ def remove_bg_profile_pic(captured_image_data, pk, form):
         # Optionally, delete the temporary files
         os.remove(original_image_path)
         os.remove(processed_image_path)
+
 
 
 @login_required

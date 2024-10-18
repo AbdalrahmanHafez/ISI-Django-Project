@@ -32,12 +32,29 @@ class ArabicFileInput(ClearableFileInput):
             <div class="form-group">
                 <label class="custom-file-label" for="{attrs['id']}">اختر ملف</label>
                 <input type="file" class="custom-file-input" id="{attrs['id']}" name="{name}">
-                <span class="file-name">لم يتم اختيار ملف</span>
-            </div>
-            
+                <span class="file-name">{'لم يتم اختيار ملف' if not value else 'حالياً: ' + str(value)}</span>
+        '''
+
+        # If a file exists (i.e., if value is provided), add the clear checkbox near the label
+        if value:
+            clear_checkbox_name = self.clear_checkbox_name(name)
+            clear_checkbox_id = self.clear_checkbox_id(clear_checkbox_name)
+            clear_label = 'إزالة الصورة الحالية'  # Clear image in Arabic
+
+            html += f'''
+                <span style="margin-left: 20px;">
+                    <input type="checkbox" class="form-check-input" id="{clear_checkbox_id}" name="{clear_checkbox_name}">
+                    <label class="form-check-label" for="{clear_checkbox_id}">{clear_label}</label>
+                </span>
+            '''
+
+        # Close the form-group div
+        html += '</div>'
+
+        # Add a script to handle file input change
+        html += f'''
             <script>
               const fileInput = document.getElementById('{attrs['id']}');
-              const fileLabel = document.querySelector('.custom-file-label');
               const fileNameDisplay = document.querySelector('.file-name');
               
               fileInput.addEventListener('change', function () {{
@@ -46,6 +63,7 @@ class ArabicFileInput(ClearableFileInput):
               }});
             </script>
         '''
+
         return mark_safe(html)
 
 

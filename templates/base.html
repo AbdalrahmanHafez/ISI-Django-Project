@@ -10,7 +10,7 @@
     <title>معهد نظم المعلومات</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/ISILogo.png' %}">
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
-    <link href="{% static 'css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap-datetimepicker.css' %}" rel="stylesheet" />
 
     <!-- IonIcons -->
     <link rel="stylesheet" href="{% static 'css/ionicons.min.css' %}">
@@ -98,6 +98,8 @@
               // https://www.jqueryscript.net/time-clock/hijri-date-picker-bootstrap.html 
               // https://www.jqueryscript.net/time-clock/Clean-Data-Timepicker-with-jQuery-Bootstrap-3.html
               $(".hijri-picker").hijriDatePicker({
+                  locale: 'ar-SA',
+                  showTodayButton: false,
                   hijri:false,
                   showSwitcher:false,
                   debug: false,

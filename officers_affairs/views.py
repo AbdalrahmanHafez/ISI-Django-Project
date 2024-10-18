@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from django.contrib import messages
 from venv import logger
 from django.shortcuts import redirect, render, get_object_or_404
@@ -29,6 +29,7 @@ from django.utils.timezone import now
 from django.db.models import Q, Min, Max
 from django.utils import timezone
 import re
+import datetime
 
 # os.environ['HTTP_PROXY'] = 'http://localhost:3129'
 # os.environ['HTTPS_PROXY'] = 'http://localhost:3129'
@@ -392,9 +393,6 @@ def get_initial_approver(officer_profile):
 
 
 
-from django.utils import timezone
-import datetime
-from .models import LeaveRequest
 
 def get_remaining_days(officer, leave_type):
     today = timezone.now().date()  # التأكد من أن today هو كائن date
@@ -1152,14 +1150,14 @@ def assign_shifts(request):
         holidays_str = request.POST.getlist('holidays')
 
         # Convert start_date and end_date to date objects
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d').date()
 
         # Convert holidays to date objects, ensuring no duplicates
         holidays = set()
         for holiday_str in holidays_str:
             try:
-                holidays.update(datetime.strptime(h.strip(), '%Y-%m-%d').date() for h in holiday_str.split(',') if h.strip())
+                holidays.update(datetime.datetime.strptime(h.strip(), '%Y-%m-%d').date() for h in holiday_str.split(',') if h.strip())
             except ValueError as e:
                 print(f"Error parsing holiday dates: {e}")
 
@@ -1215,7 +1213,7 @@ def assign_shifts(request):
 
     # Handle GET request to render the manual assignment form
     if request.method == 'GET':
-        start_date = datetime.now().date()
+        start_date = datetime.datetime.now().date()
         end_date = start_date + timedelta(days=7)
         days_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
 

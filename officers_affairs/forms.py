@@ -20,7 +20,8 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         full_name = cleaned_data.get('full_name')
 
         if create_user:
-            username = full_name.lower().replace(" ", "_")
+            # username = full_name.lower().replace(" ", "_")
+            username = cleaned_data.get('military_number')
 
             if User.objects.filter(username=username).exists():
                 self.add_error('full_name', "هناك مستخدم له نفس اسم المستخدم بالفعل ")
@@ -32,7 +33,8 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         
         # Check if we need to create a user
         if self.cleaned_data.get('create_user') and not officer.user:
-            username = officer.full_name.lower().replace(" ", "_")
+            # username = officer.full_name.lower().replace(" ", "_")
+            username = officer.military_number
             user = User.objects.create_user(username=username, password='123')
             officer.user = user
                  

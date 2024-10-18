@@ -146,6 +146,11 @@ def officers_home_view(request):
         'status': OfficerStatus.objects.filter(name="قوة"),
     }
 
+    if(len(request.GET) == 0): # if no params default to قوة
+        newParams = request.GET.copy()
+        newParams['status'] = officerFilterDefault['status'][0].pk
+        return redirect(f"{request.path}?{newParams.urlencode()}")
+
 
     context= {
         'ranks':Rank.objects.all(),
@@ -159,6 +164,7 @@ def officers_home_view(request):
         'inside_officers':inside_officers,
         'outside_officers': outside_officers,
     }
+
 
     return render(request, 'officers_affairs/home.html', context)
 
@@ -356,7 +362,7 @@ def officers_list(request):
 
     ctx={
         'ranks':Rank.objects.all(),
-        'officers_filter': filters.OfficerFilter(request.GET or officerFilterDefault),
+        'officers_filter': filters.OfficerFilter(request.GET),
     }
     return render(request, 'officers_affairs/officer_list.html', ctx)
 

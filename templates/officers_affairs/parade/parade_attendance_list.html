@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block content %}
+<h2 class="text-center mb-4 section-title">حضور الطابور الصباحي - {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+
+<div class="container">
+    <table class="table table-bordered table-hover text-center">
+        <thead>
+            <tr>
+                <th>م</th>
+                
+                <th>الرتبة</th>
+                <th>الأسم</th>
+                <th>التمام</th>
+                <th>ملاحظات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in parade_records %}
+            <tr>
+                <td>{{ forloop.counter|arabic_numbers }}</td>
+                
+                <td>{{ record.officer.rank }}</td>
+                <td>{{ record.officer.full_name }}</td>
+                <td>{{ record.status }}</td>
+                <td>{{ record.notes|default_if_none:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

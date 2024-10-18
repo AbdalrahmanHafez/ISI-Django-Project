@@ -1127,6 +1127,65 @@ def attendance_list(request):
     return render(request, 'officers_affairs/attendance/attendance_list.html', context)
 
 
+
+# حضور الطابور الصباحي
+# View to record morning parade attendance
+def record_parade_attendance(request):
+    date_str = request.GET.get('date', None)
+    date_value = parse_date(date_str) if date_str else timezone.localtime().date()
+
+    if request.method == 'POST':
+        officers = Officer.objects.filter(status__name='قوة')  # Officers currently in the unit
+        for officer in officers:
+            status = request.POST.get(f'status_{officer.id}')
+            notes = request.POST.get(f'notes_{officer.id}', '')
+
+            if status:
+                unit_status_instance, created = UnitStatus.objects.get_or_create(name=status)
+                existing_parade_attendance = MorningParadeAttendance.objects.filter(officer=officer, date=date_value).first()
+
+                if existing_parade_attendance:
+                    if existing_parade_attendance.status != unit_status_instance or existing_parade_attendance.notes != notes:
+                        existing_parade_attendance.status = unit_status_instance
+                        existing_parade_attendance.notes = notes
+                        existing_parade_attendance.save()
+                else:
+                    MorningParadeAttendance.objects.create(
+                        officer=officer,
+                        date=date_value,
+                        status=unit_status_instance,
+                        notes=notes,
+                    )
+
+    officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number').exclude(role='المدير')
+    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number),reverse=False)
+    unit_statuses = UnitStatus.objects.all()
+
+    context = {
+        'officers': officers,
+        'unit_statuses': unit_statuses,
+        'today': date_value,
+    }
+    return render(request, 'officers_affairs/parade/record_parade_attendance.html', context)
+
+
+# View to display morning parade attendance
+def parade_attendance_list(request):
+    date_str = request.GET.get('date', None)
+    date_value = parse_date(date_str) if date_str else timezone.localtime().date()
+
+    parade_records = MorningParadeAttendance.objects.filter(date=date_value).select_related('officer')
+
+    context = {
+        'parade_records': parade_records,
+        'today': date_value,
+    }
+    return render(request, 'officers_affairs/parade/parade_attendance_list.html', context)
+
+
+
+
+
 # النبطشيات
 
 

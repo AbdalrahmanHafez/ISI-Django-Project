@@ -255,6 +255,24 @@
                         </a>
                     </li>
                 {% endif %}
+
+                <li class="nav-header">الطابور الصباحي</li>
+                <li class="nav-item">
+                    <a href="{% url 'parade_attendance_list' %}" class="nav-link">
+                    <i class="nav-icon fas fa-list"></i>
+                     <p>عرض حضور الطابور الصباحي</p>
+                    </a>
+                </li>
+
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                <li class="nav-item">
+                    <a href="{% url 'record_parade_attendance' %}" class="nav-link">
+                    <i class="nav-icon fas fa-edit"></i>
+                  <p>تسجيل حضور الطابور الصباحي</p>
+                  </a>
+                </li>
+                {% endif %}
+
                 <li class="nav-header">الأجازات</li>
                 {% if request.user.officer_profile.role != 'المدير' %}
                     <li class="nav-item">

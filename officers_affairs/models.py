@@ -226,3 +226,23 @@ class ShiftSwapRequest(models.Model):
     new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True, verbose_name="النوبطچية الجديدة")
     is_approved = models.BooleanField(default=False, verbose_name="تمت الموافقة")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+
+
+class MorningParadeAttendance(models.Model):
+    ATTENDANCE_STATUS_CHOICES = [
+        ('حضر', 'حضر'),
+        ('لم يحضر', 'لم يحضر'),
+    ]
+
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, verbose_name="الضابط")
+    date = models.DateField(default=timezone.now, verbose_name="التاريخ")
+    status = models.CharField(max_length=20, choices=ATTENDANCE_STATUS_CHOICES, verbose_name="حالة الحضور")
+    notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات")
+
+    class Meta:
+        unique_together = ('officer', 'date')
+        verbose_name = 'حضور الطابور الصباحي'
+        verbose_name_plural = 'حضور الطابور الصباحي'
+
+    def __str__(self):
+        return f"{self.officer.full_name} - {self.date} - {self.status}"

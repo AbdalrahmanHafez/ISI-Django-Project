@@ -34,5 +34,9 @@ urlpatterns = [
     path('record_attendance/', views.record_attendance, name='record_attendance'),
     path('attendance_list/', views.attendance_list, name='attendance_list'),
     
+    path('record_parade_attendance/', views.record_parade_attendance, name='record_parade_attendance'),
+    path('parade_attendance_list/', views.parade_attendance_list, name='parade_attendance_list'),
+
+    
     path('shifts/assign/', views.assign_shifts, name='assign_shifts'),
 ]

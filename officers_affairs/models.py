@@ -206,9 +206,9 @@ class ShiftTeam(models.Model):
         ('قائد منوب', 'قائد منوب'),
         ('ضابط نوبطچي', 'ضابط نوبطچي')
     ]
-    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES)
-    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='shift_teams')
-    created_at = models.DateTimeField(auto_now_add=True)
+    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES, verbose_name="نوع الطاقم")
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='shift_teams', verbose_name="الضابط")
+    created_at = models.DateTimeField(auto_now_add=True,verbose_name="تاريخ الإنشاء")
 
 
 class Shift(models.Model):
@@ -220,9 +220,9 @@ class Shift(models.Model):
 
 
 class ShiftSwapRequest(models.Model):
-    requesting_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_requests')
-    target_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_targets')
-    original_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='original_shift')
-    new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True)
-    is_approved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    requesting_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_requests', verbose_name="الضابط المقدم للطلب")
+    target_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_targets', verbose_name="الضابط المستهدف")
+    original_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='original_shift', verbose_name="النوبطچية الأصلية")
+    new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True, verbose_name="النوبطچية الجديدة")
+    is_approved = models.BooleanField(default=False, verbose_name="تمت الموافقة")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")

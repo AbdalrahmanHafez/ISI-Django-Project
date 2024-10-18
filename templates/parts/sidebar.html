@@ -246,7 +246,7 @@
                         <p>عرض التمام اليومي</p>
                     </a>
                 </li>
-                {% comment %} {% if request.user.officer_profile.role or  request.user.officer_profile.is_leader   %}{% endif %}{% endcomment %}
+                
                 {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch_id == 8 %}
                     <li class="nav-item">
                         <a href="{% url 'record_attendance' %}" class="nav-link">
@@ -296,6 +296,15 @@
                         <p>تغيير كلمة المرور</p>
                     </a>
                 </li>
+                <li class="nav-header">النوبطچيات</li>
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                 <li class="nav-item">
+                    <a href="{% url 'assign_shifts' %}" class="nav-link">
+                    <i class="nav-icon fas fa-calendar-alt"></i>
+                    <p>تعيين النوبطچيات</p>
+                    </a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

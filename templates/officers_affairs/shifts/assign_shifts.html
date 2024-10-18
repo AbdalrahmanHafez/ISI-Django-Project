@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>تعيين اطقم النوبطچيات</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- خيار التوزيع اليدوي أو التلقائي -->
+        <div class="form-group">
+            <label for="assignment_type">نوع التوزيع:</label>
+            <select class="form-control" name="assignment_type" id="assignment_type" onchange="toggleManualAssignment()">
+                <option value="automatic">توزيع تلقائي</option>
+                <option value="manual">توزيع يدوي</option>
+            </select>
+        </div>
+
+        <!-- اختيار الضباط (للتوزيع التلقائي) -->
+        <div id="officer_selection" class="form-group">
+            <label for="officers">اختر الضباط للتوزيع التلقائي:</label>
+            <select multiple class="form-control" name="officers" id="officers">
+                {% for officer in officers %}
+                    <option value="{{ officer.id }}">{{ officer.rank }} / {{ officer.full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- نوع النوبطچية -->
+        <div class="form-group">
+            <label for="shift_type">نوع النوبطچية:</label>
+            <select class="form-control" name="shift_type" id="shift_type">
+                <option value="قائد منوب">قائد منوب</option>
+                <option value="ضابط نوبطچي">ضابط نوبطچي</option>
+            </select>
+        </div>
+
+        <!-- اختيار التاريخ -->
+        <div class="form-group">
+            <label for="start_date">تاريخ البداية:</label>
+            <input type="date" class="hijri-picker form-control" name="start_date" id="start_date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="end_date">تاريخ النهاية:</label>
+            <input type="date" class="form-control" name="end_date" id="end_date" required>
+        </div>
+
+        <!-- اختيار أيام العطلات -->
+        <div class="form-group">
+            <label for="holidays">أيام العطلات:</label>
+            <input type="text" class="form-control" name="holidays" id="holidays" placeholder="اختر التواريخ">
+        </div>
+
+        <!-- توزيع النوبطچيات اليدوي (يظهر فقط عند اختيار التوزيع اليدوي) -->
+        <div id="manual_assignment_section" style="display: none;">
+            <h3>توزيع النوبطچيات اليدوي:</h3>
+            {% for day in days_range %}
+                <div class="form-row">
+                    <label for="manual_assignment_{{ day }}">النوبطچية ليوم {{ day }}:</label>
+                    <select class="form-control" name="manual_assignment_{{ day }}" id="manual_assignment_{{ day }}">
+                        <option value="">اختر الضابط</option>
+                        {% for officer in officers %}
+                            <option value="{{ officer.id }}">{{ officer.rank }} / {{ officer.full_name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- اختيار ما إذا كان اليوم عطلة -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_holiday_{{ day }}" id="is_holiday_{{ day }}">
+                        <label class="form-check-label" for="is_holiday_{{ day }}">
+                            هذا اليوم عطلة
+                        </label>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- زر التقديم -->
+        <button type="submit" class="btn btn-primary">توزيع النبطشيات</button>
+    </form>
+</div>
+
+<script>
+    // Function to toggle manual assignment section based on the selected assignment type
+    function toggleManualAssignment() {
+        var assignmentType = document.getElementById('assignment_type').value;
+        var manualAssignmentSection = document.getElementById('manual_assignment_section');
+        var officerSelection = document.getElementById('officer_selection');
+
+        if (assignmentType === 'manual') {
+            manualAssignmentSection.style.display = 'block';  // Show manual assignment section
+            officerSelection.style.display = 'none';  // Hide officer selection for automatic assignment
+            updateManualDays();  // Update manual days when switching to manual assignment
+        } else {
+            manualAssignmentSection.style.display = 'none';  // Hide manual assignment section
+            officerSelection.style.display = 'block';  // Show officer selection for automatic assignment
+        }
+    }
+
+    // Function to update manual assignment days
+    function updateManualDays() {
+        var startDate = new Date(document.getElementById('start_date').value);
+        var endDate = new Date(document.getElementById('end_date').value);
+        var manualAssignmentSection = document.getElementById('manual_assignment_section');
+
+        // Clear previous manual assignment sections
+        manualAssignmentSection.innerHTML = '';
+
+        // Calculate days and update the manual assignment section
+        if (startDate && endDate) {
+            var days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1; // +1 to include end date
+            for (var i = 0; i < days; i++) {
+                var day = new Date(startDate);
+                day.setDate(day.getDate() + i);
+                var dayStr = day.toISOString().split('T')[0]; // Get YYYY-MM-DD format
+
+                manualAssignmentSection.innerHTML += `
+                    <div class="form-row">
+                        <label for="manual_assignment_${dayStr}">النوبطچية ليوم ${dayStr}:</label>
+                        <select class="form-control" name="manual_assignment_${dayStr}" id="manual_assignment_${dayStr}">
+                            <option value="">اختر الضابط</option>
+                            {% for officer in officers %}
+                                <option value="{{ officer.id }}">{{ officer.rank }} / {{ officer.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_holiday_${dayStr}" id="is_holiday_${dayStr}">
+                            <label class="form-check-label" for="is_holiday_${dayStr}">
+                                هذا اليوم عطلة
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Add event listeners for date inputs
+    document.getElementById('start_date').addEventListener('change', updateManualDays);
+    document.getElementById('end_date').addEventListener('change', updateManualDays);
+</script>
+
+{% endblock %}

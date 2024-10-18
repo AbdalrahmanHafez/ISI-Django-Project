@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from django.contrib import messages
 from venv import logger
 from django.shortcuts import redirect, render, get_object_or_404
@@ -9,13 +9,13 @@ from django.db.models import Case, When, Value, IntegerField
 from django.db.models.functions import Cast
 import base64
 from django.core.files.base import ContentFile
-
+from django.contrib.auth.decorators import user_passes_test
+from django.db import transaction
 import cv2
 from rembg import remove
 import numpy as np
 import os
 from django.conf import settings
-
 from .models import *
 from .forms import BranchForm,  JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseRedirect
@@ -1063,7 +1063,7 @@ def record_attendance(request):
                     #     })
                     # })
 
-    # GET request: Fetch officers with status "موجود"
+    # GET request: Fetch officers with status "قوة"
     officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number')
     officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number))
 
@@ -1127,3 +1127,100 @@ def attendance_list(request):
         'outside_travel_officers':outside_travel_officers,
     }
     return render(request, 'officers_affairs/attendance/attendance_list.html', context)
+
+
+# النبطشيات
+
+
+
+# Check if user is 'رئيس فرع شئون ضباط'
+def is_officer_in_charge(user):
+    return user.officer_profile.role == 'رئيس فرع شئون ضباط'
+
+# View for both manual and automatic shift assignment
+@user_passes_test(is_officer_in_charge)
+def assign_shifts(request):
+    officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number').exclude(role='المدير')
+    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number),reverse=True)
+    days_range = []
+
+    if request.method == 'POST':
+        officer_ids = request.POST.getlist('officers')
+        shift_type = request.POST.get('shift_type')
+        start_date_str = request.POST.get('start_date')
+        end_date_str = request.POST.get('end_date')
+        holidays_str = request.POST.getlist('holidays')
+
+        # Convert start_date and end_date to date objects
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        # Convert holidays to date objects, ensuring no duplicates
+        holidays = set()
+        for holiday_str in holidays_str:
+            try:
+                holidays.update(datetime.strptime(h.strip(), '%Y-%m-%d').date() for h in holiday_str.split(',') if h.strip())
+            except ValueError as e:
+                print(f"Error parsing holiday dates: {e}")
+
+        days_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+        # Use a transaction to ensure data consistency
+        with transaction.atomic():
+            for day in days_range:
+                manual_officer_id = request.POST.get(f'manual_assignment_{day}', None)
+                
+
+                # Remove any previous shifts for the same day and team type before creating/updating new ones
+                Shift.objects.filter(
+                    team__team_type=shift_type,
+                    start_date=day,
+                    end_date=day
+                ).delete()
+
+                if manual_officer_id:
+                    # Manual assignment
+                    officer = get_object_or_404(Officer, pk=manual_officer_id)
+                    team, created = ShiftTeam.objects.get_or_create(
+                        team_type=shift_type,
+                        officer=officer,
+                    )
+                    is_holiday = bool(request.POST.get(f'is_holiday_{day}', False))
+                    
+                    Shift.objects.update_or_create(
+                        officer=officer,
+                        team=team,
+                        start_date=day,
+                        end_date=day,
+                        defaults={'is_holiday': is_holiday}
+                    )
+                elif officer_ids:
+                    # Automatic assignment
+                    officer_id = officer_ids[days_range.index(day) % len(officer_ids)]
+                    officer = get_object_or_404(Officer, pk=officer_id)
+                    team, created = ShiftTeam.objects.get_or_create(
+                        team_type=shift_type,
+                        officer=officer,
+                    )
+                    Shift.objects.update_or_create(
+                        officer=officer,
+                        team=team,
+                        start_date=day,
+                        end_date=day,
+                        defaults={'is_holiday': day in holidays}
+                    )
+        # Optional: Add a success message (requires message framework)
+        messages.success(request, "تم توزيع النوبطچيات بنجاح")
+        return redirect('shifts_list')
+
+    # Handle GET request to render the manual assignment form
+    if request.method == 'GET':
+        start_date = datetime.now().date()
+        end_date = start_date + timedelta(days=7)
+        days_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+    return render(request, 'officers_affairs/shifts/assign_shifts.html', {
+        'officers': officers,
+        'days_range': days_range,
+    })
+

@@ -220,11 +220,23 @@ class Shift(models.Model):
 
 
 class ShiftSwapRequest(models.Model):
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    
+    STATUS_CHOICES = [
+        (PENDING, 'جاري الموافقة'),
+        (APPROVED, 'موافق'),
+        (REJECTED, 'لم يوافق'),
+    ]
+
     requesting_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_requests', verbose_name="الضابط المقدم للطلب")
     target_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_targets', verbose_name="الضابط المستهدف")
     original_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='original_shift', verbose_name="النوبطچية الأصلية")
     new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True, verbose_name="النوبطچية الجديدة")
-    is_approved = models.BooleanField(default=False, verbose_name="تمت الموافقة")
+    status = models.CharField(max_length=200, choices=STATUS_CHOICES, default=PENDING, verbose_name="الحالة")
+    final_approver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='ShiftSwapRequest', verbose_name="الموافق النهائي")
+    approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="الموافق الحالي")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
 
 

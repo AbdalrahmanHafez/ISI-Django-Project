@@ -39,4 +39,12 @@ urlpatterns = [
 
     
     path('shifts/assign/', views.assign_shifts, name='assign_shifts'),
+    path('shifts/list/', views.shifts_list, name='shifts_list'),
+    path('shifts/my-requests', views.my_shift_swap_requests, name='my-shift-swap-requests'),
+    path('shifts/swap-requests', views.shift_swap_requests_list, name='shift_swap_requests_list'),
+    path('shifts/swap/<int:original_shift_id>/<int:new_shift_id>/', views.shift_swap, name='shift_swap'),
+    path('shifts/swap/approve_shift_request/<int:shift_id>', views.approve_shift_request, name='approve_shift_request'),
+
+
+    
 ]

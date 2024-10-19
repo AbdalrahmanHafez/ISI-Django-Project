@@ -316,13 +316,40 @@
                 </li>
                 <li class="nav-header">النوبطچيات</li>
                 {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
-                 <li class="nav-item">
-                    <a href="{% url 'assign_shifts' %}" class="nav-link">
-                    <i class="nav-icon fas fa-calendar-alt"></i>
-                    <p>تعيين النوبطچيات</p>
-                    </a>
+                    <li class="nav-item">
+                        <a href="{% url 'assign_shifts' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>تعيين النوبطچيات</p>
+                        </a>
                     </li>
                 {% endif %}
+
+                <li class="nav-item">
+                    <a href="{% url 'shifts_list' %}" class="nav-link">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>جدول النوبطچيات</p>
+                    </a>
+                </li>
+
+
+                    <li class="nav-item">
+                        <a href="{% url 'shift_swap_requests_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>المبادلات</p>
+                        </a>
+                    </li>
+                    
+
+                {% if request.user.officer_profile.role != 'المدير' %}
+                    <li class="nav-item">
+                        <a href="{% url 'my-shift-swap-requests' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>مبادلاتي</p>
+                        </a>
+                    </li>
+                {% endif %}
+
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

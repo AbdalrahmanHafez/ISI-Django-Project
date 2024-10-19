@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2 class="text-center mb-4 section-title">طلبات مبادلة النوبطچيات</h2>
+
+    <table class="table table-bordered table-hover text-center">
+        <thead>
+            <tr>
+                <th>طرف اول</th>
+                <th>نوع النوبطچية</th>
+                <th>النوبطچية الأصلية</th>
+                <th>النوبطچية المطلوبة</th>
+                <th>طرف ثاني</th>
+                <th>الحالة</th>
+                <th>الموافق الحالي</th>
+                <th>تاريخ الطلب</th>
+                <th>الاجرائات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for swap in swap_requests %}
+                <tr>
+
+                    <td>{{ swap.requesting_officer.rank }} / {{ swap.requesting_officer.full_name }}</td>
+                    <td>{{ swap.original_shift.team.team_type }}</td>
+                    <td>{{ swap.original_shift.start_date }}</td>
+                    <td>{{ swap.new_shift.start_date }}</td>
+                    <td>{{ swap.target_officer.full_name }}</td>
+                    <td>{{ swap.get_status_display }}</td>
+
+                    <td>
+                        {% if swap.approver.officer_profile.role %}
+                            {{ swap.approver.officer_profile.role }}
+                        {% else %}
+                            {{ swap.approver.officer_profile.rank }} / {{ swap.approver.officer_profile.full_name }}
+                        {% endif %}
+                    </td>
+
+                    <td>{{ swap.created_at|date:"Y-m-d" }}</td>
+                    <td>
+                        {% if swap.status == 'approved' %}
+                            <button class="btn btn-outline-secondary" disabled>تم قبول الطلب</button>
+                        {% elif swap.status == 'rejected' %}
+                            <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
+                        {% elif swap.approver == user %}
+                                <a href="#"
+                                   class="btn btn-primary"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#approveModal2"
+                                   data-id="{{ swap.id }}">ابداء الرأي</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">لا توجد طلبات تبديل نوبطچيات.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<!-- Approval Modal 2 -->
+<div class="modal fade"
+        id="approveModal2"
+        tabindex="-1"
+        aria-labelledby="approveModalLabel"
+        aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveModalLabel">إبداء الرأي</h5>
+                <button type="button"
+                        class="close"
+                        style="margin-right: auto"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <strong><span aria-hidden="true">&times;</span></strong>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>الرأي</p>
+                <div class="form-actions">
+                    <button class="btn btn-success" id="acceptBtn2">اوافق</button>
+                    <button class="btn btn-danger" id="rejectBtn2">لا اوافق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let selected_swap_id;
+
+    $('#approveModal2').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget); // Button that triggered the modal
+        selected_swap_id = button.data('id'); // Extract info from data-* attributes
+    });
+
+    $('#acceptBtn2').on('click', function() {
+        $.post("{% url 'approve_shift_request' 0 %}".replace('0', selected_swap_id), {
+            decision: 'accept',
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }, function(response) {
+            location.reload(); // Reload the page to reflect the new status
+        });
+    });
+
+    $('#rejectBtn2').on('click', function() {
+        $.post("{% url 'approve_shift_request' 0 %}".replace('0', selected_swap_id), {
+            decision: 'reject',
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }, function(response) {
+            location.reload(); // Reload the page to reflect the new status
+        });
+    });
+</script>
+{% endblock content %}

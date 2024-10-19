@@ -1188,6 +1188,128 @@ def parade_attendance_list(request):
 
 # النبطشيات
 
+def shifts_list(request):
+    shifts = Shift.objects.order_by('start_date', 'officer__rank')
+
+    officer_profile = request.user.officer_profile
+    officer_teams = Shift.objects.filter(officer=officer_profile).values_list('team__team_type', flat=True).distinct()
+   
+    # if a there's a pending shift request on this shift, then it's not swapable
+    # if the current officer has a pending request, then no swap can be made at all
+    not_swappable_shifts = set()  # Use a set to avoid duplicates
+    can_apply_swap_shift = True
+
+    for shift_request in ShiftSwapRequest.objects.all():
+        if shift_request.status == ShiftSwapRequest.PENDING and shift_request.requesting_officer == officer_profile:
+            can_apply_swap_shift = False
+
+        if shift_request.status == ShiftSwapRequest.PENDING:
+            not_swappable_shifts.add(shift_request.original_shift.pk)
+            not_swappable_shifts.add(shift_request.new_shift.pk)
+
+
+    context = {
+        'shifts': shifts,
+        'officer_teams': officer_teams,
+        'not_swappable_shifts': not_swappable_shifts,
+        'can_apply_swap_shift': can_apply_swap_shift
+    }
+
+    return render(request, 'officers_affairs/shifts/shifts_list.html', context)
+
+def shift_swap(request, original_shift_id, new_shift_id):
+    requesting_officer = request.user.officer_profile
+    
+    original_shift = get_object_or_404(Shift, id=original_shift_id)
+    new_shift = get_object_or_404(Shift, id=new_shift_id)
+    
+    # switch with self | invlid request | different shift types
+    if new_shift.officer == requesting_officer or original_shift.officer != requesting_officer or original_shift.team.team_type != new_shift.team.team_type :
+        return HttpResponse("invalid")
+
+
+    shift_swap_request = ShiftSwapRequest.objects.create(
+        requesting_officer=requesting_officer,
+        target_officer=new_shift.officer,
+        original_shift=original_shift,
+        new_shift=new_shift,
+        approver= new_shift.officer.user,
+        final_approver= get_final_approver(),
+    )
+
+    return redirect(reverse('my-shift-swap-requests'))
+
+def my_shift_swap_requests(request):
+    requesting_officer = request.user.officer_profile
+
+    swap_requests = ShiftSwapRequest.objects.filter(requesting_officer=requesting_officer)
+
+    context = {
+        'swap_requests': swap_requests,
+    }
+
+    return render(request, 'officers_affairs/shifts/my_shift_swap_requests.html', context)
+
+
+def shift_swap_requests_list(request):
+    swap_requests = ShiftSwapRequest.objects.all()
+    requesting_officer = request.user.officer_profile
+   
+
+    if request.user == get_head_of_branch():
+        pass
+    elif request.user == get_final_approver():
+        swap_requests = swap_requests.filter(approver= requesting_officer.user, status= ShiftSwapRequest.PENDING)
+    else:
+        swap_requests = swap_requests.filter(approver= requesting_officer.user)
+
+    context = {
+        'swap_requests': swap_requests,
+    }
+
+    return render(request, 'officers_affairs/shifts/shift_swap_requests_list.html', context)
+
+def approve_shift_request(request, shift_id):
+    if request.method == "POST":
+        decision = request.POST.get('decision')
+        shift_request = get_object_or_404(ShiftSwapRequest, id=shift_id)
+
+        current_approver = shift_request.approver
+
+        if shift_request.status != ShiftSwapRequest.PENDING:
+            return HttpResponse("لا يمكن اعطاء قرار في هذا الطلب")
+
+        # Check the decision and current approver
+        if decision == 'accept':
+            if current_approver == get_head_of_branch():
+                shift_request.approver = get_final_approver()
+                shift_request.save()
+                return JsonResponse({'status': 'pending', 'message': 'Shift request pending final approval.'})
+            elif current_approver == get_final_approver(): 
+                # actually shift
+                original_shift = shift_request.original_shift
+                new_shift = shift_request.new_shift
+
+                original_shift.officer = shift_request.target_officer
+                new_shift.officer = shift_request.requesting_officer
+                
+                original_shift.save()
+                new_shift.save()
+
+                shift_request.status = ShiftSwapRequest.APPROVED
+                shift_request.save()
+                return JsonResponse({'status': 'approved', 'message': 'Shift request approved.'})
+            else:
+                shift_request.approver = get_head_of_branch()
+                shift_request.save()
+                return JsonResponse({'status': 'pending', 'message': 'Shift request pending head of branch approval.'})
+
+        elif decision == 'reject':
+            shift_request.status = ShiftSwapRequest.REJECTED
+            shift_request.save()
+            return JsonResponse({'status': 'rejected', 'message': 'Shift request rejected.'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
 
 
 # Check if user is 'رئيس فرع شئون ضباط'
@@ -1225,6 +1347,10 @@ def assign_shifts(request):
         # Use a transaction to ensure data consistency
         with transaction.atomic():
             for day in days_range:
+            #     for shift in ShiftSwapRequest.objects.all():
+            #         if  shift.status == ShiftSwapRequest.PENDING and (shift.original_shift.start_date == day or shift.new_shift.start_date == day):
+            #             return HttpResponse(f"هنالك طلب مقيد لتبديل النبطشية عن يوم {day}")
+
                 manual_officer_id = request.POST.get(f'manual_assignment_{day}', None)
                 
 

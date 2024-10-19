@@ -1276,6 +1276,8 @@ def my_shift_swap_requests(request):
         'swap_requests': swap_requests,
     }
 
+    swap_requests.order_by('-created_at')
+
     return render(request, 'officers_affairs/shifts/my_shift_swap_requests.html', context)
 
 
@@ -1291,9 +1293,24 @@ def shift_swap_requests_list(request):
     else:
         swap_requests = swap_requests.filter(approver= requesting_officer.user)
 
+
+    # Sorting: Show requests needing the current user's approval first, then by date (newest to oldest), then by rank
+    swap_requests = swap_requests.annotate(
+        needs_approval=Case(
+            When(approver=request.user,  status='pending', then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+    ).order_by(
+        '-needs_approval',      # Priority to requests needing approval from the current user
+        '-created_at',           # Sort by submission date (newest to oldest)
+    )
+
+
     context = {
         'swap_requests': swap_requests,
     }
+
 
     return render(request, 'officers_affairs/shifts/shift_swap_requests_list.html', context)
 

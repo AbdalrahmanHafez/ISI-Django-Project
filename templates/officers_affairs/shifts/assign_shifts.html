@@ -64,7 +64,7 @@
                         <!-- Visible input for date selection -->
                         <input class="hijri-picker form-control" id="date-picker" placeholder="اختر التواريخ">
                         <!-- Button to add the selected date -->
-                        <button type="button" id="add-date" class="btn btn-primary me-2" style="width: 10rem">اضافة تاريخ</button>
+                        <button type="button" id="add-date" class="btn btn-outline-primary me-2" style="width: 10rem">اضافة تاريخ</button>
                     </div>
 
                     <!-- Display selected dates as a list -->
@@ -165,9 +165,9 @@
     }
 
     // Add event listeners for date inputs
-    document.getElementById('start_date').addEventListener('change', updateManualDays);
-    document.getElementById('end_date').addEventListener('change', updateManualDays);
-
+    {% comment %} document.getElementById('start_date').addEventListener('dp.change', updateManualDays);
+    document.getElementById('end_date').addEventListener('dp.change', updateManualDays); {% endcomment %}
+    $('#start_date, #end_date').on('dp.change', updateManualDays)
 
     document.addEventListener('DOMContentLoaded', function() {
         const datePicker = document.getElementById('date-picker');

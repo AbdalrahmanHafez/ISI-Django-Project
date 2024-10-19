@@ -1227,6 +1227,11 @@ def shift_swap(request, original_shift_id, new_shift_id):
     if new_shift.officer == requesting_officer or original_shift.officer != requesting_officer or original_shift.team.team_type != new_shift.team.team_type :
         return HttpResponse("invalid")
 
+    Notification.objects.create(
+        user=new_shift.officer.user,
+        message=f"طلب مبادلة جديد من {requesting_officer.rank} / {requesting_officer.full_name} يحتاج موافقتك.",
+        link=reverse('shift_swap_requests_list')
+    )
 
     shift_swap_request = ShiftSwapRequest.objects.create(
         requesting_officer=requesting_officer,
@@ -1284,9 +1289,28 @@ def approve_shift_request(request, shift_id):
             if current_approver == get_head_of_branch():
                 shift_request.approver = get_final_approver()
                 shift_request.save()
+
+                Notification.objects.create(
+                    user=get_final_approver(),
+                    message=f"طلب مبادلة جديد من {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name} يحتاج موافقتك.",
+                    link=reverse('shift_swap_requests_list')
+                )
+
                 return JsonResponse({'status': 'pending', 'message': 'Shift request pending final approval.'})
             elif current_approver == get_final_approver(): 
-                # actually shift
+
+                Notification.objects.create(
+                    user=get_head_of_branch(),
+                    message= f" تمت الموافقة على طلب مبادلة {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name}.",
+                    link=reverse('shift_swap_requests_list')
+                )
+                Notification.objects.create(
+                    user=shift_request.requesting_officer.user,
+                    message=f"تم التصديق علي طلب مبادلة لك من السيد  /  المدير",
+                    link=reverse('shift_swap_requests_list')
+                )
+
+                # actually swap
                 original_shift = shift_request.original_shift
                 new_shift = shift_request.new_shift
 
@@ -1302,6 +1326,13 @@ def approve_shift_request(request, shift_id):
             else:
                 shift_request.approver = get_head_of_branch()
                 shift_request.save()
+
+                Notification.objects.create(
+                    user=get_head_of_branch(),
+                    message=f"طلب مبادلة جديد من {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name} يحتاج موافقتك.",
+                    link=reverse('shift_swap_requests_list')
+                )
+
                 return JsonResponse({'status': 'pending', 'message': 'Shift request pending head of branch approval.'})
 
         elif decision == 'reject':

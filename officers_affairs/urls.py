@@ -45,6 +45,5 @@ urlpatterns = [
     path('shifts/swap/<int:original_shift_id>/<int:new_shift_id>/', views.shift_swap, name='shift_swap'),
     path('shifts/swap/approve_shift_request/<int:shift_id>', views.approve_shift_request, name='approve_shift_request'),
 
-
     
 ]

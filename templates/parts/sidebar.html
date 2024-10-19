@@ -287,33 +287,28 @@
                 {% endif %}
                 <!-- Change Password Link -->
                 {% if request.user.officer_profile.is_leader or request.user.officer_profile.role %}
-                    <a href="{% url 'leave_requests_list' %}"
-                       class="nav-link"
-                       data-toggle="modal"
-                       data-target="#changePasswordModal">
-                        <i class="nav-icon fas fa-users"></i>
-                        <p>طلبات الاجازة</p>
-                    </a>
+                    <li class="nav-item">
+                        <a href="{% url 'leave_requests_list' %}"
+                        class="nav-link"
+                        data-toggle="modal"
+                        data-target="#changePasswordModal">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>طلبات الاجازة</p>
+                        </a>
+                    </li>
                 {% endif %}
                 {% if request.user.officer_profile.role != 'المدير' %}
-                    <a href="{% url 'leave_requests' %}"
-                       class="nav-link"
-                       data-toggle="modal"
-                       data-target="#changePasswordModal">
-                        <i class="nav-icon fas fa-mug-hot"></i>
-                        <p>طلباتي للاجازة</p>
-                    </a>
+                    <li class="nav-item">
+                        <a href="{% url 'leave_requests' %}"
+                        class="nav-link"
+                        data-toggle="modal"
+                        data-target="#changePasswordModal">
+                            <i class="nav-icon fas fa-mug-hot"></i>
+                            <p>طلباتي للاجازة</p>
+                        </a>
+                    </li>
                 {% endif %}
-                <li class="nav-header">الحساب</li>
-                <li class="nav-item">
-                    <a href="{% url 'change_password' %}"
-                       class="nav-link"
-                       data-toggle="modal"
-                       data-target="#changePasswordModal">
-                        <i class="nav-icon fas fa-key"></i>
-                        <p>تغيير كلمة المرور</p>
-                    </a>
-                </li>
+               
                 <li class="nav-header">النوبطچيات</li>
                 {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
                     <li class="nav-item">
@@ -348,6 +343,18 @@
                         </a>
                     </li>
                 {% endif %}
+
+
+                <li class="nav-header">الحساب</li>
+                <li class="nav-item">
+                    <a href="{% url 'change_password' %}"
+                       class="nav-link"
+                       data-toggle="modal"
+                       data-target="#changePasswordModal">
+                        <i class="nav-icon fas fa-key"></i>
+                        <p>تغيير كلمة المرور</p>
+                    </a>
+                </li>
 
 
             </ul>

@@ -30,9 +30,8 @@ from django.db.models import Q, Min, Max
 from django.utils import timezone
 import re
 import datetime
+import mediapipe as mp
 
-# os.environ['HTTP_PROXY'] = 'http://localhost:3129'
-# os.environ['HTTPS_PROXY'] = 'http://localhost:3129'
 
 def remove_bk(input_image_path, output_image_path):
     try:
@@ -196,7 +195,23 @@ def remove_bg_profile_pic(captured_image_data, pk, form):
         os.remove(original_image_path)
         os.remove(processed_image_path)
 
+def has_face(image_path):
+    # Initialize Mediapipe Face Detection
+    mp_face_detection = mp.solutions.face_detection
+    face_detection = mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5)
 
+    # Load the image
+    image = cv2.imread(image_path)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Detect faces
+    results = face_detection.process(image_rgb)
+
+    # Check if faces are detected
+    face_detection.close()
+    if results.detections:
+        return True
+    return False
 
 @login_required
 @permission_required('officers_affairs.add_officer', raise_exception=True)
@@ -207,7 +222,32 @@ def officers_add(request, pk= None): # creates or Updates an officer
             form = OfficerForm(request.POST, request.FILES, instance= officer)
             if form.is_valid():
                 form.instance.updated_by = request.user
-                remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
+                captured_image_data = request.POST.get('captured_image')
+                if captured_image_data:
+                    image_data = base64.b64decode(captured_image_data.split(',')[1])
+                    temp_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"temp_{officer.pk}.png")
+                    with open(temp_image_path, 'wb') as f:
+                        f.write(image_data)
+
+                    if not has_face(temp_image_path):
+                        os.remove(temp_image_path)
+                        return render(request, "officers_affairs/officer_add.html", {
+                            'form': form,
+                            'error_message': "عفوا هذه الصورة لا تحتوي علي وجه .. حاول التقاط صورة أخري"
+                        })
+
+                    # remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
+                    processed_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"processed_{officer.pk}.png")
+                    remove_bk(temp_image_path, processed_image_path)
+
+                    # Save processed image to officer's profile
+                    with open(processed_image_path, 'rb') as f:
+                        form.instance.profile_image.save(f"processed_{officer.pk}.png", ContentFile(f.read()))
+
+                    # Clean up temporary files
+                    os.remove(temp_image_path)
+                    os.remove(processed_image_path)
+
                 form.save()
                 return HttpResponse(
                     status=204,
@@ -227,7 +267,32 @@ def officers_add(request, pk= None): # creates or Updates an officer
             if form.is_valid():
                 form.instance.created_by = request.user  # Set created_by only when creating
                 form.instance.updated_by = request.user
-                remove_bg_profile_pic(request.POST.get('captured_image'), form.instance.pk, form)
+                captured_image_data = request.POST.get('captured_image')
+                if captured_image_data:
+                    image_data = base64.b64decode(captured_image_data.split(',')[1])
+                    temp_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"temp_{form.instance.pk}.png")
+                    with open(temp_image_path, 'wb') as f:
+                        f.write(image_data)
+
+                    if not has_face(temp_image_path):
+                        os.remove(temp_image_path)
+                        return render(request, "officers_affairs/officer_add.html", {
+                            'form': form,
+                            'error_message': "عفوا هذه الصورة لا تحتوي علي وجه .. حاول التقاط صورة أخري"
+                        })
+
+                    # remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
+                    processed_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"processed_{form.instance.pk}.png")
+                    remove_bk(temp_image_path, processed_image_path)
+
+                    # Save processed image to officer's profile
+                    with open(processed_image_path, 'rb') as f:
+                        form.instance.profile_image.save(f"processed_{form.instance.pk}.png", ContentFile(f.read()))
+
+                    # Clean up temporary files
+                    os.remove(temp_image_path)
+                    os.remove(processed_image_path)
+
                 form.save()
                 return HttpResponse(
                     status=204,

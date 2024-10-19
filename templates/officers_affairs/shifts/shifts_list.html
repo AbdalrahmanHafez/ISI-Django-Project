@@ -6,10 +6,17 @@
 
 
     {% if request.GET.original_shift %}
-        <p class="alert alert-info text-center">الرجاء اختيار نوبطچية جديدة لتبديلها مع النوبطچية الأصلية</p>
-    {% endif %}
+        <p class="alert alert-info text-center">الرجاء اختيار نوبطچية جديدة لتبديلها مع نوبطچية
+            {{original_shift.team.team_type}} 
+            عن يوم
+            {{original_shift.start_date|date:"d-m-Y"|arabic_numbers}} -
+            {{original_shift.officer.rank}} /
+            {{original_shift.officer.full_name}}
+        </p>
         
 
+    {% endif %}
+       
     <table class="table table-bordered table-hover text-center">
         <thead>
             <tr>
@@ -38,7 +45,7 @@
                             {% if request.GET.original_shift == shift.id|to_string %}
                                 المطلوب تبديلها
 
-                            {% elif shift.team.team_type in officer_teams and shift.officer != request.user.officer_profile   %}
+                            {% elif shift.team.team_type in officer_teams and shift.team.team_type == original_shift.team.team_type and shift.officer != request.user.officer_profile   %}
                                 <form method="POST" action="{% url 'shift_swap' request.GET.original_shift shift.id %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-primary">اختر</button>

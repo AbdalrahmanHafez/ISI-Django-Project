@@ -1226,12 +1226,16 @@ def shifts_list(request):
             not_swappable_shifts.add(shift_request.original_shift.pk)
             not_swappable_shifts.add(shift_request.new_shift.pk)
 
+    original_shift = None
+    if 'original_shift' in request.GET:
+        original_shift = get_object_or_404(Shift, pk=request.GET['original_shift'])
 
     context = {
         'shifts': shifts,
         'officer_teams': officer_teams,
         'not_swappable_shifts': not_swappable_shifts,
-        'can_apply_swap_shift': can_apply_swap_shift
+        'can_apply_swap_shift': can_apply_swap_shift,
+        'original_shift': original_shift
     }
 
     return render(request, 'officers_affairs/shifts/shifts_list.html', context)

@@ -29,8 +29,15 @@
                     <td>{{ swap.original_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>{{ swap.new_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>{{ swap.target_officer.full_name }}</td>
-                    <td>{{ swap.get_status_display }}</td>
-
+                    <td>
+                        {% if swap.status == 'approved' %}
+                            <span class="badge bg-success">{{ swap.get_status_display }}</span>
+                        {% elif swap.status == 'rejected' %}
+                            <span class="badge bg-danger">{{ swap.get_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning">{{ swap.get_status_display }}</span>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if swap.approver.officer_profile.role %}
                             {{ swap.approver.officer_profile.role }}
@@ -56,7 +63,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="9" class="text-center">لا توجد طلبات تبديل نوبطچيات.</td>
+                    <td colspan="10" class="text-center">لا توجد طلبات تبديل نوبطچيات.</td>
                 </tr>
             {% endfor %}
         </tbody>

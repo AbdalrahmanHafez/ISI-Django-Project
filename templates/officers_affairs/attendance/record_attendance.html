@@ -23,7 +23,7 @@
                     <td>{{ forloop.counter|arabic_numbers }}</td>
                     <td>{{ officer.rank }}</td>
                     <td>{{ officer.full_name }}</td>
-                    <td>{{ officer.branch }}</td>
+                    <td>{{ officer.branch|default:"-" }}</td>
                     <td>
                         <select name="status_{{ officer.id }}" class="form-control">
                             <option value="">اختر التمام</option> <!-- Placeholder -->

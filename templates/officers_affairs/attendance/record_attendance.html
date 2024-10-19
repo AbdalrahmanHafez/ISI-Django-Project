@@ -3,7 +3,7 @@
 {% load custom_filters %}
 <h2 class="text-center mb-4 section-title">تسجيل التمام اليومي - {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
 
-<div class="container">
+<div class="container d-flex justify-content-center">
     <form method="post" id="attendanceForm">
         {% csrf_token %}
         <table class="table table-bordered table-hover text-center">

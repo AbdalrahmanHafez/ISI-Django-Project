@@ -313,7 +313,7 @@
                 {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
                     <li class="nav-item">
                         <a href="{% url 'assign_shifts' %}" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <i class="nav-icon fas fa-pen"></i>
                             <p>تعيين النوبطچيات</p>
                         </a>
                     </li>
@@ -329,7 +329,7 @@
 
                     <li class="nav-item">
                         <a href="{% url 'shift_swap_requests_list' %}" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <i class="nav-icon fas fa-check-square"></i>
                             <p>المبادلات</p>
                         </a>
                     </li>
@@ -338,7 +338,7 @@
                 {% if request.user.officer_profile.role != 'المدير' %}
                     <li class="nav-item">
                         <a href="{% url 'my-shift-swap-requests' %}" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <i class="nav-icon fas fa-random"></i>
                             <p>مبادلاتي</p>
                         </a>
                     </li>

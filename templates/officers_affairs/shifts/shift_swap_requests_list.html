@@ -48,16 +48,35 @@
 
                     <td>{{ swap.created_at|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>
-                        {% if swap.status == 'approved' %}
-                            <button class="btn btn-outline-secondary" disabled>تم قبول الطلب</button>
-                        {% elif swap.status == 'rejected' %}
-                            <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
-                        {% elif swap.approver == user %}
+                        <!-- If the current user is the approver -->
+                        {% if swap.approver == user and request.user.officer_profile.role != 'المدير' %}
+                            <!-- Show إبداء الرأي button for other approvers -->
+                            {% if swap.status != 'rejected' and swap.status != 'approved' %}
                                 <a href="#"
                                    class="btn btn-primary"
                                    data-bs-toggle="modal"
                                    data-bs-target="#approveModal2"
                                    data-id="{{ swap.id }}">ابداء الرأي</a>
+                            {% else %}
+                                <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
+                            {% endif %}
+                        {% endif %}
+                        {% if  user.officer_profile.role == 'المدير' %}
+                            <a href="#"
+                               class="btn btn-primary"
+                               data-bs-toggle="modal"
+                               data-bs-target="#approveModal"
+                               data-id="{{ swap.id }}">التصديق</a>
+                        {% endif %}
+                        <!-- If the user is not the approver but is رئيس فرع شئون ضباط -->
+                        {% if swap.approver != user and user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                            {% if swap.status == 'approved' %}
+                                <button class="btn btn-outline-secondary" disabled>تم التصديق</button>
+                            {% elif swap.status == 'pending' %}
+                                <button class="btn btn-outline-secondary" disabled>قيد الانتظار</button>
+                            {% elif swap.status == 'rejected' %}
+                                <button class="btn btn-outline-secondary" disabled>تم رفض الطلب</button>
+                            {% endif %}
                         {% endif %}
                     </td>
                 </tr>
@@ -68,6 +87,36 @@
             {% endfor %}
         </tbody>
     </table>
+
+
+<!-- Approval Modal -->
+<div class="modal fade"
+        id="approveModal"
+        tabindex="-1"
+        aria-labelledby="approveModalLabel"
+        aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveModalLabel">تصدقي على الأجازة</h5>
+                <button type="button"
+                        class="close"
+                        style="margin-right: auto"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <strong><span aria-hidden="true">&times;</span></strong>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>قرار التصديق ؟</p>
+                <div class="form-actions">
+                    <button class="btn btn-success" id="acceptBtn">تصدق</button>
+                    <button class="btn btn-danger" id="rejectBtn">لم يتصدق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Approval Modal 2 -->
 <div class="modal fade"
@@ -98,6 +147,31 @@
     </div>
 </div>
 <script>
+    let selectedRequestId;
+
+    $('#approveModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget); // Button that triggered the modal
+        selectedRequestId = button.data('id'); // Extract info from data-* attributes
+    });
+
+    $('#acceptBtn').on('click', function() {
+        $.post("{% url 'approve_shift_request' 0 %}".replace('0', selectedRequestId), {
+            decision: 'accept',
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }, function(response) {
+            location.reload(); // Reload the page to reflect the new status
+        });
+    });
+
+    $('#rejectBtn').on('click', function() {
+        $.post("{% url 'approve_shift_request' 0 %}".replace('0', selectedRequestId), {
+            decision: 'reject',
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }, function(response) {
+            location.reload(); // Reload the page to reflect the new status
+        });
+    });
+
     let selected_swap_id;
 
     $('#approveModal2').on('show.bs.modal', function (event) {

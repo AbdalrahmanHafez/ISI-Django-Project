@@ -1422,7 +1422,7 @@ def approve_shift_request(request, shift_id):
                 Notification.objects.create(
                     user=shift_request.requesting_officer.user,
                     message=f"تم التصديق علي طلب مبادلة لك من السيد  /  المدير",
-                    link=reverse('shift_swap_requests_list')
+                    link=reverse('my-shift-swap-requests')
                 )
 
                 # actually swap
@@ -1453,6 +1453,20 @@ def approve_shift_request(request, shift_id):
         elif decision == 'reject':
             shift_request.status = ShiftSwapRequest.REJECTED
             shift_request.save()
+
+
+            Notification.objects.create(
+                user=get_head_of_branch(),
+                message=f"تم رفض طلب مبادلة ل {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name}",
+                link=reverse('shift_swap_requests_list')
+            )
+
+            Notification.objects.create(
+                user=shift_request.requesting_officer.user,
+                message=f"تم رفض طلب مبادلتك من {shift_request.approver.officer_profile.rank} / {shift_request.approver.officer_profile.full_name}",
+                link=reverse('my-shift-swap-requests')
+            )
+
             return JsonResponse({'status': 'rejected', 'message': 'Shift request rejected.'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request.'})

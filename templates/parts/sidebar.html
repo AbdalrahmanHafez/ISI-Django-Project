@@ -1,4 +1,6 @@
 {% load static %}
+{% load custom_filters %}
+
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <!--begin::Sidebar Brand-->
     <div class="sidebar-brand text-center">
@@ -14,6 +16,28 @@
                 data-lte-toggle="treeview"
                 role="menu"
                 data-accordion="false">
+
+                {% if request.user|in_group:"الافراد" %}
+                    <li class="nav-item">
+                        <a href="{% url 'leave_requests_list' %}"
+                        class="nav-link"
+                        data-toggle="modal"
+                        data-target="#changePasswordModal">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>طلبات الاجازة</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'shifts_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>جدول النوبطچيات</p>
+                        </a>
+                    </li>
+                {% else %}
+
+
+
                 <!-- Officers List -->
                 <li class="nav-item">
                     <a href="{% url 'officers' %}" class="nav-link">
@@ -357,6 +381,7 @@
                 </li>
 
 
+                {% endif %}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

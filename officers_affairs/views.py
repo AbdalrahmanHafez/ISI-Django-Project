@@ -730,7 +730,8 @@ def get_next_approver(current_approver, leave_request):
 
 @login_required
 def leave_requests_list(request):
-    user_officer = request.user.officer_profile
+    afrad = request.user.groups.filter(name="الافراد").exists()
+
     branches = Group.objects.all()
 
     # Roles that can see the leave requests for their approval
@@ -750,34 +751,40 @@ def leave_requests_list(request):
             half = 2 if latest_date.month > 6 else 1
             half_year = f"{half}/{year}"
    
-    # Prepare the leave requests based on user's role
-    if user_officer.role == 'رئيس فرع شئون ضباط':
-        # 'رئيس فرع شئون ضباط' can view all leave requests
-        leave_requests = LeaveRequest.objects.all()
-    elif user_officer.role == 'المدير':
-        # 'المدير' sees only pending requests that need their approval
 
-        # if current approvar == final aproval or
-        leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True) | Q(officer__role__isnull=False) | Q(approver=get_final_approver()))
-    
-    elif  user_officer.role in approver_roles:
-        # Leaders or approvers see only pending requests from their branch that need their approval
-        leave_requests = LeaveRequest.objects.filter(
-            status='pending',
-            approver=request.user  # Only requests where the user is the approver
-        )    
-        
-    elif user_officer.is_leader :
-        # Leaders or approvers see only pending requests from their branch that need their approval
-        leave_requests = LeaveRequest.objects.filter(
-            officer__branch=user_officer.branch,
-            status='pending',
-            approver=request.user  # Only requests where the user is the approver
-        )
-        
+    leave_requests = LeaveRequest.objects.all()
+    if afrad:
+        leave_requests = leave_requests.filter(status= LeaveRequest.APPROVED)
     else:
-        # No requests for users without appropriate roles
-        leave_requests = LeaveRequest.objects.none()
+        user_officer = request.user.officer_profile
+        # Prepare the leave requests based on user's role
+        if user_officer.role == 'رئيس فرع شئون ضباط':
+            # 'رئيس فرع شئون ضباط' can view all leave requests
+            leave_requests = LeaveRequest.objects.all()
+        elif user_officer.role == 'المدير':
+            # 'المدير' sees only pending requests that need their approval
+
+            # if current approvar == final aproval or
+            leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True) | Q(officer__role__isnull=False) | Q(approver=get_final_approver()))
+        
+        elif  user_officer.role in approver_roles:
+            # Leaders or approvers see only pending requests from their branch that need their approval
+            leave_requests = LeaveRequest.objects.filter(
+                status='pending',
+                approver=request.user  # Only requests where the user is the approver
+            )    
+            
+        elif user_officer.is_leader :
+            # Leaders or approvers see only pending requests from their branch that need their approval
+            leave_requests = LeaveRequest.objects.filter(
+                officer__branch=user_officer.branch,
+                status='pending',
+                approver=request.user  # Only requests where the user is the approver
+            )
+            
+        else:
+            # No requests for users without appropriate roles
+            leave_requests = LeaveRequest.objects.none()
     
     if half_year:
         half, year = map(int, half_year.split('/'))
@@ -1210,8 +1217,14 @@ def parade_attendance_list(request):
 def shifts_list(request):
     shifts = Shift.objects.order_by('start_date', 'officer__rank')
 
-    officer_profile = request.user.officer_profile
-    officer_teams = Shift.objects.filter(officer=officer_profile).values_list('team__team_type', flat=True).distinct()
+    afrad = request.user.groups.filter(name="الافراد").exists()
+
+    if afrad:
+        officer_profile = None
+        officer_teams = None
+    else:
+        officer_profile = request.user.officer_profile
+        officer_teams = Shift.objects.filter(officer=officer_profile).values_list('team__team_type', flat=True).distinct()
 
    
     # if a there's a pending shift request on this shift, then it's not swapable
@@ -1219,13 +1232,14 @@ def shifts_list(request):
     not_swappable_shifts = set()  # Use a set to avoid duplicates
     can_apply_swap_shift = True
 
-    for shift_request in ShiftSwapRequest.objects.all():
-        if shift_request.status == ShiftSwapRequest.PENDING and shift_request.requesting_officer == officer_profile:
-            can_apply_swap_shift = False
+    if not afrad:
+        for shift_request in ShiftSwapRequest.objects.all():
+            if shift_request.status == ShiftSwapRequest.PENDING and shift_request.requesting_officer == officer_profile:
+                can_apply_swap_shift = False
 
-        if shift_request.status == ShiftSwapRequest.PENDING:
-            not_swappable_shifts.add(shift_request.original_shift.pk)
-            not_swappable_shifts.add(shift_request.new_shift.pk)
+            if shift_request.status == ShiftSwapRequest.PENDING:
+                not_swappable_shifts.add(shift_request.original_shift.pk)
+                not_swappable_shifts.add(shift_request.new_shift.pk)
 
     original_shift = None
     if 'original_shift' in request.GET:

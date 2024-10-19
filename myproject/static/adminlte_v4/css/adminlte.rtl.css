@@ -15350,3 +15350,13 @@ html.maximized-card {
   width: 32px;
 }
 /*# sourceMappingURL=adminlte.rtl.css.map */
+
+.present {
+  background-color: #d4edda;  /* Green for present */
+  color: #155724;
+}
+
+.absent {
+  background-color: #f8d7da;  /* Red for absent */
+  color: #721c24;
+}

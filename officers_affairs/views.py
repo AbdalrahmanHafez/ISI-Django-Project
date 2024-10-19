@@ -1103,6 +1103,7 @@ def attendance_list(request):
     outside_leader_grant_officers = DailyAttendance.objects.filter(status__name='منحة قائد',date=date_value).count()
     outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=date_value).count()
     outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=date_value).count()
+    outside_command_officers = DailyAttendance.objects.filter(status__name='فرقه',date=date_value).count()
 
     
     attendance_records = sorted(attendance_records, key=lambda record: extract_numeric(record.officer.seniority_number))
@@ -1123,6 +1124,7 @@ def attendance_list(request):
         'outside_leader_grant_officers':outside_leader_grant_officers,
         'outside_grant_officers':outside_grant_officers,
         'outside_travel_officers':outside_travel_officers,
+        'outside_command_officers':outside_command_officers,
     }
     return render(request, 'officers_affairs/attendance/attendance_list.html', context)
 
@@ -1137,50 +1139,66 @@ def record_parade_attendance(request):
     if request.method == 'POST':
         officers = Officer.objects.filter(status__name='قوة')  # Officers currently in the unit
         for officer in officers:
-            status = request.POST.get(f'status_{officer.id}')
+            status = request.POST.get(f'status_{officer.id}')  # Expecting 'حضر' or 'لم يحضر'
             notes = request.POST.get(f'notes_{officer.id}', '')
 
             if status:
-                unit_status_instance, created = UnitStatus.objects.get_or_create(name=status)
+                # Check if there's already a record for this officer on the selected date
                 existing_parade_attendance = MorningParadeAttendance.objects.filter(officer=officer, date=date_value).first()
 
                 if existing_parade_attendance:
-                    if existing_parade_attendance.status != unit_status_instance or existing_parade_attendance.notes != notes:
-                        existing_parade_attendance.status = unit_status_instance
+                    # Update existing record if there's a change
+                    if existing_parade_attendance.status != status or existing_parade_attendance.notes != notes:
+                        existing_parade_attendance.status = status
                         existing_parade_attendance.notes = notes
                         existing_parade_attendance.save()
                 else:
+                    # Create new attendance record if none exists
                     MorningParadeAttendance.objects.create(
                         officer=officer,
                         date=date_value,
-                        status=unit_status_instance,
+                        status=status,
                         notes=notes,
                     )
 
-    officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number').exclude(role='المدير')
-    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number),reverse=False)
-    unit_statuses = UnitStatus.objects.all()
+    officers = Officer.objects.filter(status__name='قوة',unit_status__name='موجود').order_by('seniority_number').exclude(role='المدير')
+    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number), reverse=False)
 
     context = {
         'officers': officers,
-        'unit_statuses': unit_statuses,
         'today': date_value,
     }
     return render(request, 'officers_affairs/parade/record_parade_attendance.html', context)
 
 
 # View to display morning parade attendance
+# View to display morning parade attendance
 def parade_attendance_list(request):
     date_str = request.GET.get('date', None)
     date_value = parse_date(date_str) if date_str else timezone.localtime().date()
 
-    parade_records = MorningParadeAttendance.objects.filter(date=date_value).select_related('officer')
+    # الحصول على سجلات الحضور فقط لهذا التاريخ
+    parade_records = (
+        MorningParadeAttendance.objects
+        .filter(date=date_value)
+        .select_related('officer')
+        .order_by(('officer__seniority_number'))  # ترتيب السجلات حسب seniority_number
+    )
 
+    # ترتيب السجلات حسب seniority_number في Python
+    sorted_parade_records = sorted(
+        parade_records,
+        key=lambda record: extract_numeric(record.officer.seniority_number), reverse=False
+        )
+
+    # إعداد السياق لتمريره إلى القالب
     context = {
-        'parade_records': parade_records,
+        'parade_records': sorted_parade_records,
         'today': date_value,
     }
+    
     return render(request, 'officers_affairs/parade/parade_attendance_list.html', context)
+
 
 
 

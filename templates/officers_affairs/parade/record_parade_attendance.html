@@ -10,10 +10,9 @@
             <thead>
                 <tr>
                     <th>م</th>
-                    <th>رقم الاقدمية</th>
                     <th>الرتبة</th>
                     <th>الأسم</th>
-                    <th>التمام</th>
+                    <th>حالة الحضور</th>
                     <th>ملاحظات</th>
                 </tr>
             </thead>
@@ -21,7 +20,6 @@
                 {% for officer in officers %}
                 <tr>
                     <td>{{ forloop.counter|arabic_numbers }}</td>
-                    <td>{{ officer.seniority_number }}</td>
                     <td>{{ officer.rank }}</td>
                     <td>{{ officer.full_name }}</td>
                     <td>

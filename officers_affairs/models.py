@@ -104,7 +104,7 @@ class Officer(models.Model):
     profile_image = models.ImageField(upload_to='officers/', null=True, blank=True, verbose_name="الصورة الشخصية")
     birth_date = models.DateField(blank=True, null=True, verbose_name="تاريخ الميلاد")
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_unit', verbose_name="الوحدة")
-    join_date = models.DateField(blank=True, null=True, verbose_name="تاريخ الانضمام")
+    join_date = models.DateField(blank=True, null=True, verbose_name="تاريخ الضم")
     previous_unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_units', verbose_name="الوحدة السابقة")
     status = models.ForeignKey(OfficerStatus, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الحالة")
     unit_status = models.ForeignKey(UnitStatus, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الحالة بالوحدة")

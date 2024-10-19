@@ -18,6 +18,10 @@
     <form method="GET"
           action="{% url 'shifts_list' %}"
           class="row g-3 mb-3">
+          {% if request.GET.original_shift %}
+            <input type="hidden" name="original_shift" value="{{request.GET.original_shift}}" /> 
+          {% endif %}
+
         <div class="col-auto">
             <label for="team_type" class="form-label">نوع النوبطچية</label>
             <select name="selected_team_type" id="team_type" class="form-select">

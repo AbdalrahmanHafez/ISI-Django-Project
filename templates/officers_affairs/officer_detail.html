@@ -30,35 +30,35 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">الاسم: {{ officer.full_name }}</li>
-                            <li class="list-group-item">الفرع: {{ officer.branch.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">الرقم العسكري: {{ officer.military_number|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">العنوان: {{ officer.address|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">السلاح: {{ officer.weapon.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">الوحدة الحالية: {{ officer.unit.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">تاريخ الانضمام: {{ officer.join_date|date:"d-m-Y"|arabic_numbers }}</li>
-                            <li class="list-group-item">الحالة: {{ officer.status.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">الحالة بالوحدة: {{ officer.unit_status.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">الوظيفة: {{ officer.job.name|default:"" }}</li>
-                            <li class="list-group-item">تاريخ آخر ترقية: {{ officer.rank_promotion_date|date:"d-m-Y"|arabic_numbers }}</li>
+                    <div class="col-md-6" >
+                        <ul class="list-group list-group-flush " >
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الاسم: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.full_name }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الفرع: </font><font style="font-size: 19px; font-family: sans-serif;">{{ officer.branch.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الرقم العسكري: </font> <font style="font-size: 19px; font-family: sans-serif;" >{{ officer.military_number|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">العنوان: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.address|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">السلاح: </font><font style="font-size: 19px; font-family: sans-serif;" >{{ officer.weapon.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الوحده الحاليه: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.unit.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">تاريخ الانضمام: </font><font style="font-size: 19px; font-family: sans-serif;">{{ officer.join_date|date:"d-m-Y"|arabic_numbers }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الحاله: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.status.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الحاله بالوحده: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.unit_status.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الوظيفه: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.job.name|default:"" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">تاريخ آخر ترقيه : </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.rank_promotion_date|date:"d-m-Y"|arabic_numbers }}</font></li>
                         </ul>
                     </div>
                     <div class="col-md-6">
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item">الرتبة: {{ officer.rank.name }}</li>
-                            <li class="list-group-item">القسم: {{ officer.section.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">رقم الأقدمية: {{ officer.seniority_number|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">الرقم القومي: {{ officer.national_id|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">فصيلة الدم: {{ officer.blood_type.type|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">الوحدة السابقة: {{ officer.previous_unit.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">رقم الهاتف ١: {{ officer.phone1|default:'لا يوجد' }}</li>
-                            <li class="list-group-item">رقم الهاتف ٢: {{ officer.phone2|default:'لا يوجد' }}</li>
-                            {% comment %} <li class="list-group-item">رقم هاتف المنزل: {{ officer.home_phone|default:'لا يوجد' }}</li> {% endcomment %}
-                            <li class="list-group-item">الحالة الإجتماعية: {{ officer.marital_status.name|default:"لا يوجد" }}</li>
-                            <li class="list-group-item">رقم الدفعة: {{ officer.batch_number|default:"" }}</li>
-                            <li class="list-group-item">تاريخ الميلاد: {{ officer.birth_date|date:"d-m-Y"|arabic_numbers }}</li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الرتبه: </font> <font  style="font-size: 19px; font-family: sans-serif;">{{ officer.rank.name }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">القسم: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.section.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;" >رقم الاقدميه: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.seniority_number|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;" >الرقم القومي: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.national_id|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">فصيله الدم: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.blood_type.type|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الوحده السابقه</font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.previous_unit.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">رقم الهاتف ١: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.phone1|default:'لا يوجد' }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">رقم الهاتف ٢: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.phone2|default:'لا يوجد' }}</font></li>
+                            {% comment %} <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">رقم هاتف المنزل: </font><font style="font-size: 19px; font-family: sans-serif;">{{ officer.home_phone|default:'لا يوجد' }}</font></li> {% endcomment %}
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">الحاله الاجتماعيه: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.marital_status.name|default:"لا يوجد" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">رقم الدفعه: </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.batch_number|default:"" }}</font></li>
+                            <li class="list-group-item"><font style="font-size: 20px; font-family: Sans-serif; font-weight: bold;">تاريخ الميلاد : </font> <font style="font-size: 19px; font-family: sans-serif;">{{ officer.birth_date|date:"d-m-Y"|arabic_numbers }}</font></li>
                         </ul>
                     </div>
                 </div>

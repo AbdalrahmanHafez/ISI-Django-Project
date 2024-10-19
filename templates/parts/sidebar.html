@@ -1,5 +1,5 @@
 {% load static %}
-<aside class="app-sidebar bg-body-secondary shadow w-100" data-bs-theme="dark">
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
     <!--begin::Sidebar Brand-->
     <div class="sidebar-brand text-center">
         <a href="{% url 'home' %}" class="brand-link d-block">
@@ -246,7 +246,7 @@
                         <p>عرض التمام اليومي</p>
                     </a>
                 </li>
-                {% comment %} {% if request.user.officer_profile.role or  request.user.officer_profile.is_leader   %}{% endif %}{% endcomment %}
+                
                 {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch_id == 8 %}
                     <li class="nav-item">
                         <a href="{% url 'record_attendance' %}" class="nav-link">
@@ -255,6 +255,24 @@
                         </a>
                     </li>
                 {% endif %}
+
+                <li class="nav-header">الطابور الصباحي</li>
+                <li class="nav-item">
+                    <a href="{% url 'parade_attendance_list' %}" class="nav-link">
+                    <i class="nav-icon fas fa-list"></i>
+                     <p>عرض حضور الطابور الصباحي</p>
+                    </a>
+                </li>
+
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                <li class="nav-item">
+                    <a href="{% url 'record_parade_attendance' %}" class="nav-link">
+                    <i class="nav-icon fas fa-edit"></i>
+                  <p>تسجيل حضور الطابور الصباحي</p>
+                  </a>
+                </li>
+                {% endif %}
+
                 <li class="nav-header">الأجازات</li>
                 {% if request.user.officer_profile.role != 'المدير' %}
                     <li class="nav-item">
@@ -296,6 +314,42 @@
                         <p>تغيير كلمة المرور</p>
                     </a>
                 </li>
+                <li class="nav-header">النوبطچيات</li>
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                    <li class="nav-item">
+                        <a href="{% url 'assign_shifts' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>تعيين النوبطچيات</p>
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="nav-item">
+                    <a href="{% url 'shifts_list' %}" class="nav-link">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>جدول النوبطچيات</p>
+                    </a>
+                </li>
+
+
+                    <li class="nav-item">
+                        <a href="{% url 'shift_swap_requests_list' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>المبادلات</p>
+                        </a>
+                    </li>
+                    
+
+                {% if request.user.officer_profile.role != 'المدير' %}
+                    <li class="nav-item">
+                        <a href="{% url 'my-shift-swap-requests' %}" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <p>مبادلاتي</p>
+                        </a>
+                    </li>
+                {% endif %}
+
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

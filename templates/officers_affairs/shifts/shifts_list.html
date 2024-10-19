@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+    <h2 class="text-center mb-4 section-title">توزيع اطقم النوبطچيات</h2>
+
+
+    {% if request.GET.original_shift %}
+        <p class="alert alert-info text-center">الرجاء اختيار نوبطچية جديدة لتبديلها مع النوبطچية الأصلية</p>
+    {% endif %}
+        
+
+    <table class="table table-bordered table-hover text-center">
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>نوع النبطشية</th>
+                <th>الاســم</th>
+                <th>الفــرع</th>
+                <th>تاريخ</th>
+                <th>عطلة</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shift in shifts %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ shift.team.team_type }}</td>
+                    <td>{{ shift.officer.rank.name }}/{{ shift.officer.full_name }}</td>
+                    <td>{{ shift.officer.branch }}</td>
+                    <td>{{ shift.start_date }}</td>
+                    <td>{{ shift.is_holiday }}</td>
+                    <td>
+                        {% if request.GET.original_shift %}
+                            {% if request.GET.original_shift == shift.id|to_string %}
+                                المطلوب تبديلها
+
+                            {% elif shift.team.team_type in officer_teams and shift.officer != request.user.officer_profile   %}
+                                <form method="POST" action="{% url 'shift_swap' request.GET.original_shift shift.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">اختر</button>
+                                </form>
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% else %}
+                            {% if request.user.officer_profile == shift.officer and shift.pk not in not_swappable_shifts and can_apply_swap_shift %}
+                                <a href="?original_shift={{ shift.id }}" class="btn btn-primary">تبديل</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock content %}

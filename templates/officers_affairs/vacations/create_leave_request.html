@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load django_bootstrap5 %}
+{% load custom_filters %}
 {% block content %}
-  <div class="container mt-5">
+  <div class="container mt-5 d-flex justify-content-center">
     <div class="row">
       <div class="col-md-40">
         <div class="card shadow-lg">
@@ -56,7 +57,7 @@
               <div class="col">
                 <div class="text-center border-end">
                   <h5 class="fw-bold mb-0">
-                    {{ remaining_days_per_type.annual }} <span class="fw-normal fs-6">/15</span>
+                    {{ remaining_days_per_type.annual|arabic_numbers }} <span class="fw-normal fs-6">/{{15|arabic_numbers}}</span>
                   </h5>
                   <span class="text-uppercase">سنوية</span>
                 </div>
@@ -64,7 +65,7 @@
               <div class="col">
                 <div class="text-center border-end">
                   <h5 class="fw-bold mb-0">
-                    {{ remaining_days_per_type.casual }} <span class="fw-normal fs-6">/7</span>
+                    {{ remaining_days_per_type.casual|arabic_numbers }} <span class="fw-normal fs-6">/{{7|arabic_numbers}}</span>
                   </h5>
                   <span class="text-uppercase">عارضة</span>
                 </div>
@@ -83,11 +84,15 @@ $(document).ready(function() {
   // Show compensation_date only if بدل راحة is slected
   const leave_type = $('#id_leave_type');
   const compensation_date = $('#id_compensation_date');
+  const label_compensation_date = $('label[for="id_compensation_date"]');
+
   function update_state_compensation() {
       if (leave_type.val() === "instead_of_rest") {
           compensation_date.show();
+          label_compensation_date.show();
       } else {
           compensation_date.hide();
+          label_compensation_date.hide();
       }
   }
 

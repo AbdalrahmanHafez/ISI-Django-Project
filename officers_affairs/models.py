@@ -206,9 +206,9 @@ class ShiftTeam(models.Model):
         ('قائد منوب', 'قائد منوب'),
         ('ضابط نوبطچي', 'ضابط نوبطچي')
     ]
-    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES)
-    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='shift_teams')
-    created_at = models.DateTimeField(auto_now_add=True)
+    team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES, verbose_name="نوع الطاقم")
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='shift_teams', verbose_name="الضابط")
+    created_at = models.DateTimeField(auto_now_add=True,verbose_name="تاريخ الإنشاء")
 
 
 class Shift(models.Model):
@@ -220,9 +220,41 @@ class Shift(models.Model):
 
 
 class ShiftSwapRequest(models.Model):
-    requesting_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_requests')
-    target_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_targets')
-    original_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='original_shift')
-    new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True)
-    is_approved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    
+    STATUS_CHOICES = [
+        (PENDING, 'جـاري التصديــق'),
+        (APPROVED, 'تصــدق'),
+        (REJECTED, 'لم يتصدق'),
+    ]
+
+    requesting_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_requests', verbose_name="الضابط المقدم للطلب")
+    target_officer = models.ForeignKey(Officer, on_delete=models.CASCADE, related_name='swap_targets', verbose_name="الضابط المستهدف")
+    original_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='original_shift', verbose_name="النوبطچية الأصلية")
+    new_shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name='new_shift', null=True, blank=True, verbose_name="النوبطچية الجديدة")
+    status = models.CharField(max_length=200, choices=STATUS_CHOICES, default=PENDING, verbose_name="الحالة")
+    final_approver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='ShiftSwapRequest', verbose_name="المصدق النهائي")
+    approver = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="المصدق الحالي")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+
+
+class MorningParadeAttendance(models.Model):
+    ATTENDANCE_STATUS_CHOICES = [
+        ('حضر', 'حضر'),
+        ('لم يحضر', 'لم يحضر'),
+    ]
+
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE, verbose_name="الضابط")
+    date = models.DateField(default=timezone.now, verbose_name="التاريخ")
+    status = models.CharField(max_length=20, choices=ATTENDANCE_STATUS_CHOICES, verbose_name="حالة الحضور")
+    notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات")
+
+    class Meta:
+        unique_together = ('officer', 'date')
+        verbose_name = 'حضور الطابور الصباحي'
+        verbose_name_plural = 'حضور الطابور الصباحي'
+
+    def __str__(self):
+        return f"{self.officer.full_name} - {self.date} - {self.status}"

@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'officers_affairs.context_processor.sidebarforms',
                 
                 
             ],
@@ -94,6 +95,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
+BOOTSTRAP5 = {
+    # https://django-bootstrap5.readthedocs.io/en/latest/settings.html
+    "css_url": "/static/css/bootstrap.min.css",
+    "javascript_url": "/static/js/bootstrap.bundle.min.js"
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

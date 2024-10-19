@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block content %}
+<h2 class="text-center mb-4 section-title">تسجيل حضور الطابور الصباحي - {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        <table class="table table-bordered table-hover text-center">
+            <thead>
+                <tr>
+                    <th>م</th>
+                    <th>الرتبة</th>
+                    <th>الأسم</th>
+                    <th>حالة الحضور</th>
+                    <th>ملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for officer in officers %}
+                <tr>
+                    <td>{{ forloop.counter|arabic_numbers }}</td>
+                    <td>{{ officer.rank }}</td>
+                    <td>{{ officer.full_name }}</td>
+                    <td>
+                        <select name="status_{{ officer.id }}" class="form-control">
+                            <option value="">اختر التمام</option>
+                            <option value="حضر">حضر</option>
+                            <option value="لم يحضر">لم يحضر</option>
+                        </select>
+                    </td>
+                    
+                    <td>
+                        <input type="text" name="notes_{{ officer.id }}" class="form-control" placeholder="أضف ملاحظة (اختياري)">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">حفظ الحضور</button>
+    </form>
+</div>
+{% endblock %}

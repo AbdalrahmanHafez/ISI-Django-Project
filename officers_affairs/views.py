@@ -1212,6 +1212,7 @@ def shifts_list(request):
 
     officer_profile = request.user.officer_profile
     officer_teams = Shift.objects.filter(officer=officer_profile).values_list('team__team_type', flat=True).distinct()
+
    
     # if a there's a pending shift request on this shift, then it's not swapable
     # if the current officer has a pending request, then no swap can be made at all
@@ -1230,12 +1231,76 @@ def shifts_list(request):
     if 'original_shift' in request.GET:
         original_shift = get_object_or_404(Shift, pk=request.GET['original_shift'])
 
+    # Filtering
+    selected_team_type = request.GET.get('selected_team_type')
+    selected_date = request.GET.get('selected_date')
+    selected_officer_name = request.GET.get('selected_officer_name', '').strip()
+    selected_branch_id = request.GET.get('selected_branch')
+    selected_half_year = request.GET.get('selected_half_year') 
+
+    if selected_team_type:
+        shifts = shifts.filter(team__team_type= selected_team_type)
+    if selected_date:
+        shifts = shifts.filter(start_date=selected_date)
+    if selected_officer_name:
+        shifts = shifts.filter(officer__full_name__icontains=selected_officer_name)
+    if selected_branch_id:
+        shifts = shifts.filter(officer__branch_id=selected_branch_id)
+    if not selected_half_year:
+        latest_date = Shift.objects.aggregate(latest=Max('start_date'))['latest']
+        if latest_date:
+            year = latest_date.year
+            half = 2 if latest_date.month > 6 else 1
+            selected_half_year = f"{half}/{year}"
+    if selected_half_year:
+        half, year = map(int, selected_half_year.split('/'))
+        start_date = datetime.date(year, 1 if half == 1 else 7, 1)
+        end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
+        shifts = shifts.filter(start_date__range=(start_date, end_date))
+
+
+    # Determine half-year options based on available data
+    date_range = Shift.objects.aggregate(
+        earliest=Min('start_date'), latest=Max('start_date')
+    )
+    half_years = []
+    if date_range['earliest'] and date_range['latest']:
+        current_date = date_range['earliest']
+        while current_date <= date_range['latest']:
+            # Check if there are requests in the first half
+            if Shift.objects.filter(
+                start_date__range=(datetime.date(current_date.year, 1, 1), datetime.date(current_date.year, 6, 30))
+            ).exists():
+                half_years.append((f'1/{current_date.year}', f'{current_date.year} النصف الاول'))
+            
+            # Check if there are requests in the second half
+            if Shift.objects.filter(
+                start_date__range=(datetime.date(current_date.year, 7, 1), datetime.date(current_date.year, 12, 31))
+            ).exists():
+                half_years.append((f'2/{current_date.year}', f'{current_date.year} النصف الثاني'))
+
+            current_date = current_date.replace(year=current_date.year + 1)
+        
+
+    branches = Group.objects.all()
+    team_types = ShiftTeam.objects.values_list('team_type', flat=True).distinct()
+
+
     context = {
         'shifts': shifts,
         'officer_teams': officer_teams,
         'not_swappable_shifts': not_swappable_shifts,
         'can_apply_swap_shift': can_apply_swap_shift,
-        'original_shift': original_shift
+        'original_shift': original_shift,
+        'team_types': team_types,
+
+        'selected_team_type': selected_team_type,
+        'selected_date': selected_date,
+        'selected_officer_name': selected_officer_name,
+        'selected_branch_id': selected_branch_id,
+        'branches': branches, 
+        'selected_half_year': selected_half_year,
+        'half_years': half_years,
     }
 
     return render(request, 'officers_affairs/shifts/shifts_list.html', context)

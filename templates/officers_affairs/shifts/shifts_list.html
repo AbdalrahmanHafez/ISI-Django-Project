@@ -13,9 +13,62 @@
             {{original_shift.officer.rank}} /
             {{original_shift.officer.full_name}}
         </p>
-        
-
     {% endif %}
+
+    <form method="GET"
+          action="{% url 'shifts_list' %}"
+          class="row g-3 mb-3">
+        <div class="col-auto">
+            <label for="team_type" class="form-label">نوع النوبطچية</label>
+            <select name="selected_team_type" id="team_type" class="form-select">
+                <option value="" {% if not selected_status %}selected{% endif %}>الكل</option>
+                {% for team_type in team_types %}
+                    <option value="{{ team_type }}"
+                        {% if selected_team_type == team_type %}selected{% endif %}>{{ team_type }} </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="shift_date" class="form-label">بتاريخ تقديم الطلب</label>
+            <input id="shift_date"
+                   name="selected_date"
+                   class="hijri-picker form-control"
+                   value="{{ selected_date }}">
+        </div>
+        <div class="col-auto">
+            <label for="officer_name" class="form-label">اسم الضابط</label>
+            <input type="text"
+                   name="selected_officer_name"
+                   id="officer_name"
+                   class="form-control"
+                   value="{{ selected_officer_name }}">
+        </div>
+        <div class="col-auto">
+            <label for="branch" class="form-label">اختر الفرع</label>
+            <select name="selected_branch" id="branch" class="form-select">
+                <option value="">جميع الأفرع</option>
+                {% for branch in branches %}
+                    <option value="{{ branch.id }}"
+                            {% if branch.id|to_string == selected_branch_id %}selected{% endif %}>
+                        {{ branch.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <label for="half_year" class="form-label">نصف السنة</label>
+            <select name="selected_half_year" id="half_year" class="form-select">
+                {% for value, label in half_years %}
+                    <option value="{{ value }}" {% if selected_half_year == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-auto d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">بحث</button>
+        </div>
+    </form>
        
     <table class="table table-bordered table-hover text-center">
         <thead>
@@ -61,6 +114,11 @@
                             {% endif %}
                         {% endif %}
                     </td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">لا يوجد</td>
                 </tr>
             {% endfor %}
         </tbody>

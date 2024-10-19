@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, timedelta
 from django.contrib import messages
 from venv import logger
 from django.shortcuts import redirect, render, get_object_or_404
@@ -9,13 +9,13 @@ from django.db.models import Case, When, Value, IntegerField
 from django.db.models.functions import Cast
 import base64
 from django.core.files.base import ContentFile
-
+from django.contrib.auth.decorators import user_passes_test
+from django.db import transaction
 import cv2
 from rembg import remove
 import numpy as np
 import os
 from django.conf import settings
-
 from .models import *
 from .forms import BranchForm,  JobForm, LeaveRequestForm, OffUnitStatusForm, OfficerForm, OfficerStatusForm,RankForm, SectionForm, UnitForm, WeaponForm
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseRedirect
@@ -29,9 +29,9 @@ from django.utils.timezone import now
 from django.db.models import Q, Min, Max
 from django.utils import timezone
 import re
+import datetime
+import mediapipe as mp
 
-# os.environ['HTTP_PROXY'] = 'http://localhost:3129'
-# os.environ['HTTPS_PROXY'] = 'http://localhost:3129'
 
 def remove_bk(input_image_path, output_image_path):
     try:
@@ -75,7 +75,6 @@ def handle_captured_image(request, officer_instance):
         ext = format.split('/')[-1]
         # Create a ContentFile and save it as profile_image
         officer_instance.profile_image.save(f'officer_{officer_instance.pk}.{ext}', ContentFile(base64.b64decode(imgstr)))
-
 
 
 
@@ -147,27 +146,25 @@ def officers_home_view(request):
         'status': OfficerStatus.objects.filter(name="قوة"),
     }
 
+    if(len(request.GET) == 0): # if no params default to قوة
+        newParams = request.GET.copy()
+        newParams['status'] = officerFilterDefault['status'][0].pk
+        return redirect(f"{request.path}?{newParams.urlencode()}")
+
+
     context= {
         'ranks':Rank.objects.all(),
         'form': OfficerForm(),
         'officers_filter': filters.OfficerFilter(request.GET or officerFilterDefault),
         'count_officers_total': Officer.objects.count(),
         'count_officers_availble': Officer.objects.filter(unit_status__name="موجود").count(),
-        'formweapon':WeaponForm(),
-        'formunit':UnitForm(),
-        'formbranch':BranchForm(),
-        'formsection':SectionForm(),
-        'formjob':JobForm(),
-        'formrank':RankForm(),
-        'formoffunitstat':OffUnitStatusForm(),
-        'formoffstat':OfficerStatusForm(),
-        
         'unread_notifications': unread_notifications,
         'today':today,
         'total_officers':total_officers,
         'inside_officers':inside_officers,
         'outside_officers': outside_officers,
     }
+
 
     return render(request, 'officers_affairs/home.html', context)
 
@@ -198,6 +195,23 @@ def remove_bg_profile_pic(captured_image_data, pk, form):
         os.remove(original_image_path)
         os.remove(processed_image_path)
 
+def has_face(image_path):
+    # Initialize Mediapipe Face Detection
+    mp_face_detection = mp.solutions.face_detection
+    face_detection = mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5)
+
+    # Load the image
+    image = cv2.imread(image_path)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Detect faces
+    results = face_detection.process(image_rgb)
+
+    # Check if faces are detected
+    face_detection.close()
+    if results.detections:
+        return True
+    return False
 
 @login_required
 @permission_required('officers_affairs.add_officer', raise_exception=True)
@@ -208,7 +222,32 @@ def officers_add(request, pk= None): # creates or Updates an officer
             form = OfficerForm(request.POST, request.FILES, instance= officer)
             if form.is_valid():
                 form.instance.updated_by = request.user
-                remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
+                captured_image_data = request.POST.get('captured_image')
+                if captured_image_data:
+                    image_data = base64.b64decode(captured_image_data.split(',')[1])
+                    temp_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"temp_{officer.pk}.png")
+                    with open(temp_image_path, 'wb') as f:
+                        f.write(image_data)
+
+                    if not has_face(temp_image_path):
+                        os.remove(temp_image_path)
+                        return render(request, "officers_affairs/officer_add.html", {
+                            'form': form,
+                            'error_message': "عفوا هذه الصورة لا تحتوي علي وجه .. حاول التقاط صورة أخري"
+                        })
+
+                    # remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
+                    processed_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"processed_{officer.pk}.png")
+                    remove_bk(temp_image_path, processed_image_path)
+
+                    # Save processed image to officer's profile
+                    with open(processed_image_path, 'rb') as f:
+                        form.instance.profile_image.save(f"processed_{officer.pk}.png", ContentFile(f.read()))
+
+                    # Clean up temporary files
+                    os.remove(temp_image_path)
+                    os.remove(processed_image_path)
+
                 form.save()
                 return HttpResponse(
                     status=204,
@@ -228,7 +267,32 @@ def officers_add(request, pk= None): # creates or Updates an officer
             if form.is_valid():
                 form.instance.created_by = request.user  # Set created_by only when creating
                 form.instance.updated_by = request.user
-                remove_bg_profile_pic(request.POST.get('captured_image'), form.instance.pk, form)
+                captured_image_data = request.POST.get('captured_image')
+                if captured_image_data:
+                    image_data = base64.b64decode(captured_image_data.split(',')[1])
+                    temp_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"temp_{form.instance.pk}.png")
+                    with open(temp_image_path, 'wb') as f:
+                        f.write(image_data)
+
+                    if not has_face(temp_image_path):
+                        os.remove(temp_image_path)
+                        return render(request, "officers_affairs/officer_add.html", {
+                            'form': form,
+                            'error_message': "عفوا هذه الصورة لا تحتوي علي وجه .. حاول التقاط صورة أخري"
+                        })
+
+                    # remove_bg_profile_pic(request.POST.get('captured_image'), officer.pk, form)
+                    processed_image_path = os.path.join(settings.MEDIA_ROOT, 'officers', f"processed_{form.instance.pk}.png")
+                    remove_bk(temp_image_path, processed_image_path)
+
+                    # Save processed image to officer's profile
+                    with open(processed_image_path, 'rb') as f:
+                        form.instance.profile_image.save(f"processed_{form.instance.pk}.png", ContentFile(f.read()))
+
+                    # Clean up temporary files
+                    os.remove(temp_image_path)
+                    os.remove(processed_image_path)
+
                 form.save()
                 return HttpResponse(
                     status=204,
@@ -364,7 +428,7 @@ def officers_list(request):
 
     ctx={
         'ranks':Rank.objects.all(),
-        'officers_filter': filters.OfficerFilter(request.GET or officerFilterDefault),
+        'officers_filter': filters.OfficerFilter(request.GET),
     }
     return render(request, 'officers_affairs/officer_list.html', ctx)
 
@@ -394,9 +458,6 @@ def get_initial_approver(officer_profile):
 
 
 
-from django.utils import timezone
-import datetime
-from .models import LeaveRequest
 
 def get_remaining_days(officer, leave_type):
     today = timezone.now().date()  # التأكد من أن today هو كائن date
@@ -734,7 +795,8 @@ def get_next_approver(current_approver, leave_request):
 
 @login_required
 def leave_requests_list(request):
-    user_officer = request.user.officer_profile
+    afrad = request.user.groups.filter(name="الافراد").exists()
+
     branches = Group.objects.all()
 
     # Roles that can see the leave requests for their approval
@@ -754,34 +816,40 @@ def leave_requests_list(request):
             half = 2 if latest_date.month > 6 else 1
             half_year = f"{half}/{year}"
    
-    # Prepare the leave requests based on user's role
-    if user_officer.role == 'رئيس فرع شئون ضباط':
-        # 'رئيس فرع شئون ضباط' can view all leave requests
-        leave_requests = LeaveRequest.objects.all()
-    elif user_officer.role == 'المدير':
-        # 'المدير' sees only pending requests that need their approval
 
-        # if current approvar == final aproval or
-        leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True) | Q(officer__role__isnull=False) | Q(approver=get_final_approver()))
-    
-    elif  user_officer.role in approver_roles:
-        # Leaders or approvers see only pending requests from their branch that need their approval
-        leave_requests = LeaveRequest.objects.filter(
-            status='pending',
-            approver=request.user  # Only requests where the user is the approver
-        )    
-        
-    elif user_officer.is_leader :
-        # Leaders or approvers see only pending requests from their branch that need their approval
-        leave_requests = LeaveRequest.objects.filter(
-            officer__branch=user_officer.branch,
-            status='pending',
-            approver=request.user  # Only requests where the user is the approver
-        )
-        
+    leave_requests = LeaveRequest.objects.all()
+    if afrad:
+        leave_requests = leave_requests.filter(status= LeaveRequest.APPROVED)
     else:
-        # No requests for users without appropriate roles
-        leave_requests = LeaveRequest.objects.none()
+        user_officer = request.user.officer_profile
+        # Prepare the leave requests based on user's role
+        if user_officer.role == 'رئيس فرع شئون ضباط':
+            # 'رئيس فرع شئون ضباط' can view all leave requests
+            leave_requests = LeaveRequest.objects.all()
+        elif user_officer.role == 'المدير':
+            # 'المدير' sees only pending requests that need their approval
+
+            # if current approvar == final aproval or
+            leave_requests = LeaveRequest.objects.exclude(status='approved').exclude(status='rejected',approver=get_final_approver()).filter(Q(officer__is_leader=True) | Q(officer__role__isnull=False) | Q(approver=get_final_approver()))
+        
+        elif  user_officer.role in approver_roles:
+            # Leaders or approvers see only pending requests from their branch that need their approval
+            leave_requests = LeaveRequest.objects.filter(
+                status='pending',
+                approver=request.user  # Only requests where the user is the approver
+            )    
+            
+        elif user_officer.is_leader :
+            # Leaders or approvers see only pending requests from their branch that need their approval
+            leave_requests = LeaveRequest.objects.filter(
+                officer__branch=user_officer.branch,
+                status='pending',
+                approver=request.user  # Only requests where the user is the approver
+            )
+            
+        else:
+            # No requests for users without appropriate roles
+            leave_requests = LeaveRequest.objects.none()
     
     if half_year:
         half, year = map(int, half_year.split('/'))
@@ -1065,7 +1133,7 @@ def record_attendance(request):
                     #     })
                     # })
 
-    # GET request: Fetch officers with status "موجود"
+    # GET request: Fetch officers with status "قوة"
     officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number')
     officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number))
 
@@ -1107,6 +1175,7 @@ def attendance_list(request):
     outside_leader_grant_officers = DailyAttendance.objects.filter(status__name='منحة قائد',date=date_value).count()
     outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=date_value).count()
     outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=date_value).count()
+    outside_command_officers = DailyAttendance.objects.filter(status__name='فرقه',date=date_value).count()
 
     
     attendance_records = sorted(attendance_records, key=lambda record: extract_numeric(record.officer.seniority_number))
@@ -1127,5 +1196,453 @@ def attendance_list(request):
         'outside_leader_grant_officers':outside_leader_grant_officers,
         'outside_grant_officers':outside_grant_officers,
         'outside_travel_officers':outside_travel_officers,
+        'outside_command_officers':outside_command_officers,
     }
     return render(request, 'officers_affairs/attendance/attendance_list.html', context)
+
+
+
+# حضور الطابور الصباحي
+# View to record morning parade attendance
+def record_parade_attendance(request):
+    date_str = request.GET.get('date', None)
+    date_value = parse_date(date_str) if date_str else timezone.localtime().date()
+
+    if request.method == 'POST':
+        officers = Officer.objects.filter(status__name='قوة')  # Officers currently in the unit
+        for officer in officers:
+            status = request.POST.get(f'status_{officer.id}')  # Expecting 'حضر' or 'لم يحضر'
+            notes = request.POST.get(f'notes_{officer.id}', '')
+
+            if status:
+                # Check if there's already a record for this officer on the selected date
+                existing_parade_attendance = MorningParadeAttendance.objects.filter(officer=officer, date=date_value).first()
+
+                if existing_parade_attendance:
+                    # Update existing record if there's a change
+                    if existing_parade_attendance.status != status or existing_parade_attendance.notes != notes:
+                        existing_parade_attendance.status = status
+                        existing_parade_attendance.notes = notes
+                        existing_parade_attendance.save()
+                else:
+                    # Create new attendance record if none exists
+                    MorningParadeAttendance.objects.create(
+                        officer=officer,
+                        date=date_value,
+                        status=status,
+                        notes=notes,
+                    )
+        return redirect(reverse("parade_attendance_list"))
+
+    officers = Officer.objects.filter(status__name='قوة',unit_status__name='موجود').order_by('seniority_number').exclude(role='المدير')
+    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number), reverse=False)
+
+    context = {
+        'officers': officers,
+        'today': date_value,
+    }
+    return render(request, 'officers_affairs/parade/record_parade_attendance.html', context)
+
+
+# View to display morning parade attendance
+# View to display morning parade attendance
+def parade_attendance_list(request):
+    date_str = request.GET.get('date', None)
+    date_value = parse_date(date_str) if date_str else timezone.localtime().date()
+
+    # الحصول على سجلات الحضور فقط لهذا التاريخ
+    parade_records = (
+        MorningParadeAttendance.objects
+        .filter(date=date_value)
+        .select_related('officer')
+        .order_by(('officer__seniority_number'))  # ترتيب السجلات حسب seniority_number
+    )
+
+    # ترتيب السجلات حسب seniority_number في Python
+    sorted_parade_records = sorted(
+        parade_records,
+        key=lambda record: extract_numeric(record.officer.seniority_number), reverse=False
+        )
+
+    # إعداد السياق لتمريره إلى القالب
+    context = {
+        'parade_records': sorted_parade_records,
+        'today': date_value,
+    }
+    
+    return render(request, 'officers_affairs/parade/parade_attendance_list.html', context)
+
+
+
+
+
+
+# النبطشيات
+
+def shifts_list(request):
+    shifts = Shift.objects.order_by('start_date', 'officer__rank')
+
+    afrad = request.user.groups.filter(name="الافراد").exists()
+
+    if afrad:
+        officer_profile = None
+        officer_teams = None
+    else:
+        officer_profile = request.user.officer_profile
+        officer_teams = Shift.objects.filter(officer=officer_profile).values_list('team__team_type', flat=True).distinct()
+
+   
+    # if a there's a pending shift request on this shift, then it's not swapable
+    # if the current officer has a pending request, then no swap can be made at all
+    not_swappable_shifts = set()  # Use a set to avoid duplicates
+    can_apply_swap_shift = True
+
+    if not afrad:
+        for shift_request in ShiftSwapRequest.objects.all():
+            if shift_request.status == ShiftSwapRequest.PENDING and shift_request.requesting_officer == officer_profile:
+                can_apply_swap_shift = False
+
+            if shift_request.status == ShiftSwapRequest.PENDING:
+                not_swappable_shifts.add(shift_request.original_shift.pk)
+                not_swappable_shifts.add(shift_request.new_shift.pk)
+
+    original_shift = None
+    if 'original_shift' in request.GET:
+        original_shift = get_object_or_404(Shift, pk=request.GET['original_shift'])
+
+    # Filtering
+    selected_team_type = request.GET.get('selected_team_type')
+    selected_date = request.GET.get('selected_date')
+    selected_officer_name = request.GET.get('selected_officer_name', '').strip()
+    selected_branch_id = request.GET.get('selected_branch')
+    selected_half_year = request.GET.get('selected_half_year') 
+
+    if selected_team_type:
+        shifts = shifts.filter(team__team_type= selected_team_type)
+    if selected_date:
+        shifts = shifts.filter(start_date=selected_date)
+    if selected_officer_name:
+        shifts = shifts.filter(officer__full_name__icontains=selected_officer_name)
+    if selected_branch_id:
+        shifts = shifts.filter(officer__branch_id=selected_branch_id)
+    if not selected_half_year:
+        latest_date = Shift.objects.aggregate(latest=Max('start_date'))['latest']
+        if latest_date:
+            year = latest_date.year
+            half = 2 if latest_date.month > 6 else 1
+            selected_half_year = f"{half}/{year}"
+    if selected_half_year:
+        half, year = map(int, selected_half_year.split('/'))
+        start_date = datetime.date(year, 1 if half == 1 else 7, 1)
+        end_date = datetime.date(year, 6, 30) if half == 1 else datetime.date(year, 12, 31)
+        shifts = shifts.filter(start_date__range=(start_date, end_date))
+
+
+    # Determine half-year options based on available data
+    date_range = Shift.objects.aggregate(
+        earliest=Min('start_date'), latest=Max('start_date')
+    )
+    half_years = []
+    if date_range['earliest'] and date_range['latest']:
+        current_date = date_range['earliest']
+        while current_date <= date_range['latest']:
+            # Check if there are requests in the first half
+            if Shift.objects.filter(
+                start_date__range=(datetime.date(current_date.year, 1, 1), datetime.date(current_date.year, 6, 30))
+            ).exists():
+                half_years.append((f'1/{current_date.year}', f'{current_date.year} النصف الاول'))
+            
+            # Check if there are requests in the second half
+            if Shift.objects.filter(
+                start_date__range=(datetime.date(current_date.year, 7, 1), datetime.date(current_date.year, 12, 31))
+            ).exists():
+                half_years.append((f'2/{current_date.year}', f'{current_date.year} النصف الثاني'))
+
+            current_date = current_date.replace(year=current_date.year + 1)
+        
+
+    branches = Group.objects.all()
+    team_types = ShiftTeam.objects.values_list('team_type', flat=True).distinct()
+
+    paginator = Paginator(shifts, 10)  # Show 10 requests per page
+    page_number = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)  # If page is not an integer, deliver first page
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
+
+
+    context = {
+        'shifts': page_obj,
+        'officer_teams': officer_teams,
+        'not_swappable_shifts': not_swappable_shifts,
+        'can_apply_swap_shift': can_apply_swap_shift,
+        'original_shift': original_shift,
+        'team_types': team_types,
+
+        'selected_team_type': selected_team_type,
+        'selected_date': selected_date,
+        'selected_officer_name': selected_officer_name,
+        'selected_branch_id': selected_branch_id,
+        'branches': branches, 
+        'selected_half_year': selected_half_year,
+        'half_years': half_years,
+        'page_obj': page_obj,
+    }
+
+    return render(request, 'officers_affairs/shifts/shifts_list.html', context)
+
+def shift_swap(request, original_shift_id, new_shift_id):
+    requesting_officer = request.user.officer_profile
+    
+    original_shift = get_object_or_404(Shift, id=original_shift_id)
+    new_shift = get_object_or_404(Shift, id=new_shift_id)
+    
+    # switch with self | invlid request | different shift types
+    if new_shift.officer == requesting_officer or original_shift.officer != requesting_officer or original_shift.team.team_type != new_shift.team.team_type :
+        return HttpResponse("invalid")
+
+    Notification.objects.create(
+        user=new_shift.officer.user,
+        message=f"طلب مبادلة جديد من {requesting_officer.rank} / {requesting_officer.full_name} يحتاج موافقتك.",
+        link=reverse('shift_swap_requests_list')
+    )
+
+    shift_swap_request = ShiftSwapRequest.objects.create(
+        requesting_officer=requesting_officer,
+        target_officer=new_shift.officer,
+        original_shift=original_shift,
+        new_shift=new_shift,
+        approver= new_shift.officer.user,
+        final_approver= get_final_approver(),
+    )
+
+    return redirect(reverse('my-shift-swap-requests'))
+
+def my_shift_swap_requests(request):
+    requesting_officer = request.user.officer_profile
+
+    swap_requests = ShiftSwapRequest.objects.filter(requesting_officer=requesting_officer)
+
+    context = {
+        'swap_requests': swap_requests,
+    }
+
+    swap_requests.order_by('-created_at')
+
+    return render(request, 'officers_affairs/shifts/my_shift_swap_requests.html', context)
+
+
+def shift_swap_requests_list(request):
+    swap_requests = ShiftSwapRequest.objects.all()
+    requesting_officer = request.user.officer_profile
+   
+
+    if request.user == get_head_of_branch():
+        pass
+    elif request.user == get_final_approver():
+        swap_requests = swap_requests.filter(approver= requesting_officer.user, status= ShiftSwapRequest.PENDING)
+    else:
+        swap_requests = swap_requests.filter(approver= requesting_officer.user)
+
+
+    # Sorting: Show requests needing the current user's approval first, then by date (newest to oldest), then by rank
+    swap_requests = swap_requests.annotate(
+        needs_approval=Case(
+            When(approver=request.user,  status='pending', then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        )
+    ).order_by(
+        '-needs_approval',      # Priority to requests needing approval from the current user
+        '-created_at',           # Sort by submission date (newest to oldest)
+    )
+
+
+    context = {
+        'swap_requests': swap_requests,
+    }
+
+
+    return render(request, 'officers_affairs/shifts/shift_swap_requests_list.html', context)
+
+def approve_shift_request(request, shift_id):
+    if request.method == "POST":
+        decision = request.POST.get('decision')
+        shift_request = get_object_or_404(ShiftSwapRequest, id=shift_id)
+
+        current_approver = shift_request.approver
+
+        if shift_request.status != ShiftSwapRequest.PENDING:
+            return HttpResponse("لا يمكن اعطاء قرار في هذا الطلب")
+
+        # Check the decision and current approver
+        if decision == 'accept':
+            if current_approver == get_head_of_branch():
+                shift_request.approver = get_final_approver()
+                shift_request.save()
+
+                Notification.objects.create(
+                    user=get_final_approver(),
+                    message=f"طلب مبادلة جديد من {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name} يحتاج موافقتك.",
+                    link=reverse('shift_swap_requests_list')
+                )
+
+                return JsonResponse({'status': 'pending', 'message': 'Shift request pending final approval.'})
+            elif current_approver == get_final_approver(): 
+
+                Notification.objects.create(
+                    user=get_head_of_branch(),
+                    message= f" تمت الموافقة على طلب مبادلة {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name}.",
+                    link=reverse('shift_swap_requests_list')
+                )
+                Notification.objects.create(
+                    user=shift_request.requesting_officer.user,
+                    message=f"تم التصديق علي طلب مبادلة لك من السيد  /  المدير",
+                    link=reverse('my-shift-swap-requests')
+                )
+
+                # actually swap
+                original_shift = shift_request.original_shift
+                new_shift = shift_request.new_shift
+
+                original_shift.officer = shift_request.target_officer
+                new_shift.officer = shift_request.requesting_officer
+                
+                original_shift.save()
+                new_shift.save()
+
+                shift_request.status = ShiftSwapRequest.APPROVED
+                shift_request.save()
+                return JsonResponse({'status': 'approved', 'message': 'Shift request approved.'})
+            else:
+                shift_request.approver = get_head_of_branch()
+                shift_request.save()
+
+                Notification.objects.create(
+                    user=get_head_of_branch(),
+                    message=f"طلب مبادلة جديد من {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name} يحتاج موافقتك.",
+                    link=reverse('shift_swap_requests_list')
+                )
+
+                return JsonResponse({'status': 'pending', 'message': 'Shift request pending head of branch approval.'})
+
+        elif decision == 'reject':
+            shift_request.status = ShiftSwapRequest.REJECTED
+            shift_request.save()
+
+
+            Notification.objects.create(
+                user=get_head_of_branch(),
+                message=f"تم رفض طلب مبادلة ل {shift_request.requesting_officer.rank} / {shift_request.requesting_officer.full_name}",
+                link=reverse('shift_swap_requests_list')
+            )
+
+            Notification.objects.create(
+                user=shift_request.requesting_officer.user,
+                message=f"تم رفض طلب مبادلتك من {shift_request.approver.officer_profile.rank} / {shift_request.approver.officer_profile.full_name}",
+                link=reverse('my-shift-swap-requests')
+            )
+
+            return JsonResponse({'status': 'rejected', 'message': 'Shift request rejected.'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+
+
+# Check if user is 'رئيس فرع شئون ضباط'
+def is_officer_in_charge(user):
+    return user.officer_profile.role == 'رئيس فرع شئون ضباط'
+
+# View for both manual and automatic shift assignment
+@user_passes_test(is_officer_in_charge)
+def assign_shifts(request):
+    officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number').exclude(role='المدير')
+    officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number),reverse=True)
+    days_range = []
+
+    if request.method == 'POST':
+        officer_ids = request.POST.getlist('officers')
+        shift_type = request.POST.get('shift_type')
+        start_date_str = request.POST.get('start_date')
+        end_date_str = request.POST.get('end_date')
+        holidays_str = request.POST.getlist('holidays')
+
+        # Convert start_date and end_date to date objects
+        start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        # Convert holidays to date objects, ensuring no duplicates
+        holidays = set()
+        for holiday_str in holidays_str:
+            try:
+                holidays.update(datetime.datetime.strptime(h.strip(), '%Y-%m-%d').date() for h in holiday_str.split(',') if h.strip())
+            except ValueError as e:
+                print(f"Error parsing holiday dates: {e}")
+
+        days_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+        # Use a transaction to ensure data consistency
+        with transaction.atomic():
+            for day in days_range:
+            #     for shift in ShiftSwapRequest.objects.all():
+            #         if  shift.status == ShiftSwapRequest.PENDING and (shift.original_shift.start_date == day or shift.new_shift.start_date == day):
+            #             return HttpResponse(f"هنالك طلب مقيد لتبديل النبطشية عن يوم {day}")
+
+                manual_officer_id = request.POST.get(f'manual_assignment_{day}', None)
+                
+
+                # Remove any previous shifts for the same day and team type before creating/updating new ones
+                Shift.objects.filter(
+                    team__team_type=shift_type,
+                    start_date=day,
+                    end_date=day
+                ).delete()
+
+                if manual_officer_id:
+                    # Manual assignment
+                    officer = get_object_or_404(Officer, pk=manual_officer_id)
+                    team, created = ShiftTeam.objects.get_or_create(
+                        team_type=shift_type,
+                        officer=officer,
+                    )
+                    is_holiday = bool(request.POST.get(f'is_holiday_{day}', False))
+                    
+                    Shift.objects.update_or_create(
+                        officer=officer,
+                        team=team,
+                        start_date=day,
+                        end_date=day,
+                        defaults={'is_holiday': is_holiday}
+                    )
+                elif officer_ids:
+                    # Automatic assignment
+                    officer_id = officer_ids[days_range.index(day) % len(officer_ids)]
+                    officer = get_object_or_404(Officer, pk=officer_id)
+                    team, created = ShiftTeam.objects.get_or_create(
+                        team_type=shift_type,
+                        officer=officer,
+                    )
+                    Shift.objects.update_or_create(
+                        officer=officer,
+                        team=team,
+                        start_date=day,
+                        end_date=day,
+                        defaults={'is_holiday': day in holidays}
+                    )
+        # Optional: Add a success message (requires message framework)
+        messages.success(request, "تم توزيع النوبطچيات بنجاح")
+        return redirect('shifts_list')
+
+    # Handle GET request to render the manual assignment form
+    if request.method == 'GET':
+        start_date = datetime.datetime.now().date()
+        end_date = start_date + timedelta(days=7)
+        days_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+    return render(request, 'officers_affairs/shifts/assign_shifts.html', {
+        'officers': officers,
+        'days_range': days_range,
+    })
+

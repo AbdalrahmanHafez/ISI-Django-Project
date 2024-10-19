@@ -41,6 +41,10 @@
       <!-- Hidden input to store the captured image data -->
       <input type="hidden" id="captured-image" name="captured_image">
   </div>
+  
+    {% if error_message %}
+        <div class="alert alert-danger mt-3">{{ error_message }}</div>
+    {% endif %}
 
   <div class="modal-footer">
       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>

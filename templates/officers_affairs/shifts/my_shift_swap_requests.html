@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+
+    <h2 class="mb-4 section-title text-center">طلبات مبادلة النوبطچيات خاصة</h2>
+    <h2 class="mb-4 section-title text-center">
+        {{ request.user.officer_profile.rank }} / {{ request.user.officer_profile.full_name }}
+    </h2>
+
+    <table class="table table-bordered table-hover text-center">
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>نوع النوبطچية</th>
+                <th>النوبطچية الأصلية</th>
+                <th>النوبطچية الجديدة</th>
+                <th>الحالة</th>
+                <th>المصدق الحالي</th>
+                <th>تاريخ الطلب</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for swap in swap_requests %}
+                <tr>
+                    <td>{{ forloop.counter|arabic_numbers }} </td>
+                    <td>{{ swap.original_shift.team.team_type }} </td>
+                    <td>{{ swap.original_shift.start_date|date:"d-m-Y"|arabic_numbers }} </td>
+                    <td>{{ swap.new_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
+                    <td>
+                        {% if swap.status == 'approved' %}
+                            <span class="badge bg-success">{{ swap.get_status_display }}</span>
+                        {% elif swap.status == 'rejected' %}
+                            <span class="badge bg-danger">{{ swap.get_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning">{{ swap.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ swap.approver.officer_profile.full_name }}</td>
+                    <td>{{ swap.created_at|date:"d-m-Y"|arabic_numbers }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">لا توجد طلبات تبديل نوبطچيات.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock content %}

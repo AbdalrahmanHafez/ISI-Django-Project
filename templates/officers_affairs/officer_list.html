@@ -4,9 +4,12 @@
 <div id="officers_list"
      hx-trigger="officer_list_changed from:body"
      hx-get="{% url 'officers_list' %}"
+     hx-vals="js:{...getCurrentUrlParams()}"
      hx-target="this">
   <form hx-get="{% url "officers_list" %}"
         hx-target="#officers_list"
+        hx-swap='outerHTML'
+        id="filterForm"
         class="mb-3">
     <!-- Rank Filter buttons -->
     <div class="btn-group-sm"
@@ -17,7 +20,7 @@
              id="rank-null"
              autocomplete="off"
              {% if officers_filter.form.rank.value == None %}checked{% endif %}
-             hx-on:click="this.closest('form').querySelector('[name=rank]').value = undefined; document.getElementById('filterSubmitBtn').click()">
+             hx-on:click="this.closest('form').querySelector('[name=rank]').disabled=true; this.closest('form').querySelector('[name=rank]').value = undefined; document.getElementById('filterSubmitBtn').click()">
       <label class="btn btn-outline-secondary" for="rank-null">الكل</label>
       {% for rank in ranks %}
         <input type="radio"
@@ -25,7 +28,7 @@
                id="rank-{{ rank.id }}"
                autocomplete="off"
                {% if officers_filter.form.rank.value == rank.id|to_string %}checked{% endif %}
-               hx-on:click="this.closest('form').querySelector('[name=rank]').value = {{ rank.id }}; document.getElementById('filterSubmitBtn').click()">
+               hx-on:click="this.closest('form').querySelector('[name=rank]').disabled=false; this.closest('form').querySelector('[name=rank]').value = {{ rank.id }}; document.getElementById('filterSubmitBtn').click()">
         <label class="btn btn-outline-primary dark-mode" for="rank-{{ rank.id }}">{{ rank.name }}</label>
       {% endfor %}
     </div>
@@ -33,6 +36,9 @@
       <div class="card card-body">
         {% for field in officers_filter.form.visible_fields %}
           <div class="form-group mb-2">
+            <label style="margin-left: 1rem;">
+              <input type="checkbox" class="filter-toggle" data-filter="{{ field.name }}">
+            </label>
             <label>{{ field.label }}</label>
             {{ field }}
             {% for error in field.errors %}<span class="help-block text-danger">{{ error }}</span>{% endfor %}
@@ -43,11 +49,7 @@
     </div>
   </form>
   <!-- Officers List -->
-  <div class="row"
-       id="officers_list"
-       hx-trigger="officer_list_changed from:body"
-       hx-get="{% url 'officers_list' %}"
-       hx-target="this">
+  <div class="row">
     {% for officer in officers_filter.qs %}
       {% if perms.officers_affairs.view_officer %}
         <!-- Officer Card -->
@@ -115,11 +117,12 @@
               <!-- Officer Details -->
               <div class="card-body">
                 <div class="text-end mt-5">
-                  <h5 class="description-header">الرقم العسكري: {{ officer.military_number }}</h5>
-                  <h5 class="description-header">رقم الاقدمية {{ officer.seniority_number }}</h5>
-                  <h5 class="description-header">الفرع: {{ officer.branch.name }}</h5>
-                  <h5 class="description-header">القسم: {{ officer.section.name }}</h5>
-                  <h5 class="description-header">رقم الهاتف: {{ officer.phone1 }}</h5>
+                  <h5 class="description-header">الرقم العسكري: {{ officer.military_number|arabic_numbers }}</h5>
+                  <h5 class="description-header">رقم الاقدمية {{ officer.seniority_number|arabic_numbers }}</h5>
+                  <h5 class="description-header">الفرع: {{ officer.branch.name|default:"لايوجد" }}</h5>
+                  {% comment %} <h5 class="description-header">القسم: {{ officer.section.name }}</h5> {% endcomment %}
+                  <h5 class="description-header">السلاح: {{ officer.weapon.name }}</h5>
+                  <h5 class="description-header">رقم الهاتف: {{ officer.phone1|arabic_numbers}}</h5>
                   {% comment %}
                     <h5 class="description-header">الوظيفة: {{ officer.job.name }}</h5>
                    <h5 class="description-header">الوحدة: {{ officer.unit.name }}</h5>
@@ -137,5 +140,41 @@
         <h3>لايوجد</h3>
       {% endfor %}
     </div>
-  </div>
+
 </div>
+<script>
+ document.getElementById('filterForm').addEventListener('submit', function(event) {
+      event.preventDefault();  // Prevent the default form submission
+
+      console.log("filter form submit");
+      
+      // Serialize the form data
+      const form = event.target;
+      const formData = new FormData(form);
+      const searchParams = new URLSearchParams(formData).toString();
+
+      // Update the URL without reloading the page
+      const newUrl = `${window.location.pathname}?${searchParams}`;
+      history.pushState(null, '', newUrl);  // Update the URL
+
+      // Temporarily remove the event listener to prevent an infinite loop
+      form.removeEventListener('submit', arguments.callee);
+
+      // Trigger the HTMX request manually
+      htmx.trigger(form, 'submit');
+    });
+
+
+
+
+  function getCurrentUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        let paramObj = {};
+        params.forEach((value, key) => {
+            paramObj[key] = value;
+        });
+        return paramObj;  
+    }
+
+
+  </script>

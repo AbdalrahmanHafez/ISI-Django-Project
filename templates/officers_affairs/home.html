@@ -352,4 +352,69 @@
 
 
 </script>
+
+
+
+<script>
+  function updateState(){
+    console.log("update state")
+
+        const filtertoggles = document.querySelectorAll('.filter-toggle');
+        const urlparams = new URLSearchParams(window.location.search);
+
+        filtertoggles.forEach(toggle => {
+            const filtername = toggle.getAttribute('data-filter');
+            const filterfields = document.querySelectorAll(`[name="${filtername}"]`);
+            
+            
+            if (urlparams.has(filtername)) {
+                toggle.checked = true;
+
+                filterfields.forEach(field => {
+                    field.style.display = 'inline-block';
+                    field.disabled = false;
+                    if(field.type ==="checkbox") field.parentElement.style.display='block'
+                });
+            } else {
+                toggle.checked = false;
+
+                filterfields.forEach(field => {
+                    field.style.display = 'none';
+                    field.disabled = true;
+                    if(field.type ==="checkbox") field.parentElement.style.display='none'
+                });
+            }
+            
+            toggle.addEventListener('change', function() {
+              console.log("filtername", filtername)
+              
+                for(let i = 0; i < filterfields.length; i++){
+                  if (this.checked) {
+                    if(filterfields[i].type ==="checkbox") filterfields[i].parentElement.style.display='block'
+                    filterfields[i].style.display = 'inline-block';
+                    filterfields[i].disabled = false; 
+                  } else {
+                    if(filterfields[i].type ==="checkbox") filterfields[i].parentElement.style.display='none'
+                    filterfields[i].style.display = 'none';
+                    filterfields[i].disabled = true;           
+                  }
+                }
+            });
+        });
+
+
+
+      
+  }
+
+  htmx.on('htmx:afterSettle', (e)=>{
+      if (e.detail.target.id === 'officers_list') {
+                updateState();
+          }
+  })
+
+  updateState();
+  
+</script>
+
 {% endblock content %}

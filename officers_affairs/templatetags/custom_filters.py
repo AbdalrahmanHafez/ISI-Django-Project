@@ -12,6 +12,9 @@ def arabic_numbers(value):
     arabic_numbers_map = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
     return str(value).translate(arabic_numbers_map)
 
+@register.filter(name='in_group')
+def in_group(user, group_name):
+    return user.groups.filter(name=group_name).exists()
 
 def unread_messages(user):
     return user.notification_set.filter(is_read=False).count()

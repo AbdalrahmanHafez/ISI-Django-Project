@@ -100,3 +100,4 @@ websockets==13.0.1
 wfastcgi==3.0.0
 wsproto==1.2.0
 yarl==1.9.6
+mediapipe==0.10.14

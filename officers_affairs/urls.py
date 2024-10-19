@@ -33,4 +33,17 @@ urlpatterns = [
     
     path('record_attendance/', views.record_attendance, name='record_attendance'),
     path('attendance_list/', views.attendance_list, name='attendance_list'),
+    
+    path('record_parade_attendance/', views.record_parade_attendance, name='record_parade_attendance'),
+    path('parade_attendance_list/', views.parade_attendance_list, name='parade_attendance_list'),
+
+    
+    path('shifts/assign/', views.assign_shifts, name='assign_shifts'),
+    path('shifts/list/', views.shifts_list, name='shifts_list'),
+    path('shifts/my-requests', views.my_shift_swap_requests, name='my-shift-swap-requests'),
+    path('shifts/swap-requests', views.shift_swap_requests_list, name='shift_swap_requests_list'),
+    path('shifts/swap/<int:original_shift_id>/<int:new_shift_id>/', views.shift_swap, name='shift_swap'),
+    path('shifts/swap/approve_shift_request/<int:shift_id>', views.approve_shift_request, name='approve_shift_request'),
+
+    
 ]

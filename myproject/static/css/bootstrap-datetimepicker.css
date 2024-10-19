@@ -16,6 +16,23 @@
     --disabled-color:#cccccc;
 }
 
+[data-bs-theme=dark]{
+    --text-color:white;
+    --weekend-bg-color:#191919;
+}
+
+[data-bs-theme=dark] .datepicker thead th.dow {
+    color: white;
+    font-weight: 500;
+    font-size: var(--font-size);
+}
+
+[data-bs-theme=dark] .bootstrap-datetimepicker-widget .picker-switch {
+    text-align: center;
+    font-size: var(--font-size);
+    color: white;
+}
+
  .bootstrap-datetimepicker-widget {
     list-style: none;
 }

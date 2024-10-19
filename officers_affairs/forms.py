@@ -14,25 +14,27 @@ class OfficerForm(LoginRequiredMixin, forms.ModelForm):
         exclude = ("created_by", "updated_by", "created_at", "updated_at","user")
 
 
-    def clean(self):
-        cleaned_data = super().clean()
-        create_user = cleaned_data.get('create_user')
-        full_name = cleaned_data.get('full_name')
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     create_user = cleaned_data.get('create_user')
+    #     full_name = cleaned_data.get('full_name')
 
-        if create_user:
-            username = full_name.lower().replace(" ", "_")
+    #     if create_user:
+    #         # username = full_name.lower().replace(" ", "_")
+    #         username = cleaned_data.get('military_number')
 
-            if User.objects.filter(username=username).exists():
-                self.add_error('full_name', "هناك مستخدم له نفس اسم المستخدم بالفعل ")
+    #         if User.objects.filter(username=username).exists():
+    #             self.add_error('military_number', "هناك مستخدم له نفس اسم المستخدم بالفعل ")
         
-        return cleaned_data
+    #     return cleaned_data
     
     def save(self, commit=True):
         officer = super().save(commit=False)
         
         # Check if we need to create a user
         if self.cleaned_data.get('create_user') and not officer.user:
-            username = officer.full_name.lower().replace(" ", "_")
+            # username = officer.full_name.lower().replace(" ", "_")
+            username = officer.military_number
             user = User.objects.create_user(username=username, password='123')
             officer.user = user
                  

@@ -10,7 +10,7 @@
     <title>معهد نظم المعلومات</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/ISILogo.png' %}">
     <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
-    <link href="{% static 'css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap-datetimepicker.css' %}" rel="stylesheet" />
 
     <!-- IonIcons -->
     <link rel="stylesheet" href="{% static 'css/ionicons.min.css' %}">
@@ -28,18 +28,25 @@
     {% comment %} <link rel="stylesheet" href="{% static  'adminlte_3_rtl/css/custom.css' %}">  {% endcomment %}
 
     <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    {% comment %} <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet"> {% endcomment %}
+    <link href="{% static "fonts/Source_Sans_Pro.css" %}" rel="stylesheet">
 
     
     {% load django_bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+
     <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
     {% comment %} <script src="{% static  'dist/js/adminlte.js' %}"></script> {% endcomment %}
     <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
     <script src="{% static 'js/htmx.min.js' %} "></script>
     <script src="{% static 'js/moment.min.js' %}"></script>
     <script src="{% static 'js/bootstrap-hijri-datetimepickermin.js' %}"></script>
+
+    {% comment %} cool scroll bar for the sidebar {% endcomment %}
+    <script src="{% static "js/overlayscrollbars.browser.es6.min.js" %}" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static "css/overlayscrollbars.min.css" %}" crossorigin="anonymous">
+
   </head>
   {% comment %} <body dir="rtl" class="hold-transition sidebar-mini dark-mode" data-bs-theme="dark"> {% endcomment %}
   <body dir="rtl" class="layout-fixed sidebar-expand-lg sidebar-mini bg-body-tertiary" >
@@ -96,6 +103,9 @@
               // https://www.jqueryscript.net/time-clock/hijri-date-picker-bootstrap.html 
               // https://www.jqueryscript.net/time-clock/Clean-Data-Timepicker-with-jQuery-Bootstrap-3.html
               $(".hijri-picker").hijriDatePicker({
+                  locale: 'ar-SA',
+                  showClear: true,
+                  showTodayButton: false,
                   hijri:false,
                   showSwitcher:false,
                   debug: false,
@@ -111,6 +121,31 @@
       
       
       </script>
+
+
+      <script>
+        const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
+        const Default = {
+            scrollbarTheme: "os-theme-light",
+            scrollbarAutoHide: "leave",
+            scrollbarClickScroll: true,
+        };
+        document.addEventListener("DOMContentLoaded", function() {
+            const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+            if (
+                sidebarWrapper &&
+                typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
+            ) {
+                OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+                    scrollbars: {
+                        theme: Default.scrollbarTheme,
+                        autoHide: Default.scrollbarAutoHide,
+                        clickScroll: Default.scrollbarClickScroll,
+                    },
+                });
+            }
+        });
+    </script>
 
   </body>
 </html>

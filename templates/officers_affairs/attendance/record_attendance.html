@@ -3,14 +3,13 @@
 {% load custom_filters %}
 <h2 class="text-center mb-4 section-title">تسجيل التمام اليومي - {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
 
-<div class="container">
+<div class="container d-flex justify-content-center">
     <form method="post" id="attendanceForm">
         {% csrf_token %}
         <table class="table table-bordered table-hover text-center">
             <thead>
                 <tr>
                     <th>م</th>
-                    <th>رقم الاقدمية</th>
                     <th>الرتبة</th>
                     <th>الأسم</th>
                     <th>الفرع</th>
@@ -22,7 +21,6 @@
                 {% for officer in officers %}
                 <tr>
                     <td>{{ forloop.counter|arabic_numbers }}</td>
-                    <td>{{ officer.seniority_number }}</td>
                     <td>{{ officer.rank }}</td>
                     <td>{{ officer.full_name }}</td>
                     <td>{{ officer.branch }}</td>

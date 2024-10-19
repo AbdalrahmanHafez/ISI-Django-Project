@@ -64,7 +64,11 @@
         <div class="info me-auto">
             <span class="text-bold d-block" style="font-size: 14px; color: #6c757d;">المستخدم الآن</span>
             <a href="{% url 'profile_view'%}" class="d-block" style="font-size: 18px; font-weight: bold; color: #007bff; text-decoration: none;">
-              {{ request.user.officer_profile.rank }}/{{ request.user.officer_profile.full_name }}
+              {% if request.user.officer_profile %}
+                {{ request.user.officer_profile.rank }}/{{ request.user.officer_profile.full_name }}
+              {% else %}
+                {{request.user.username}}
+              {% endif %}
             </a>
         </div>
     </div>

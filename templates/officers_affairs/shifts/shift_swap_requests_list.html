@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
     <h2 class="text-center mb-4 section-title">طلبات مبادلة النوبطچيات</h2>
@@ -6,6 +7,7 @@
     <table class="table table-bordered table-hover text-center">
         <thead>
             <tr>
+                <th>م</th>
                 <th>طرف اول</th>
                 <th>نوع النوبطچية</th>
                 <th>النوبطچية الأصلية</th>
@@ -21,10 +23,11 @@
             {% for swap in swap_requests %}
                 <tr>
 
+                    <td>{{ forloop.counter|arabic_numbers }}</td>
                     <td>{{ swap.requesting_officer.rank }} / {{ swap.requesting_officer.full_name }}</td>
                     <td>{{ swap.original_shift.team.team_type }}</td>
-                    <td>{{ swap.original_shift.start_date }}</td>
-                    <td>{{ swap.new_shift.start_date }}</td>
+                    <td>{{ swap.original_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
+                    <td>{{ swap.new_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>{{ swap.target_officer.full_name }}</td>
                     <td>{{ swap.get_status_display }}</td>
 
@@ -36,7 +39,7 @@
                         {% endif %}
                     </td>
 
-                    <td>{{ swap.created_at|date:"Y-m-d" }}</td>
+                    <td>{{ swap.created_at|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>
                         {% if swap.status == 'approved' %}
                             <button class="btn btn-outline-secondary" disabled>تم قبول الطلب</button>

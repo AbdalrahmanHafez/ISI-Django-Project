@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
 
@@ -10,6 +11,7 @@
     <table class="table table-bordered table-hover text-center">
         <thead>
             <tr>
+                <th>م</th>
                 <th>النوبطچية الأصلية</th>
                 <th>النوبطچية الجديدة</th>
                 <th>الحالة</th>
@@ -20,11 +22,12 @@
         <tbody>
             {% for swap in swap_requests %}
                 <tr>
-                    <td>{{ swap.original_shift.start_date }} </td>
-                    <td>{{ swap.new_shift.start_date }}</td>
+                    <td>{{ forloop.counter|arabic_numbers }} </td>
+                    <td>{{ swap.original_shift.start_date|date:"d-m-Y"|arabic_numbers }} </td>
+                    <td>{{ swap.new_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>{{ swap.get_status_display }}</td>
                     <td>{{ swap.approver.officer_profile.full_name }}</td>
-                    <td>{{ swap.created_at|date:"Y-m-d" }}</td>
+                    <td>{{ swap.created_at|date:"d-m-Y"|arabic_numbers }}</td>
                 </tr>
             {% empty %}
                 <tr>

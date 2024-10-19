@@ -248,3 +248,13 @@ button img {
 }
 
 /* end of sidebar */
+
+.present {
+  background-color: #d4edda;  /* Green for present */
+  color: #155724;
+}
+
+.absent {
+  background-color: #f8d7da;  /* Red for absent */
+  color: #721c24;
+}

@@ -1160,6 +1160,7 @@ def record_parade_attendance(request):
                         status=status,
                         notes=notes,
                     )
+        return redirect(reverse("parade_attendance_list"))
 
     officers = Officer.objects.filter(status__name='قوة',unit_status__name='موجود').order_by('seniority_number').exclude(role='المدير')
     officers = sorted(officers, key=lambda officer: extract_numeric(officer.seniority_number), reverse=False)

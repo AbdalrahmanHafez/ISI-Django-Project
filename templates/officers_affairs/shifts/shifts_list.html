@@ -2,7 +2,7 @@
 {% load custom_filters %}
 
 {% block content %}
-    <h2 class="text-center mb-4 section-title">توزيع اطقم النوبطچيات</h2>
+    <h2 class="text-center mb-4 section-title">اطقم النوبطچيات</h2>
 
 
     {% if request.GET.original_shift %}
@@ -30,7 +30,9 @@
                     <td>{{ shift.officer.rank.name }}/{{ shift.officer.full_name }}</td>
                     <td>{{ shift.officer.branch }}</td>
                     <td>{{ shift.start_date }}</td>
-                    <td>{{ shift.is_holiday }}</td>
+                    <td>
+                        {% if shift.is_holiday %} ✔ {% else %} - {% endif %}
+                    </td>
                     <td>
                         {% if request.GET.original_shift %}
                             {% if request.GET.original_shift == shift.id|to_string %}

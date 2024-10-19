@@ -74,7 +74,7 @@
                         <td>{{ forloop.counter|arabic_numbers }}</td>
                         <td>{{ record.officer.rank }}</td>
                         <td>{{ record.officer.full_name }}</td>
-                        <td>{{ record.officer.branch }}</td>
+                        <td>{{ record.officer.branch|default:"-" }}</td>
                         <td>{{ record.status.name }}</td>
                         <td>{{ record.notes|default_if_none:"-" }}</td>
                     </tr>

@@ -23,11 +23,18 @@
                     <td>{{ officer.rank }}</td>
                     <td>{{ officer.full_name }}</td>
                     <td>
-                        <select name="status_{{ officer.id }}" class="form-control">
+                        {% comment %} <select name="status_{{ officer.id }}" class="form-control">
                             <option value="">اختر التمام</option>
                             <option value="حضر">حضر</option>
                             <option value="لم يحضر">لم يحضر</option>
-                        </select>
+                        </select> {% endcomment %}
+
+<input type="hidden" name="status_{{ officer.id }}" value="لم يحضر">
+<label>
+    <input type="checkbox" name="status_{{ officer.id }}" value="حضر"> حضر
+</label>
+
+
                     </td>
                     
                     <td>

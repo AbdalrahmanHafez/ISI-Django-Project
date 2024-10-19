@@ -1285,9 +1285,18 @@ def shifts_list(request):
     branches = Group.objects.all()
     team_types = ShiftTeam.objects.values_list('team_type', flat=True).distinct()
 
+    paginator = Paginator(shifts, 10)  # Show 10 requests per page
+    page_number = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)  # If page is not an integer, deliver first page
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page
+
 
     context = {
-        'shifts': shifts,
+        'shifts': page_obj,
         'officer_teams': officer_teams,
         'not_swappable_shifts': not_swappable_shifts,
         'can_apply_swap_shift': can_apply_swap_shift,
@@ -1301,6 +1310,7 @@ def shifts_list(request):
         'branches': branches, 
         'selected_half_year': selected_half_year,
         'half_years': half_years,
+        'page_obj': page_obj,
     }
 
     return render(request, 'officers_affairs/shifts/shifts_list.html', context)

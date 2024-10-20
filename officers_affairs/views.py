@@ -152,6 +152,27 @@ def officers_home_view(request):
         return redirect(f"{request.path}?{newParams.urlencode()}")
 
 
+    today = timezone.now().date()
+    shift_types = ['قائد منوب', 'ضابط نوبطچي']
+    shifts = {}
+    for team_type in shift_types:
+        shift = Shift.objects.filter(
+            team__team_type=team_type,
+            start_date__lte=today,
+            end_date__gte=today
+        ).first()
+        
+        if shift:
+            shifts[team_type] = {
+                'officer_name': shift.officer.full_name,
+                'officer_phone': shift.officer.phone1
+            }
+        else:
+            shifts[team_type] = {
+                'officer_name': "لم يحدد",
+                'officer_phone': "-"
+            }
+
     context= {
         'ranks':Rank.objects.all(),
         'form': OfficerForm(),
@@ -163,6 +184,7 @@ def officers_home_view(request):
         'total_officers':total_officers,
         'inside_officers':inside_officers,
         'outside_officers': outside_officers,
+        'shifts': shifts
     }
 
 

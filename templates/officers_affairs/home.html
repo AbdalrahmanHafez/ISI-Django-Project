@@ -65,25 +65,25 @@
                         <tr>
                           <th>الوظيفة</th>
                           <th>الاسم</th>
-                          <th>رقم التيليفون</th>
+                          <th>رقم الهاتف</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
+
+                        {% for team_type, details in shifts.items %}
+                          <tr>
+                              <td>{{ team_type }}</td>
+                              <td>{{ details.officer_name }}</td>
+                              <td>{{ details.officer_phone }}</td>
+                          </tr>
+                        {% endfor %}
+
+                        {% comment %} <tr>
                           <td>قائد منوب</td>
                           <td>مقدم / شريف شكري</td>
                           <td>01234567899</td>
-                        </tr>
-                        <tr>
-                          <td>ضابط نبطچي</td>
-                          <td>ملازم / يحيى عبدالله</td>
-                          <td>01234567899</td>
-                        </tr>
-                        <tr>
-                          <td>ضابط الخفيفة</td>
-                          <td>نقيب / عبدالوهاب محمد</td>
-                          <td>01234567899</td>
-                        </tr>
+                        </tr> {% endcomment %}
+                       
                       </tbody>
                     </table>
                   </div>

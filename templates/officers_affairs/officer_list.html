@@ -118,7 +118,7 @@
               <div class="card-body">
                 <div class="text-end mt-5">
                   <h5 class="description-header">الرقم العسكري: {{ officer.military_number|arabic_numbers }}</h5>
-                  <h5 class="description-header">رقم الاقدمية {{ officer.seniority_number|arabic_numbers }}</h5>
+                  <h5 class="description-header">رقم الاقدمية: {{ officer.seniority_number|arabic_numbers }}</h5>
                   <h5 class="description-header">الفرع: {{ officer.branch.name|default:"لايوجد" }}</h5>
                   {% comment %} <h5 class="description-header">القسم: {{ officer.section.name }}</h5> {% endcomment %}
                   <h5 class="description-header">السلاح: {{ officer.weapon.name }}</h5>

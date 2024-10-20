@@ -36,7 +36,7 @@
                             <span class="badge bg-warning">{{ swap.get_status_display }}</span>
                         {% endif %}
                     </td>
-                    <td>{{ swap.approver.officer_profile.full_name }}</td>
+                    <td>{{ swap.approver.officer_profile.rank }} / {{ swap.approver.officer_profile.full_name }}</td>
                     <td>{{ swap.created_at|date:"d-m-Y"|arabic_numbers }}</td>
                 </tr>
             {% empty %}

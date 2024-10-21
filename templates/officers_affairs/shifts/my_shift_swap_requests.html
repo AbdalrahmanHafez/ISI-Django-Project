@@ -3,7 +3,7 @@
 
 {% block content %}
 
-    <h2 class="mb-4 section-title text-center">طلبات مبادلة النوبطچيات خاصة</h2>
+    <h2 class="mb-4 section-title text-center">طلبات مبادلة النوبتچيات خاصة</h2>
     <h2 class="mb-4 section-title text-center">
         {{ request.user.officer_profile.rank }} / {{ request.user.officer_profile.full_name }}
     </h2>
@@ -12,9 +12,9 @@
         <thead>
             <tr>
                 <th>م</th>
-                <th>نوع النوبطچية</th>
-                <th>النوبطچية الأصلية</th>
-                <th>النوبطچية الجديدة</th>
+                <th>نوع النوبتچية</th>
+                <th>النوبتچية الأصلية</th>
+                <th>النوبتچية الجديدة</th>
                 <th>الحالة</th>
                 <th>المصدق الحالي</th>
                 <th>تاريخ الطلب</th>
@@ -41,7 +41,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">لا توجد طلبات تبديل نوبطچيات.</td>
+                    <td colspan="7" class="text-center">لا توجد طلبات تبديل نوبتچيات.</td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -2,11 +2,11 @@
 {% load custom_filters %}
 
 {% block content %}
-    <h2 class="text-center mb-4 section-title">اطقم النوبطچيات</h2>
+    <h2 class="text-center mb-4 section-title">اطقم النوبتچيات</h2>
 
 
     {% if request.GET.original_shift %}
-        <p class="alert alert-info text-center">الرجاء اختيار نوبطچية جديدة لتبديلها مع نوبطچية
+        <p class="alert alert-info text-center">الرجاء اختيار نوبتچية جديدة لتبديلها مع نوبتچية
             {{original_shift.team.team_type}} 
             عن يوم
             {{original_shift.start_date|date:"d-m-Y"|arabic_numbers}} -
@@ -23,7 +23,7 @@
           {% endif %}
 
         <div class="col-auto">
-            <label for="team_type" class="form-label">نوع النوبطچية</label>
+            <label for="team_type" class="form-label">نوع النوبتچية</label>
             <select name="selected_team_type" id="team_type" class="form-select">
                 <option value="" {% if not selected_status %}selected{% endif %}>الكل</option>
                 {% for team_type in team_types %}
@@ -33,7 +33,7 @@
             </select>
         </div>
         <div class="col-auto">
-            <label for="shift_date" class="form-label">تاريخ النوبطچية</label>
+            <label for="shift_date" class="form-label">تاريخ النوبتچية</label>
             <input id="shift_date"
                    name="selected_date"
                    class="hijri-picker form-control"

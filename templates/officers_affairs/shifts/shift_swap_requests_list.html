@@ -2,16 +2,16 @@
 {% load custom_filters %}
 
 {% block content %}
-    <h2 class="text-center mb-4 section-title">طلبات مبادلة النوبطچيات</h2>
+    <h2 class="text-center mb-4 section-title">طلبات مبادلة النوبتچيات</h2>
 
     <table class="table table-bordered table-hover text-center">
         <thead>
             <tr>
                 <th>م</th>
                 <th>طرف اول</th>
-                <th>نوع النوبطچية</th>
-                <th>النوبطچية الأصلية</th>
-                <th>النوبطچية المطلوبة</th>
+                <th>نوع النوبتچية</th>
+                <th>النوبتچية الأصلية</th>
+                <th>النوبتچية المطلوبة</th>
                 <th>طرف ثاني</th>
                 <th>الحالة</th>
                 <th>المصدق الحالي</th>
@@ -28,7 +28,7 @@
                     <td>{{ swap.original_shift.team.team_type }}</td>
                     <td>{{ swap.original_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>{{ swap.new_shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
-                    <td>{{ swap.target_officer.full_name }}</td>
+                    <td> {{ swap.target_officer.rank }} / {{ swap.target_officer.full_name }}</td>
                     <td>
                         {% if swap.status == 'approved' %}
                             <span class="badge bg-success">{{ swap.get_status_display }}</span>
@@ -82,7 +82,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="10" class="text-center">لا توجد طلبات تبديل نوبطچيات.</td>
+                    <td colspan="10" class="text-center">لا توجد طلبات تبديل نوبتچيات.</td>
                 </tr>
             {% endfor %}
         </tbody>

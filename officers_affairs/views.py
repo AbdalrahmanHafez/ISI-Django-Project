@@ -476,7 +476,14 @@ def get_final_approver():
 
 def get_initial_approver(officer_profile):
     # Get the branch leader who is the first approver
-    return Officer.objects.filter(branch=officer_profile.branch, is_leader=True).first().user
+    branch_leader = Officer.objects.filter(branch=officer_profile.branch, is_leader=True).first()
+    
+    # If no branch leader is found, return None
+    if branch_leader:
+        return branch_leader.user
+    else:
+        return get_head_of_branch()
+
 
 
 

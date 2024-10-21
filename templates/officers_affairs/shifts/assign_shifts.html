@@ -4,7 +4,7 @@
 <div class="container-fluid d-flex justify-content-center">
     <div class="mt-2 mb-5 card shadow-lg " style="min-width: 32rem">
         <div class="card-header bg-primary text-white">
-            <h2>تعيين اطقم النوبطچيات</h2>
+            <h2>تعيين اطقم النوبتچيات</h2>
         </div>
         <div class="card-body">
             <form method="post">
@@ -28,12 +28,12 @@
                     </select>
                 </div>
 
-                <!-- نوع النوبطچية -->
+                <!-- نوع النوبتچية -->
                 <div class="form-group mb-3">
-                    <label for="shift_type">نوع النوبطچية:</label>
+                    <label for="shift_type">نوع النوبتچية:</label>
                     <select class="form-control" name="shift_type" id="shift_type">
                         <option value="قائد منوب">قائد منوب</option>
-                        <option value="ضابط نوبطچي">ضابط نوبطچي</option>
+                        <option value="ضابط نوبطچي">ضابط نوبتچي</option>
                     </select>
                 </div>
 
@@ -72,12 +72,12 @@
                 </div>
 
 
-                <!-- توزيع النوبطچيات اليدوي (يظهر فقط عند اختيار التوزيع اليدوي) -->
+                <!-- توزيع النوبتچيات اليدوي (يظهر فقط عند اختيار التوزيع اليدوي) -->
                 <div id="manual_assignment_section" style="display: none;">
-                    <h3>توزيع النوبطچيات اليدوي:</h3>
+                    <h3>توزيع النوبتچيات اليدوي:</h3>
                     {% for day in days_range %}
                         <div class="form-row">
-                            <label for="manual_assignment_{{ day }}">النوبطچية ليوم {{ day }}:</label>
+                            <label for="manual_assignment_{{ day }}">النوبتچية ليوم {{ day }}:</label>
                             <select class="form-control" name="manual_assignment_{{ day }}" id="manual_assignment_{{ day }}">
                                 <option value="">اختر الضابط</option>
                                 {% for officer in officers %}
@@ -145,7 +145,7 @@
 
                 manualAssignmentSection.innerHTML += `
                     <div class="form-row">
-                        <label for="manual_assignment_${dayStr}">النوبطچية ليوم ${dayStr}:</label>
+                        <label for="manual_assignment_${dayStr}">النوبتچية ليوم ${dayStr}:</label>
                         <select class="form-control" name="manual_assignment_${dayStr}" id="manual_assignment_${dayStr}">
                             <option value="">اختر الضابط</option>
                             {% for officer in officers %}

@@ -31,7 +31,7 @@
                     <li class="nav-item">
                         <a href="{% url 'shifts_list' %}" class="nav-link">
                             <i class="nav-icon fas fa-calendar-alt"></i>
-                            <p>جدول النوبطچيات</p>
+                            <p>جدول النوبتچيات</p>
                         </a>
                     </li>
                 {% else %}
@@ -333,12 +333,12 @@
                     </li>
                 {% endif %}
                
-                <li class="nav-header">النوبطچيات</li>
+                <li class="nav-header">النوبتچيات</li>
                 {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
                     <li class="nav-item">
                         <a href="{% url 'assign_shifts' %}" class="nav-link">
                             <i class="nav-icon fas fa-pen"></i>
-                            <p>تعيين النوبطچيات</p>
+                            <p>تعيين النوبتچيات</p>
                         </a>
                     </li>
                 {% endif %}
@@ -346,7 +346,7 @@
                 <li class="nav-item">
                     <a href="{% url 'shifts_list' %}" class="nav-link">
                         <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>جدول النوبطچيات</p>
+                        <p>جدول النوبتچيات</p>
                     </a>
                 </li>
 

@@ -99,7 +99,7 @@
                     {% endif %}
                     <td>
                         {% if request.compensation_date %}
-                            {{ request.compensation_date|arabic_numbers }}
+                            {{ request.compensation_date|date:"d-m-Y"|arabic_numbers }}
                         {% else %}
                             -
                         {% endif %}

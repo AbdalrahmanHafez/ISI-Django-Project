@@ -46,7 +46,7 @@
                     </a>
                 </li>
                 <!-- add_weapon Section -->
-                {% if perms.officers_affairs.add_weapon %}
+                {% if perms.officers_affairs.add_weapon   %}
                     <li class="nav-item has-treeview">
                         <a href="#" class="nav-link active">
                             <i class="nav-icon fas  fa-shield-alt"></i>
@@ -252,17 +252,7 @@
                     </li>
                 {% endif %}
                 <!-- Filter Section -->
-                {% comment %} <li class="nav-header">الحاله</li>
-            <li class="nav-item">
-                <a id="statusActive" class="nav-link" hx-get="{% url 'officers_list' %}?status=1" hx-target="#officers_list">
-                    <i class="nav-icon fas fa-circle text-danger"></i>
-                    <p>خدمه</p>
-                  </a>
-                  <a id="statusRetired" class="nav-link" hx-get="{% url 'officers_list' %}?status=2" hx-target="#officers_list">
-                    <i class="nav-icon fas fa-circle text-warning"></i>
-                     <p>معاش</p>
-                </a>
-                </li> {% endcomment %}
+                
                 <li class="nav-header">التمامات اليومية</li>
                 <li class="nav-item">
                     <a href="{% url 'attendance_list' %}" class="nav-link">
@@ -271,7 +261,7 @@
                     </a>
                 </li>
                 
-                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch_id == 8 %}
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch.name == 'شئون ضباط' %}
                     <li class="nav-item">
                         <a href="{% url 'record_attendance' %}" class="nav-link">
                             <i class="nav-icon fas fa-edit"></i>
@@ -288,7 +278,7 @@
                     </a>
                 </li>
 
-                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch.name == 'شئون ضباط' %}
                 <li class="nav-item">
                     <a href="{% url 'record_parade_attendance' %}" class="nav-link">
                     <i class="nav-icon fas fa-edit"></i>
@@ -334,7 +324,7 @@
                 {% endif %}
                
                 <li class="nav-header">النوبتچيات</li>
-                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                {% if request.user.officer_profile.role == 'رئيس فرع شئون ضباط' or request.user.officer_profile.branch.name == 'شئون ضباط'  %}
                     <li class="nav-item">
                         <a href="{% url 'assign_shifts' %}" class="nav-link">
                             <i class="nav-icon fas fa-pen"></i>
@@ -377,6 +367,15 @@
                        data-target="#changePasswordModal">
                         <i class="nav-icon fas fa-key"></i>
                         <p>تغيير كلمة المرور</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'profile_view'%}"
+                       class="nav-link"
+                       data-toggle="modal"
+                       data-target="#changePasswordModal">
+                        <i class="nav-icon fas fa-key"></i>
+                        <p> أسم المستخدم والصورة </p>
                     </a>
                 </li>
 

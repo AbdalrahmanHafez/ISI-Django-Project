@@ -39,7 +39,7 @@ def profile_view(request):
                 new_officer = Officer(user=request.user)
                 new_officer.profile_image = officer_form.cleaned_data.get('profile_image')
                 new_officer.save()
-            return redirect('profile_view')  # Redirect after successful save
+            return redirect('home')  # Redirect after successful save
 
     context = {
         'user_form': user_form,

@@ -73,16 +73,15 @@
                         {% for team_type, details in shifts.items %}
                           <tr>
                               <td>{{ team_type }}</td>
-                              <td>{{ details.officer_name }}</td>
+                              <td>{% if details.officer_name != "لم يحدد" %} {{ details.officer_rank }} / {{ details.officer_name }} 
+                                {%else%} 
+                                {{ details.officer_name }}
+                                {%endif%}  </td>
                               <td>{{ details.officer_phone }}</td>
                           </tr>
                         {% endfor %}
 
-                        {% comment %} <tr>
-                          <td>قائد منوب</td>
-                          <td>مقدم / شريف شكري</td>
-                          <td>01234567899</td>
-                        </tr> {% endcomment %}
+                       
                        
                       </tbody>
                     </table>

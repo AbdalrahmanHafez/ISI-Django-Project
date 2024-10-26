@@ -13172,8 +13172,14 @@ textarea.form-control-lg {
   margin: 0;
 }
 .sidebar-menu .nav-header {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
+  font-size: 1.5rem; /* حجم الخط */
+    font-weight: bold; /* جعل الخط غامق */
+    color: #ffffff; /* لون الخط */
+    background-color: #007bff; /* لون الخلفية */
+    padding: 10px; /* مساحة داخلية */
+    text-align: center; /* محاذاة النص إلى المنتصف */
+    border-radius: 4px; /* زوايا دائرية */
+    margin: 10px 0; /* مسافة خارجية */
 }
 .sidebar-menu .nav-treeview {
   display: none;

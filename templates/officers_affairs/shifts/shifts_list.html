@@ -93,7 +93,7 @@
                     <td>{{ shift.team.team_type }}</td>
                     <td>{{ shift.officer.rank.name }} / {{ shift.officer.full_name }}</td>
                     <td>{{ shift.officer.branch }}</td>
-                    <td>{{ shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
+                    <td> {{ shift.start_date|arabic_day_name }} الموافق {{ shift.start_date|date:"d-m-Y"|arabic_numbers }}</td>
                     <td>
                         {% if shift.is_holiday %} ✔ {% else %} - {% endif %}
                     </td>

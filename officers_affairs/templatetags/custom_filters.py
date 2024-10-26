@@ -2,6 +2,21 @@ from django import template
 
 register = template.Library()
 
+# قائمة الأيام باللغة العربية
+arabic_days = {
+    "Saturday": "السبت",
+    "Sunday": "الأحد",
+    "Monday": "الإثنين",
+    "Tuesday": "الثلاثاء",
+    "Wednesday": "الأربعاء",
+    "Thursday": "الخميس",
+    "Friday": "الجمعة",
+}
+
+@register.filter
+def arabic_day_name(date):
+    day_name = date.strftime('%A')  # استخرج اسم اليوم بالإنجليزية
+    return arabic_days.get(day_name, day_name)  # حوله للعربية إذا كان موجودًا في القائمة
 
 @register.filter
 def to_string(value):

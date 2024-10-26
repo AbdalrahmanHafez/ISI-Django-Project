@@ -164,11 +164,13 @@ def officers_home_view(request):
         
         if shift:
             shifts[team_type] = {
+                'officer_rank':shift.officer.rank,
                 'officer_name': shift.officer.full_name,
                 'officer_phone': shift.officer.phone1
             }
         else:
             shifts[team_type] = {
+                'officer_rank':"",
                 'officer_name': "لم يحدد",
                 'officer_phone': "-"
             }
@@ -689,12 +691,15 @@ def approve_leave_request(request, pk):
         if request.user == leave_request.final_approver:
             # Set current approver to final approver
             leave_request.approver = leave_request.final_approver
-
+            
             # If accepted, finalize the approval
             if decision == 'accept':
                 leave_request.status = LeaveRequest.APPROVED
                 leave_request.approver = leave_request.final_approver
                 leave_request.save()
+
+                
+
                 # Notify the officer and 'رئيس فرع شئون ضباط' about the final decision
                 create_notification(
                     leave_request.officer.user, 
@@ -736,7 +741,7 @@ def approve_leave_request(request, pk):
                 # Get the next approver in the approval chain
             next_approver = get_next_approver(leave_request.approver, leave_request)
                 
-            if next_approver:
+            if next_approver :
                 leave_request.approver = next_approver
                 leave_request.status = LeaveRequest.PENDING
                 leave_request.save()
@@ -1309,7 +1314,15 @@ def parade_attendance_list(request):
 # النبطشيات
 
 def shifts_list(request):
-    shifts = Shift.objects.order_by('start_date', 'officer__rank')
+    # الحصول على التاريخ الحالي واليوم السابق
+    today_date = timezone.now().date()
+    previous_date = today_date - datetime.timedelta(days=1)
+
+    # الحصول على القيم من الطلب (GET) أو تعيين قيمة افتراضية لليوم الحالي واليوم السابق
+    selected_date = request.GET.get('selected_date')
+    
+    # ترتيب الشيفتات بحيث تظهر من اليوم السابق وحتى المستقبل
+    shifts = Shift.objects.filter(start_date__gte=previous_date).order_by('start_date', 'officer__rank')
 
     afrad = request.user.groups.filter(name="الافراد").exists()
 
@@ -1341,7 +1354,7 @@ def shifts_list(request):
 
     # Filtering
     selected_team_type = request.GET.get('selected_team_type')
-    selected_date = request.GET.get('selected_date')
+    selected_date = request.GET.get('selected_date') 
     selected_officer_name = request.GET.get('selected_officer_name', '').strip()
     selected_branch_id = request.GET.get('selected_branch')
     selected_half_year = request.GET.get('selected_half_year') 
@@ -1582,7 +1595,8 @@ def approve_shift_request(request, shift_id):
 
 # Check if user is 'رئيس فرع شئون ضباط'
 def is_officer_in_charge(user):
-    return user.officer_profile.role == 'رئيس فرع شئون ضباط'
+    return user.officer_profile.role == 'رئيس فرع شئون ضباط'or \
+           user.officer_profile.branch.name == 'شئون ضباط'
 
 # View for both manual and automatic shift assignment
 @user_passes_test(is_officer_in_charge)

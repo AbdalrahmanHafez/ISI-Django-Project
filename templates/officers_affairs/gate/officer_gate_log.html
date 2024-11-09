@@ -2,8 +2,7 @@
 {% load custom_filters %}
 {% block content %}
     <h2 class="text-center mb-4 section-title">سجل دخول وخروج الضباط بتاريخ {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
-
-    <h3 class="text-center mt-4"> دخول وخروج الضباط:]</h3>
+    <h3 class="text-center mt-4">دخول وخروج الضباط:]</h3>
     <div>
         <table class="table table-bordered table-hover text-center">
             <thead class="thead-dark">
@@ -34,29 +33,26 @@
                         </td>
                         <td id="exit-time-{{ officer.id }}">
                             {% if officer.id in existing_logs_dict %}
-                                {% with log=existing_logs_dict|dict_key:officer.id %}
-                                    {{ log.exit_time|date:"H:i:s"|arabic_numbers }}
-                                {% endwith %}
+                                {% with log=existing_logs_dict|dict_key:officer.id %}{{ log.exit_time|date:"H:i:s"|arabic_numbers }}{% endwith %}
                             {% else %}
                                 غير مسجل
                             {% endif %}
                         </td>
                         <td id="exit-reason-{{ officer.id }}">
                             {% if officer.id in existing_logs_dict %}
-                                {% with log=existing_logs_dict|dict_key:officer.id %}
-                                    {{ log.exit_reason }}
-                                {% endwith %}
+                                {% with log=existing_logs_dict|dict_key:officer.id %}{{ log.exit_reason }}{% endwith %}
                             {% else %}
                                 غير مسجل
                             {% endif %}
                         </td>
                         <td>
-                            
-                            <button class="btn btn-success" onclick="logEntry({{ officer.id }})" 
+                            <button class="btn btn-success"
+                                    onclick="logEntry({{ officer.id }})"
                                     {% if officer.id in existing_logs_dict and existing_logs_dict|dict_key:officer.id.exit_time %}style="display:none;"{% endif %}>
                                 دخول
                             </button>
-                            <button class="btn btn-danger" onclick="showExitForm({{ officer.id }})" 
+                            <button class="btn btn-danger"
+                                    onclick="showExitForm({{ officer.id }})"
                                     {% if officer.id not in existing_logs_dict or existing_logs_dict|dict_key:officer.id.exit_time %}style="display:none;"{% endif %}>
                                 خروج
                             </button>
@@ -70,7 +66,6 @@
             </tbody>
         </table>
     </div>
-
     <script>
         function logEntry(officerId) {
             fetch("{% url 'officer_gate_log' %}", {
@@ -117,5 +112,4 @@
             }
         }
     </script>
-    
 {% endblock %}

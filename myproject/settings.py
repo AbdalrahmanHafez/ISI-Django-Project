@@ -22,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vu#tx$80pnhd@#o4t2qraxr4sgjb8$460#_*+-4bkoaa**3gm@'
+SECRET_KEY = "django-insecure-vu#tx$80pnhd@#o4t2qraxr4sgjb8$460#_*+-4bkoaa**3gm@"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 ALLOWED_HOSTS = ["*"]
@@ -34,54 +34,50 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    
-    'django.contrib.sites', 
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django_bootstrap5',
-    'django_filters',
-    'mathfilters',
-    'officers_affairs',
-    'accounts',
+    "django.contrib.sites",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django_bootstrap5",
+    "django_filters",
+    "mathfilters",
+    "officers_affairs",
+    "accounts",
 ]
 SITE_ID = 2
 
 MIDDLEWARE = [
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_require_login.middleware.LoginRequiredMiddleware',
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_require_login.middleware.LoginRequiredMiddleware",
 ]
 
-ROOT_URLCONF = 'myproject.urls'
+ROOT_URLCONF = "myproject.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'officers_affairs.context_processor.sidebarforms',
-                
-                
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "officers_affairs.context_processor.sidebarforms",
             ],
         },
     },
-    
     # {
     #     # Other settings
     #     'OPTIONS': {
@@ -93,12 +89,12 @@ TEMPLATES = [
     # },
 ]
 
-WSGI_APPLICATION = 'myproject.wsgi.application'
+WSGI_APPLICATION = "myproject.wsgi.application"
 
 BOOTSTRAP5 = {
     # https://django-bootstrap5.readthedocs.io/en/latest/settings.html
     "css_url": "/static/css/bootstrap.min.css",
-    "javascript_url": "/static/js/bootstrap.bundle.min.js"
+    "javascript_url": "/static/js/bootstrap.bundle.min.js",
 }
 
 # Database
@@ -106,33 +102,27 @@ BOOTSTRAP5 = {
 
 
 DATABASES = {
-
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'django_apps',
-        'USER': 'django_apps',
-        'PASSWORD': 'APPSf0rDj@ng0',
-        'HOST': '10.10.1.8',
-        'PORT': '',  # Leave blank for default port
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'TrustServerCertificate=yes;'
+    "default": {
+        "ENGINE": "mssql",
+        "NAME": "django_apps",
+        "USER": "django_apps",
+        "PASSWORD": "APPSf0rDj@ng0",
+        "HOST": "10.10.1.8",
+        "PORT": "",  # Leave blank for default port
+        "OPTIONS": {
+            "driver": "ODBC Driver 17 for SQL Server",
+            "extra_params": "TrustServerCertificate=yes;",
         },
     },
-
     # 'default': {
     #     "ENGINE": "django.db.backends.sqlite3",
     #     "NAME": "local.sqlite3",
     # }
-
 }
-
 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
-
 
 
 # LANGUAGES = [
@@ -142,15 +132,15 @@ DATABASES = {
 # ]
 
 LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'locale'),
+    os.path.join(BASE_DIR, "locale"),
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'ar'
+LANGUAGE_CODE = "ar"
 
-TIME_ZONE = 'Africa/Cairo'
+TIME_ZONE = "Africa/Cairo"
 
 USE_I18N = True
 
@@ -162,21 +152,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'myproject/static')
-]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "myproject/static")]
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/login/"
 # LOGOUT_REDIRECT_URL = "/logout/"
-REQUIRE_LOGIN_PUBLIC_URLS = (LOGIN_URL,  )
-
+REQUIRE_LOGIN_PUBLIC_URLS = (LOGIN_URL,)

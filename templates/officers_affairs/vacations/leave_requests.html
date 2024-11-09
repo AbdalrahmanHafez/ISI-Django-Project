@@ -75,7 +75,7 @@
             <td>{{ request.remaining_days|default:"-"|arabic_numbers }}</td>
             <td>{{ request.compensation_date|date:"d-m-Y"|default:"-"|arabic_numbers }}</td>
             <td>
-              {% if request.can_edit %}
+              {% if request.status == 'pending' %}
                 <a href="{% url 'update_leave_request' request.pk %}">
                   <i class="fas fa-edit"> تعديل الطلب</i>
                 </a>

@@ -252,6 +252,31 @@
                     </li>
                 {% endif %}
                 <!-- Filter Section -->
+                {% if request.user.officer_profile.military_number == '111' %}
+                <li class="nav-header">سجل البوابه  </li>
+                <li class="nav-item">
+                    <a href="{% url 'officer_gate_log' %}" class="nav-link">
+                        <i class="nav-icon fas fa-list"></i>
+                        <p>سجل دخول وخروج الضباط</p>
+                    </a>
+                </li>
+                
+               
+                    <li class="nav-item">
+                        <a href="{% url 'visitor_log' %}" class="nav-link">
+                            <i class="nav-icon fas fa-edit"></i>
+                            <p>تسجيل الزيارات اليوميه</p>
+                        </a>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a href="{% url 'daily_log_view' %}" class="nav-link">
+                            <i class="nav-icon fas fa-edit"></i>
+                            <p>  السجل اليومي</p>
+                        </a>
+                    </li>
+                    {% endif %}
                 
                 <li class="nav-header">التمامات اليومية</li>
                 <li class="nav-item">

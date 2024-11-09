@@ -23,6 +23,7 @@ urlpatterns = [
     path('leave/requests/', views.leave_requests_list, name='leave_requests_list'),  # For leaders to see all requests
     path('leave/my-requests/', views.leave_requests, name='leave_requests'),  # For users to see only their requests
     path('leave/approve/<int:pk>/', views.approve_leave_request, name='approve_leave_request'),
+    path('delete-leave-request/<int:pk>/', views.delete_leave_request, name='delete_leave_request'),
     # path('calculate-leave-remaining/', views.calculate_leave_remaining, name='calculate_leave_remaining'),
     
     path('notifications/', views.notifications_view, name='notifications'),
@@ -44,6 +45,12 @@ urlpatterns = [
     path('shifts/swap-requests', views.shift_swap_requests_list, name='shift_swap_requests_list'),
     path('shifts/swap/<int:original_shift_id>/<int:new_shift_id>/', views.shift_swap, name='shift_swap'),
     path('shifts/swap/approve_shift_request/<int:shift_id>', views.approve_shift_request, name='approve_shift_request'),
+
+
+
+    path('officer-gate-log/', views.officer_gate_log, name='officer_gate_log'),
+    path('visitor-log/', views.visitor_log, name='visitor_log'),
+    path('daily-log/', views.daily_log_view, name='daily_log_view'),
 
     
 ]

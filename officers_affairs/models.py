@@ -117,6 +117,8 @@ class Officer(models.Model):
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_officers')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    
 
     def __str__(self):
         return self.full_name
@@ -258,3 +260,35 @@ class MorningParadeAttendance(models.Model):
 
     def __str__(self):
         return f"{self.officer.full_name} - {self.date} - {self.status}"
+
+
+# سجل دخول وخروج البوابه 
+
+class OfficerGateLog(models.Model):
+    officer = models.ForeignKey(Officer, on_delete=models.CASCADE)
+    entry_time = models.DateTimeField(auto_now_add=True)
+    exit_time = models.DateTimeField(null=True, blank=True)
+    exit_reason = models.CharField(max_length=255, null=True, blank=True)  # New field for exit reason
+
+    def __str__(self):
+        return f"{self.officer.full_name} - {self.entry_time}"
+
+
+class VisitorLog(models.Model):
+    VISITOR_TYPE_CHOICES = [
+        ('مدني', 'مدني'),
+        ('عسكري', 'عسكري'),
+    ]
+    
+    visitor_type = models.CharField(max_length=10, choices=VISITOR_TYPE_CHOICES)
+    name = models.CharField(max_length=255)
+    job_title = models.CharField(max_length=255, blank=True)  # For civilians
+    rank = models.CharField(max_length=100, blank=True)  # For military personnel
+    unit = models.CharField(max_length=100, blank=True)  # For military personnel
+    visit_reason = models.CharField(max_length=255, blank=True)
+    destination = models.CharField(max_length=255, blank=True)
+    entry_time = models.DateTimeField(auto_now_add=True)
+    exit_time = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.visitor_type} - {self.entry_time}"

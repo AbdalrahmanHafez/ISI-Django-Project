@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block content %}
+    <h2 class="text-center mb-4 section-title">سجل دخول وخروج الضباط بتاريخ {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+
+    <h3 class="text-center mt-4"> دخول وخروج الضباط:]</h3>
+    <div>
+        <table class="table table-bordered table-hover text-center">
+            <thead class="thead-dark">
+                <tr>
+                    <th>الرتبة</th>
+                    <th>الاسم</th>
+                    <th>الفرع</th>
+                    <th>وقت الدخول</th>
+                    <th>وقت الخروج</th>
+                    <th>سبب الخروج</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for officer in officers %}
+                    <tr id="officer-{{ officer.id }}">
+                        <td>{{ officer.rank }}</td>
+                        <td>{{ officer.full_name }}</td>
+                        <td>{{ officer.branch }}</td>
+                        <td id="entry-time-{{ officer.id }}">
+                            {% if officer.id in existing_logs_dict %}
+                                {% with log=existing_logs_dict|dict_key:officer.id %}
+                                    {{ log.entry_time|date:"d-m-Y H:i:s"|arabic_numbers }}
+                                {% endwith %}
+                            {% else %}
+                                غير مسجل
+                            {% endif %}
+                        </td>
+                        <td id="exit-time-{{ officer.id }}">
+                            {% if officer.id in existing_logs_dict %}
+                                {% with log=existing_logs_dict|dict_key:officer.id %}
+                                    {{ log.exit_time|date:"H:i:s"|arabic_numbers }}
+                                {% endwith %}
+                            {% else %}
+                                غير مسجل
+                            {% endif %}
+                        </td>
+                        <td id="exit-reason-{{ officer.id }}">
+                            {% if officer.id in existing_logs_dict %}
+                                {% with log=existing_logs_dict|dict_key:officer.id %}
+                                    {{ log.exit_reason }}
+                                {% endwith %}
+                            {% else %}
+                                غير مسجل
+                            {% endif %}
+                        </td>
+                        <td>
+                            
+                            <button class="btn btn-success" onclick="logEntry({{ officer.id }})" 
+                                    {% if officer.id in existing_logs_dict and existing_logs_dict|dict_key:officer.id.exit_time %}style="display:none;"{% endif %}>
+                                دخول
+                            </button>
+                            <button class="btn btn-danger" onclick="showExitForm({{ officer.id }})" 
+                                    {% if officer.id not in existing_logs_dict or existing_logs_dict|dict_key:officer.id.exit_time %}style="display:none;"{% endif %}>
+                                خروج
+                            </button>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">لا توجد سجلات اليوم.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function logEntry(officerId) {
+            fetch("{% url 'officer_gate_log' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ officer_id: officerId, action: 'enter' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const entryTime = new Date().toLocaleTimeString('ar-EG');
+                    const entryDate = new Date().toLocaleDateString('ar-EG');
+                    document.getElementById('entry-time-' + officerId).innerText = entryDate + ' ' + entryTime;
+                    document.querySelector(`#officer-${officerId} .btn-success`).style.display = 'none';
+                    document.querySelector(`#officer-${officerId} .btn-danger`).style.display = 'block';
+                }
+            });
+        }
+
+        function showExitForm(officerId) {
+            const reason = prompt("أدخل سبب الخروج: (مأمورية, اجازة, مبيت, إذن, أو سبب آخر)");
+            if (reason) {
+                fetch("{% url 'officer_gate_log' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ officer_id: officerId, action: 'exit', exit_reason: reason })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const exitTime = new Date().toLocaleTimeString('ar-EG');
+                        document.getElementById('exit-time-' + officerId).innerText = exitTime;
+                        document.getElementById('exit-reason-' + officerId).innerText = reason;
+                        document.querySelector(`#officer-${officerId} .btn-danger`).style.display = 'none';
+                        document.querySelector(`#officer-${officerId} .btn-success`).style.display = 'block';
+                    }
+                });
+            }
+        }
+    </script>
+    
+{% endblock %}

@@ -85,11 +85,11 @@ def extract_numeric(s):
 
 @permission_required('officers_affairs.view_rank', raise_exception=True)
 def officers_home_view(request):
-    today = timezone.localtime().date()
+    date_value = timezone.localtime().date()
     # Count officers with the status 'موجود', currently outside, and with a different status
-    total_officers = DailyAttendance.objects.filter(date=today).count()
-    inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=today).count()
-    outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=today).count()
+    total_officers = DailyAttendance.objects.filter(date=date_value).count()
+    inside_officers = DailyAttendance.objects.filter(status__name='موجود',date=date_value).count()
+    outside_officers = DailyAttendance.objects.exclude(status__name='موجود').filter(date=date_value).count()
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
     if request.method == 'POST':
         # Check which form was submitted
@@ -152,14 +152,14 @@ def officers_home_view(request):
         return redirect(f"{request.path}?{newParams.urlencode()}")
 
 
-    today = timezone.now().date()
+    date_value = timezone.localtime().date()
     shift_types = ['قائد منوب', 'ضابط نوبطچي']
     shifts = {}
     for team_type in shift_types:
         shift = Shift.objects.filter(
             team__team_type=team_type,
-            start_date__lte=today,
-            end_date__gte=today
+            start_date__lte=date_value,
+            end_date__gte=date_value
         ).first()
         
         if shift:
@@ -182,7 +182,7 @@ def officers_home_view(request):
         'count_officers_total': Officer.objects.count(),
         'count_officers_availble': Officer.objects.filter(unit_status__name="موجود").count(),
         'unread_notifications': unread_notifications,
-        'today':today,
+        'date_value':date_value,
         'total_officers':total_officers,
         'inside_officers':inside_officers,
         'outside_officers': outside_officers,
@@ -491,20 +491,20 @@ def get_initial_approver(officer_profile):
 
 
 def get_remaining_days(officer, leave_type):
-    today = timezone.now().date()  # التأكد من أن today هو كائن date
+    date_value = timezone.localtime().date()  # التأكد من أن today هو كائن date
     
     # تحديد فترة النصف الأول والنصف الثاني من السنة
-    start_of_first_half = datetime.date(today.year, 1, 1)  # تحويل إلى datetime.date
-    end_of_first_half = datetime.date(today.year, 6, 30)   # تحويل إلى datetime.date
-    start_of_second_half = datetime.date(today.year, 7, 1) # تحويل إلى datetime.date
-    end_of_second_half = datetime.date(today.year, 12, 31) # تحويل إلى datetime.date
+    start_of_first_half = datetime.date(date_value.year, 1, 1)  # تحويل إلى datetime.date
+    end_of_first_half = datetime.date(date_value.year, 6, 30)   # تحويل إلى datetime.date
+    start_of_second_half = datetime.date(date_value.year, 7, 1) # تحويل إلى datetime.date
+    end_of_second_half = datetime.date(date_value.year, 12, 31) # تحويل إلى datetime.date
 
     # رصيد الإجازات السنوية والعارضة
-    annual_leave_full_days = 15 if today <= end_of_first_half else 15
+    annual_leave_full_days = 15 if date_value <= end_of_first_half else 15
     casual_leave_full_days = 7  # الإجازة العارضة طوال السنة
 
     # البحث عن آخر إجازة تمت الموافقة عليها من نفس النوع
-    start_date_filter = start_of_first_half if leave_type == LeaveRequest.ANNUAL_LEAVE else datetime.date(today.year, 1, 1)
+    start_date_filter = start_of_first_half if leave_type == LeaveRequest.ANNUAL_LEAVE else datetime.date(date_value.year, 1, 1)
     
     last_approved_leave = LeaveRequest.objects.filter(
         officer=officer, 
@@ -989,6 +989,16 @@ def can_officer_edit_leave_request(officer, leaveRequest):
     
     return leaveRequest.approver == next_approver
 
+
+
+def delete_leave_request(request, pk):
+    if request.method == 'POST' :
+        leave_request = get_object_or_404(LeaveRequest, pk=pk)
+        if leave_request.status == 'pending':
+            leave_request.delete()
+            return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Unauthorized or invalid request'}, status=403)
+
 @login_required
 def leave_requests(request):
     officer = request.user.officer_profile
@@ -1107,11 +1117,10 @@ def notification_list(request):
 
 
 
-from django.utils.dateparse import parse_date
-from django.utils import timezone
-from django.http import JsonResponse
+
+
+
 from django.shortcuts import render
-from .models import Officer, UnitStatus, DailyAttendance
 
 # View to record attendance
 def record_attendance(request):
@@ -1210,6 +1219,7 @@ def attendance_list(request):
     outside_grant_officers = DailyAttendance.objects.filter(status__name='إذن',date=date_value).count()
     outside_travel_officers = DailyAttendance.objects.filter(status__name='سفر خارج البلاد',date=date_value).count()
     outside_command_officers = DailyAttendance.objects.filter(status__name='فرقه',date=date_value).count()
+    outside_marady_officers = DailyAttendance.objects.filter(status__name='اجازة مرضية',date=date_value).count()
 
     
     attendance_records = sorted(attendance_records, key=lambda record: extract_numeric(record.officer.seniority_number))
@@ -1231,6 +1241,7 @@ def attendance_list(request):
         'outside_grant_officers':outside_grant_officers,
         'outside_travel_officers':outside_travel_officers,
         'outside_command_officers':outside_command_officers,
+        'outside_marady_officers':outside_marady_officers,
     }
     return render(request, 'officers_affairs/attendance/attendance_list.html', context)
 
@@ -1315,8 +1326,8 @@ def parade_attendance_list(request):
 
 def shifts_list(request):
     # الحصول على التاريخ الحالي واليوم السابق
-    today_date = timezone.now().date()
-    previous_date = today_date - datetime.timedelta(days=1)
+    date_value = timezone.localtime().date()
+    previous_date = date_value - datetime.timedelta(days=1)
 
     # الحصول على القيم من الطلب (GET) أو تعيين قيمة افتراضية لليوم الحالي واليوم السابق
     selected_date = request.GET.get('selected_date')
@@ -1423,7 +1434,7 @@ def shifts_list(request):
         'can_apply_swap_shift': can_apply_swap_shift,
         'original_shift': original_shift,
         'team_types': team_types,
-
+        'date_value': date_value,
         'selected_team_type': selected_team_type,
         'selected_date': selected_date,
         'selected_officer_name': selected_officer_name,
@@ -1689,3 +1700,125 @@ def assign_shifts(request):
         'days_range': days_range,
     })
 
+
+# سجل دخول وخروج البوابات
+
+
+@login_required
+def officer_gate_log(request):
+    officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number').exclude(role='المدير')
+    date_value = timezone.localtime().date()
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            officer_id = data.get('officer_id')
+            officer = get_object_or_404(Officer, pk=officer_id)
+
+            if 'action' in data:
+                action = data['action']
+                if action == 'enter':
+                    existing_log_today = OfficerGateLog.objects.filter(
+                        officer=officer,
+                        entry_time__date=date_value,
+                        exit_time__isnull=True
+                    ).first()
+
+                    existing_log_previous = OfficerGateLog.objects.filter(
+                        officer=officer,
+                        exit_time__isnull=False
+                    ).first()
+
+                    if not existing_log_today:  # فقط إنشاء سجل جديد إذا لم يكن قد سجل دخولًا بالفعل
+                        OfficerGateLog.objects.create(officer=officer, entry_time=timezone.now())
+                    elif existing_log_previous:
+                        # إنشاء سجل جديد لدخول الضابط إذا كان هناك سجل سابق بوقت خروج
+                        OfficerGateLog.objects.create(officer=officer, entry_time=timezone.now())
+                    return JsonResponse({'status': 'success', 'message': 'entry_logged'})
+
+                elif action == 'exit':
+                    exit_reason = data.get('exit_reason', 'سبب غير محدد')
+                    existing_log = OfficerGateLog.objects.filter(
+                        officer=officer,
+                        entry_time__date=date_value,
+                        exit_time__isnull=True
+                    ).first()
+                    if existing_log:
+                        existing_log.exit_time = timezone.now()
+                        existing_log.exit_reason = exit_reason
+                        existing_log.save()
+                    return JsonResponse({'status': 'success', 'message': 'exit_logged'})
+
+        except Exception as e:
+            print(f"Error logging gate activity: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    # Get today's logs
+    logs = OfficerGateLog.objects.filter(entry_time__date=date_value)
+    existing_logs_dict = {log.officer.id: log for log in logs}
+
+    # Check for previous entries without exit
+    previous_logs_dict = {
+        log.officer.id: log for log in OfficerGateLog.objects.filter(exit_time__isnull=True).exclude(entry_time__date=date_value)
+    }
+
+    context = {
+        'officers': officers,
+        'existing_logs_dict': existing_logs_dict,
+        'previous_logs_dict': previous_logs_dict,
+        'today': date_value,
+    }
+    return render(request, 'officers_affairs/gate/officer_gate_log.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required
+def visitor_log(request):
+    if request.method == 'POST':
+        visitor_type = request.POST.get('visitor_type')
+        name = request.POST.get('name')
+        job_title = request.POST.get('job_title', '')
+        rank = request.POST.get('rank', '')
+        unit = request.POST.get('unit', '')
+        visit_reason = request.POST.get('visit_reason', '')
+        destination = request.POST.get('destination', '')
+
+        VisitorLog.objects.create(
+            visitor_type=visitor_type,
+            name=name,
+            job_title=job_title,
+            rank=rank,
+            unit=unit,
+            visit_reason=visit_reason,
+            destination=destination,
+        )
+
+    today = timezone.now().date()
+    visitors = VisitorLog.objects.filter(entry_time__date=today)
+    context = {
+        'visitors': visitors,
+    }
+    return render(request, 'officers_affairs/gate/visitor_log.html', context)
+
+
+@login_required
+def daily_log_view(request):
+    today = timezone.now().date()
+    officer_logs = OfficerGateLog.objects.filter(entry_time__date=today)
+    visitor_logs = VisitorLog.objects.filter(entry_time__date=today)
+
+    context = {
+        'officer_logs': officer_logs,
+        'visitor_logs': visitor_logs,
+    }
+    return render(request, 'officers_affairs/gate/daily_log_view.html', context)

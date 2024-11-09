@@ -1,0 +1,35 @@
+<h2>السجل اليومي</h2>
+
+<h3>سجلات الضباط</h3>
+<table>
+    <tr>
+        <th>الضابط</th>
+        <th>وقت الدخول</th>
+        <th>وقت الخروج</th>
+    </tr>
+    {% for log in officer_logs %}
+        <tr>
+            <td>{{ log.officer.full_name }}</td>
+            <td>{{ log.entry_time }}</td>
+            <td>{{ log.exit_time }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h3>سجلات الزوار</h3>
+<table>
+    <tr>
+        <th>الزائر</th>
+        <th>نوع الزائر</th>
+        <th>وقت الدخول</th>
+        <th>وقت الخروج</th>
+    </tr>
+    {% for visitor in visitor_logs %}
+        <tr>
+            <td>{{ visitor.name }}</td>
+            <td>{{ visitor.visitor_type }}</td>
+            <td>{{ visitor.entry_time }}</td>
+            <td>{{ visitor.exit_time }}</td>
+        </tr>
+    {% endfor %}
+</table>

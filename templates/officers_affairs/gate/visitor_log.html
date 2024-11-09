@@ -1,0 +1,34 @@
+<h2>سجل الزوار</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <select name="visitor_type">
+        <option value="مدني">مدني</option>
+        <option value="عسكري">عسكري</option>
+    </select>
+    <input type="text" name="name" placeholder="اسم الزائر" required>
+    <input type="text" name="job_title" placeholder="وظيفة (إذا كان مدني)">
+    <input type="text" name="rank" placeholder="رتبة (إذا كان عسكري)">
+    <input type="text" name="unit" placeholder="وحدة (إذا كان عسكري)">
+    <input type="text" name="visit_reason" placeholder="سبب الزيارة">
+    <input type="text" name="destination" placeholder="المكان المتجه إليه">
+    <button type="submit">تسجيل الدخول</button>
+</form>
+
+<h3>السجلات اليوم:</h3>
+<table>
+    <tr>
+        <th>الزائر</th>
+        <th>نوع الزائر</th>
+        <th>وقت الدخول</th>
+        <th>وقت الخروج</th>
+    </tr>
+    {% for visitor in visitors %}
+        <tr>
+            <td>{{ visitor.name }}</td>
+            <td>{{ visitor.visitor_type }}</td>
+            <td>{{ visitor.entry_time }}</td>
+            <td>{{ visitor.exit_time }}</td>
+        </tr>
+    {% endfor %}
+</table>

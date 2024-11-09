@@ -36,3 +36,7 @@ def unread_messages(user):
     #replace the messages_set with the appropriate related_name, and also the filter field. (I am assuming it to be "read")
 
 register.simple_tag(unread_messages)
+
+@register.filter
+def dict_key(dictionary, key):
+    return dictionary.get(key, None)

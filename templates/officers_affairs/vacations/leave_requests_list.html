@@ -77,6 +77,9 @@
                 <th>الحالة</th>
                 <th>المصــدق الأن</th>
                 <th>الإجراءات</th>
+                {% if request.approver != user and user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                <th>إجراء</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -150,12 +153,28 @@
                             {% endif %}
                         {% endif %}
                     </td>
+                    {% if request.approver != user and user.officer_profile.role == 'رئيس فرع شئون ضباط' %}
+                      <td>
+                        {% if request.status == 'pending' %}
+                        <a href="#" 
+                        class="btn btn-danger" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deleteModal" 
+                        data-id="{{ request.id }}">
+                        <i class="fa fa-trash"></i>
+                        </a>
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                      {% endif %}
                 </tr>
             {% empty %}
                 <tr>
                     <td colspan="14" class="text-center bg-success">لا توجد طلبات إجازة في الوقت الحالي</td>
                 </tr>
             {% endfor %}
+           
         </tbody>
     </table>
     <!-- Pagination Controls -->
@@ -271,6 +290,39 @@
             </div>
         </div>
     </div>
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" 
+     id="deleteModal" 
+     tabindex="-1" 
+     aria-labelledby="deleteModalLabel" 
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">تأكيد الحذف</h5>
+                <button type="button" 
+                        class="close" 
+                        data-bs-dismiss="modal" 
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من حذف هذا الطلب؟</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" 
+                        class="btn btn-danger" 
+                        id="confirmDeleteBtn">حذف</button>
+            </div>
+        </div>
+    </div>
+</div>
     <script>
     function navigateAddParam(param, value) {
         const url = new URL(window.location.href);
@@ -329,4 +381,31 @@
         });
     });
     </script>
+
+<script>
+    let selectedDeleteRequestId;
+
+    // Capture request ID when the delete modal is triggered
+    $('#deleteModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        selectedDeleteRequestId = button.data('id');
+    });
+
+    // Handle delete confirmation
+    $('#confirmDeleteBtn').on('click', function () {
+        $.ajax({
+            url: "{% url 'delete_leave_request' 0 %}".replace('0', selectedDeleteRequestId),
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (response) {
+                location.reload();  // Reload the page to reflect changes
+            },
+            error: function (error) {
+                console.log("Error deleting request:", error);
+            }
+        });
+    });
+</script>
 {% endblock %}

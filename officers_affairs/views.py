@@ -1707,66 +1707,76 @@ def assign_shifts(request):
 @login_required
 def officer_gate_log(request):
     officers = Officer.objects.filter(status__name='قوة').order_by('seniority_number').exclude(role='المدير')
-    date_value = timezone.localtime().date()
+    today = timezone.localtime().date()
 
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("post data", data)
             officer_id = data.get('officer_id')
             officer = get_object_or_404(Officer, pk=officer_id)
+            exit_reason = data.get('exit_reason', 'سبب غير محدد')
+            
+            action = data['action']
+            if action == 'enter':
+                existing_log_today = OfficerGateLog.objects.filter(
+                    officer=officer,
+                    entry_time__date=today,
+                    exit_time__isnull=True
+                ).first()
 
-            if 'action' in data:
-                action = data['action']
-                if action == 'enter':
-                    existing_log_today = OfficerGateLog.objects.filter(
-                        officer=officer,
-                        entry_time__date=date_value,
-                        exit_time__isnull=True
-                    ).first()
+                existing_log_previous = OfficerGateLog.objects.filter(
+                    officer=officer,
+                    exit_time__isnull=False
+                ).first()
 
-                    existing_log_previous = OfficerGateLog.objects.filter(
-                        officer=officer,
-                        exit_time__isnull=False
-                    ).first()
+                if not existing_log_today:  # فقط إنشاء سجل جديد إذا لم يكن قد سجل دخولًا بالفعل
+                    OfficerGateLog.objects.create(officer=officer, entry_time=timezone.now())
+                elif existing_log_previous:
+                    # إنشاء سجل جديد لدخول الضابط إذا كان هناك سجل سابق بوقت خروج
+                    OfficerGateLog.objects.create(officer=officer, entry_time=timezone.now())
+                return JsonResponse({'status': 'success', 'message': 'entry_logged'})
 
-                    if not existing_log_today:  # فقط إنشاء سجل جديد إذا لم يكن قد سجل دخولًا بالفعل
-                        OfficerGateLog.objects.create(officer=officer, entry_time=timezone.now())
-                    elif existing_log_previous:
-                        # إنشاء سجل جديد لدخول الضابط إذا كان هناك سجل سابق بوقت خروج
-                        OfficerGateLog.objects.create(officer=officer, entry_time=timezone.now())
-                    return JsonResponse({'status': 'success', 'message': 'entry_logged'})
-
-                elif action == 'exit':
-                    exit_reason = data.get('exit_reason', 'سبب غير محدد')
-                    existing_log = OfficerGateLog.objects.filter(
-                        officer=officer,
-                        entry_time__date=date_value,
-                        exit_time__isnull=True
-                    ).first()
-                    if existing_log:
-                        existing_log.exit_time = timezone.now()
-                        existing_log.exit_reason = exit_reason
-                        existing_log.save()
-                    return JsonResponse({'status': 'success', 'message': 'exit_logged'})
+            elif action == 'exit':
+                existing_log = OfficerGateLog.objects.filter(
+                    officer=officer,
+                    # entry_time__date=today,
+                    exit_time__isnull=True
+                ).first()
+                if existing_log:
+                    existing_log.exit_time = timezone.now()
+                    existing_log.exit_reason = exit_reason
+                    existing_log.save()
+                return JsonResponse({'status': 'success', 'message': 'exit_logged'})
 
         except Exception as e:
             print(f"Error logging gate activity: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     # Get today's logs
-    logs = OfficerGateLog.objects.filter(entry_time__date=date_value)
+    logs = OfficerGateLog.objects.filter(entry_time__date=today)
     existing_logs_dict = {log.officer.id: log for log in logs}
 
     # Check for previous entries without exit
     previous_logs_dict = {
-        log.officer.id: log for log in OfficerGateLog.objects.filter(exit_time__isnull=True).exclude(entry_time__date=date_value)
+        log.officer.id: log for log in OfficerGateLog.objects.filter(exit_time__isnull=True).exclude(entry_time__date=today)
     }
+
+
+    gateLog = {}
+    for log in OfficerGateLog.objects.filter(
+        Q(exit_time__isnull=True) | 
+        Q(entry_time__date__lte=today, exit_time__date__gte=today)
+    ):
+        if log.officer.id not in gateLog:
+            gateLog[log.officer.id] = []
+        gateLog[log.officer.id].append(log)
+
 
     context = {
         'officers': officers,
-        'existing_logs_dict': existing_logs_dict,
-        'previous_logs_dict': previous_logs_dict,
-        'today': date_value,
+        'today': today,
+        'gateLog': gateLog,
     }
     return render(request, 'officers_affairs/gate/officer_gate_log.html', context)
 

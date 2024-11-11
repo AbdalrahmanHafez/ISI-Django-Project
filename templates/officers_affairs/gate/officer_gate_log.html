@@ -23,39 +23,60 @@
                         <td>{{ officer.full_name }}</td>
                         <td>{{ officer.branch }}</td>
                         <td id="entry-time-{{ officer.id }}">
-                            {% if officer.id in existing_logs_dict %}
-                                {% with log=existing_logs_dict|dict_key:officer.id %}
-                                    {{ log.entry_time|date:"d-m-Y H:i:s"|arabic_numbers }}
+                            {% if officer.id in gateLog %}
+                                {% with logs=gateLog|dict_key:officer.id %}
+                                    {% for log in logs %}
+                                        {{ log.entry_time|date:"d-m-Y H:i:s"|arabic_numbers }}<br>
+                                    {% endfor %}
                                 {% endwith %}
                             {% else %}
                                 غير مسجل
                             {% endif %}
                         </td>
                         <td id="exit-time-{{ officer.id }}">
-                            {% if officer.id in existing_logs_dict %}
-                                {% with log=existing_logs_dict|dict_key:officer.id %}{{ log.exit_time|date:"H:i:s"|arabic_numbers }}{% endwith %}
+                            {% if officer.id in gateLog %}
+                                {% with logs=gateLog|dict_key:officer.id %}
+                                    {% for log in logs %}
+                                        {% if log.exit_time %}
+                                            {{ log.exit_time|date:"d-m-Y H:i:s"|arabic_numbers }}<br>
+                                        {% else %}
+                                            غير مسجل<br>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
                             {% else %}
                                 غير مسجل
                             {% endif %}
                         </td>
                         <td id="exit-reason-{{ officer.id }}">
-                            {% if officer.id in existing_logs_dict %}
-                                {% with log=existing_logs_dict|dict_key:officer.id %}{{ log.exit_reason }}{% endwith %}
+                            {% if officer.id in gateLog %}
+                                {% with logs=gateLog|dict_key:officer.id %}
+                                    {% for log in logs %}
+                                        {{ log.exit_reason|default:"غير مسجل" }}<br>
+                                    {% endfor %}
+                                {% endwith %}
                             {% else %}
                                 غير مسجل
                             {% endif %}
                         </td>
                         <td>
-                            <button class="btn btn-success"
-                                    onclick="logEntry({{ officer.id }})"
-                                    {% if officer.id in existing_logs_dict and existing_logs_dict|dict_key:officer.id.exit_time %}style="display:none;"{% endif %}>
-                                دخول
-                            </button>
-                            <button class="btn btn-danger"
-                                    onclick="showExitForm({{ officer.id }})"
-                                    {% if officer.id not in existing_logs_dict or existing_logs_dict|dict_key:officer.id.exit_time %}style="display:none;"{% endif %}>
-                                خروج
-                            </button>
+                            {% if officer.id in gateLog %}
+                                {% with logs=gateLog|dict_key:officer.id %}
+                                    {% if logs|length > 0 %}
+                                        {% with sorted_logs=logs|dictsort:"exit_time" %}
+                                            {% if sorted_logs.0.exit_time %}
+                                                <button class="btn btn-success" onclick="logEntry({{ officer.id }})">دخول</button>
+                                            {% else %}
+                                                <button class="btn btn-danger popoverButton" data-officer-id="{{ officer.id }}">خروج</button>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <button class="btn btn-success" onclick="logEntry({{ officer.id }})">دخول</button>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <button class="btn btn-success" onclick="logEntry({{ officer.id }})">دخول</button>
+                            {% endif %}
                         </td>
                     </tr>
                 {% empty %}
@@ -66,6 +87,7 @@
             </tbody>
         </table>
     </div>
+    <script rc="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script>
         function logEntry(officerId) {
             fetch("{% url 'officer_gate_log' %}", {
@@ -78,38 +100,108 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success') {
+                window.location.reload();
+                /*if (data.status === 'success') {
                     const entryTime = new Date().toLocaleTimeString('ar-EG');
                     const entryDate = new Date().toLocaleDateString('ar-EG');
                     document.getElementById('entry-time-' + officerId).innerText = entryDate + ' ' + entryTime;
                     document.querySelector(`#officer-${officerId} .btn-success`).style.display = 'none';
                     document.querySelector(`#officer-${officerId} .btn-danger`).style.display = 'block';
-                }
+                }*/
             });
         }
 
-        function showExitForm(officerId) {
-            const reason = prompt("أدخل سبب الخروج: (مأمورية, اجازة, مبيت, إذن, أو سبب آخر)");
-            if (reason) {
-                fetch("{% url 'officer_gate_log' %}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({ officer_id: officerId, action: 'exit', exit_reason: reason })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        const exitTime = new Date().toLocaleTimeString('ar-EG');
-                        document.getElementById('exit-time-' + officerId).innerText = exitTime;
-                        document.getElementById('exit-reason-' + officerId).innerText = reason;
-                        document.querySelector(`#officer-${officerId} .btn-danger`).style.display = 'none';
-                        document.querySelector(`#officer-${officerId} .btn-success`).style.display = 'block';
-                    }
-                });
-            }
+        function submitExit(officerId, reason){
+            fetch("{% url 'officer_gate_log' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ officer_id: officerId, action: 'exit', exit_reason: reason })
+            })
+            .then(response => response.json())
+            .then(data => window.location.reload());
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const exitButtons = [...document.getElementsByClassName('popoverButton')];
+            var isOverButton = false;
+            var isOverPopover = false;
+
+            exitButtons.forEach(button=>{
+
+            const officerId = button.getAttribute('data-officer-id');
+            var popover = new bootstrap.Popover(button, {
+                html: true,
+                trigger: 'manual',
+                placement: 'left',
+                sanitize: false,
+                content: `
+                    <div class="list-group">
+                        <a data-officer-id='${officerId}' data-reason='اخرى' href="#" class="list-group-item list-group-item-action">اخرى</a>
+                        <a data-officer-id='${officerId}' data-reason='مأمورية' href="#" class="list-group-item list-group-item-action">مأمورية</a>
+                        <a data-officer-id='${officerId}' data-reason='اجازة' href="#" class="list-group-item list-group-item-action">اجازة</a>
+                        <a data-officer-id='${officerId}' data-reason='مبيت' href="#" class="list-group-item list-group-item-action">مبيت</a>
+                        <a data-officer-id='${officerId}' data-reason='اذن' href="#" class="list-group-item list-group-item-action">اذن</a>
+                    </div>
+                `
+            });
+
+            function showPopover() {
+                popover.show();
+            }
+
+            function hidePopover() {
+                if (!isOverButton && !isOverPopover) {
+                    popover.hide();
+                }
+            }
+
+            button.addEventListener('mouseenter', function() {
+                isOverButton = true;
+                showPopover();
+            });
+
+            button.addEventListener('mouseleave', function() {
+                isOverButton = false;
+                setTimeout(hidePopover, 100);
+            });
+
+
+            button.addEventListener('inserted.bs.popover', function () {
+                var popoverElement = document.querySelector('.popover');
+                popoverElement.addEventListener('mouseenter', function() {
+                    isOverPopover = true;
+                });
+                popoverElement.addEventListener('mouseleave', function() {
+                    isOverPopover = false;
+                    setTimeout(hidePopover, 100);
+                });
+            });
+
+
+
+
+            })
+
+
+            document.body.addEventListener('click', function(e) {
+                var target = e.target;
+                if (target.classList.contains('list-group-item')) {
+                    e.preventDefault();
+                    const officerId = target.getAttribute('data-officer-id');
+                    const reason = target.getAttribute('data-reason');
+
+                    console.log(officerId, reason)
+                    submitExit(officerId, reason); 
+                    //popover.hide();
+                } else if (target !== button && !button.contains(target)) {
+                    //popover.hide();
+                }
+            });
+
+        });
+
     </script>
 {% endblock %}

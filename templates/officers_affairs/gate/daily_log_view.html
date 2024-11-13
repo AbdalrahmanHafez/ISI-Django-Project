@@ -46,14 +46,18 @@
                                     {% if log.exit_time %}
                                         {{ log.exit_time|date:"d-m-Y H:i:s"|arabic_numbers }}
                                     {% else %}
-                                        غير مسجل
+                                        <div class="text-secondary d-inline">غير مسجل</div>
                                     {% endif %}
                                     <br>
                                 {% endfor %}
                             </td>
                             <td>
                                 {% for log in logs %}
-                                    {{ log.exit_reason|default:"غير مسجل" }}
+                                	{% if log.exit_reason %}
+                                        {{ log.exit_reason }}
+                                    {% else %}
+                                        <div class="text-secondary d-inline">غير مسجل</div>
+                                    {% endif %}
                                     <br>
                                 {% endfor %}
                             </td>
@@ -93,7 +97,7 @@
                             {% if visitor.exit_time %}
                                 {{ visitor.exit_time|date:"d-m-Y H:i:s"|arabic_numbers }}
                             {% else %}
-                                غير مسجل
+                                    <div class="text-secondary d-inline">غير مسجل</div>
                             {% endif %}
                         </td>
                         <td>{{ visitor.rank|default:"-" }}</td>

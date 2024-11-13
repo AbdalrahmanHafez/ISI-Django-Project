@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
 {% block content %}
-    <h2 class="text-center mb-4 mt-3 section-title">سجل دخول وخروج الضباط بتاريخ {{ today|date:"d-m-Y"|arabic_numbers }}</h2>
+    <h2 class="text-center mb-4 mt-3 section-title">
+        سجل دخول وخروج الضباط بتاريخ {{ today|date:"d-m-Y"|arabic_numbers }}
+    </h2>
     <div>
         <table class="table table-bordered table-hover text-center">
             <thead class="thead-dark">
@@ -25,11 +27,12 @@
                             {% if officer.id in gateLog %}
                                 {% with logs=gateLog|dict_key:officer.id %}
                                     {% for log in logs %}
-                                        {{ log.entry_time|date:"d-m-Y H:i:s"|arabic_numbers }}<br>
+                                        {{ log.entry_time|date:"d-m-Y H:i:s"|arabic_numbers }}
+                                        <br>
                                     {% endfor %}
                                 {% endwith %}
                             {% else %}
-                                غير مسجل
+                                <div class="text-secondary d-inline">غير مسجل</div>
                             {% endif %}
                         </td>
                         <td id="exit-time-{{ officer.id }}">
@@ -37,25 +40,31 @@
                                 {% with logs=gateLog|dict_key:officer.id %}
                                     {% for log in logs %}
                                         {% if log.exit_time %}
-                                            {{ log.exit_time|date:"d-m-Y H:i:s"|arabic_numbers }}<br>
+                                            {{ log.exit_time|date:"d-m-Y H:i:s"|arabic_numbers }}
                                         {% else %}
-                                            غير مسجل<br>
+                                            <div class="text-secondary d-inline">غير مسجل</div>
                                         {% endif %}
+                                        <br>
                                     {% endfor %}
                                 {% endwith %}
                             {% else %}
-                                غير مسجل
+                                <div class="text-secondary d-inline">غير مسجل</div>
                             {% endif %}
                         </td>
                         <td id="exit-reason-{{ officer.id }}">
                             {% if officer.id in gateLog %}
                                 {% with logs=gateLog|dict_key:officer.id %}
                                     {% for log in logs %}
-                                        {{ log.exit_reason|default:"غير مسجل" }}<br>
+                                        {% if log.exit_reason %}
+                                            {{ log.exit_reason }}
+                                        {% else %}
+                                            <div class="text-secondary d-inline">غير مسجل</div>
+                                        {% endif %}
+                                        <br>
                                     {% endfor %}
                                 {% endwith %}
                             {% else %}
-                                غير مسجل
+                                <div class="text-secondary d-inline">غير مسجل</div>
                             {% endif %}
                         </td>
                         <td>
@@ -66,7 +75,8 @@
                                             {% if sorted_logs.0.exit_time %}
                                                 <button class="btn btn-success" onclick="logEntry({{ officer.id }})">دخول</button>
                                             {% else %}
-                                                <button class="btn btn-danger popoverButton" data-officer-id="{{ officer.id }}">خروج</button>
+                                                <button class="btn btn-danger popoverButton"
+                                                        data-officer-id="{{ officer.id }}">خروج</button>
                                             {% endif %}
                                         {% endwith %}
                                     {% else %}

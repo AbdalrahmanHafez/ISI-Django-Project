@@ -1780,55 +1780,89 @@ def officer_gate_log(request):
     }
     return render(request, 'officers_affairs/gate/officer_gate_log.html', context)
 
-
-
-
-
-
-
-
-
-
-
-
-
 @login_required
 def visitor_log(request):
     if request.method == 'POST':
-        visitor_type = request.POST.get('visitor_type')
-        name = request.POST.get('name')
-        job_title = request.POST.get('job_title', '')
-        rank = request.POST.get('rank', '')
-        unit = request.POST.get('unit', '')
-        visit_reason = request.POST.get('visit_reason', '')
-        destination = request.POST.get('destination', '')
+        action = request.POST.get('action')
+        if action == 'entry':
+            visitor_type = request.POST.get('visitor_type')
+            name = request.POST.get('name')
+            visit_reason = request.POST.get('visit_reason', '')
+            destination = request.POST.get('destination', '')
 
-        VisitorLog.objects.create(
-            visitor_type=visitor_type,
-            name=name,
-            job_title=job_title,
-            rank=rank,
-            unit=unit,
-            visit_reason=visit_reason,
-            destination=destination,
-        )
+            job_title = None
+            rank = None
+            unit = None
 
+            if visitor_type == 'مدني':
+                job_title = request.POST.get('job_title')
+
+            elif visitor_type == 'عسكري':
+                rank = request.POST.get('rank')
+                unit = request.POST.get('unit')
+
+            else:
+                print("Invalid visitor type")
+                return HttpResponseForbidden("Invalid visitor type")
+            
+
+            VisitorLog.objects.create(
+                visitor_type=visitor_type,
+                name=name,
+                job_title=job_title,
+                rank=rank,
+                unit=unit,
+                visit_reason=visit_reason,
+                destination=destination,
+            )
+
+
+        elif action == 'exit':
+            visitor_id = request.POST.get('visitor_id')
+            visitor = get_object_or_404(VisitorLog, pk=visitor_id)
+            
+            if not visitor.exit_time:
+                visitor.exit_time = timezone.now()
+                visitor.save()
+
+        else:
+            return HttpResponseForbidden("Invalid action")
+
+        
     today = timezone.now().date()
+
     visitors = VisitorLog.objects.filter(entry_time__date=today)
+
     context = {
         'visitors': visitors,
     }
+
     return render(request, 'officers_affairs/gate/visitor_log.html', context)
 
 
 @login_required
 def daily_log_view(request):
     today = timezone.now().date()
-    officer_logs = OfficerGateLog.objects.filter(entry_time__date=today)
-    visitor_logs = VisitorLog.objects.filter(entry_time__date=today)
+    specific_date = request.GET.get('date')
+
+    try:
+        specific_date = parse_date(specific_date)
+    except Exception:
+        specific_date = today
+
+
+    officer_logs = {}
+    for log in OfficerGateLog.objects.filter(Q(exit_time__isnull=True) & Q(entry_time__date__lte=specific_date) | Q(entry_time__date__lte=specific_date, exit_time__date__gte=specific_date)):
+        if log.officer.id not in officer_logs:
+            officer_logs[log.officer.id] = []
+        officer_logs[log.officer.id].append(log)
+
+
+    visitor_logs = VisitorLog.objects.filter(entry_time__date=specific_date)
 
     context = {
         'officer_logs': officer_logs,
         'visitor_logs': visitor_logs,
+        'today': specific_date,
     }
     return render(request, 'officers_affairs/gate/daily_log_view.html', context)

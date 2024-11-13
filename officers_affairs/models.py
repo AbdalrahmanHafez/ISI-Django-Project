@@ -282,9 +282,9 @@ class VisitorLog(models.Model):
     
     visitor_type = models.CharField(max_length=10, choices=VISITOR_TYPE_CHOICES)
     name = models.CharField(max_length=255)
-    job_title = models.CharField(max_length=255, blank=True)  # For civilians
-    rank = models.CharField(max_length=100, blank=True)  # For military personnel
-    unit = models.CharField(max_length=100, blank=True)  # For military personnel
+    job_title = models.CharField(max_length=255,null=True, blank=True)  # For civilians
+    rank = models.CharField(max_length=100,null=True, blank=True)  # For military personnel
+    unit = models.CharField(max_length=100,null=True, blank=True)  # For military personnel
     visit_reason = models.CharField(max_length=255, blank=True)
     destination = models.CharField(max_length=255, blank=True)
     entry_time = models.DateTimeField(auto_now_add=True)

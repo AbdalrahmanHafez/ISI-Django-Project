@@ -1,34 +1,148 @@
-<h2>سجل الزوار</h2>
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block content %}
+    <h2 class="text-center mb-4 section-title">سجل الزوار</h2>
+    <div class="container gap-5">
+        <div>
+            <h3>تسجيل دخول</h3>
+            <form method="POST" class="mb-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="entry">
+                <div class="form-group mb-3">
+                    <label for="visitor_type">نوع الزائر</label>
+                    <select id="visitor_type" name="visitor_type" class="form-control" required>
+                        <option value="مدني">مدني</option>
+                        <option value="عسكري">عسكري</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="name">اسم الزائر</label>
+                    <input type="text"
+                           name="name"
+                           id="name"
+                           class="form-control"
+                           placeholder="اسم الزائر"
+                           required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="job_title">وظيفة</label>
+                    <input type="text"
+                           name="job_title"
+                           id="job_title"
+                           class="form-control"
+                           placeholder="وظيفة">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="rank">رتبة</label>
+                    <input type="text"
+                           name="rank"
+                           id="rank"
+                           class="form-control"
+                           placeholder="رتبة">
+                </div>
+                <div class="form-group mb-3" id="unit-group">
+                    <label for="unit">وحدة</label>
+                    <input type="text"
+                           name="unit"
+                           id="unit"
+                           class="form-control"
+                           placeholder="وحدة">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="visit_reason">سبب الزيارة</label>
+                    <input type="text"
+                           name="visit_reason"
+                           id="visit_reason"
+                           class="form-control"
+                           placeholder="سبب الزيارة">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="destination">المكان المتجه إليه</label>
+                    <input type="text"
+                           name="destination"
+                           id="destination"
+                           class="form-control"
+                           placeholder="المكان المتجه إليه">
+                </div>
+                <div class="form-group"><button class="btn btn-primary btn-block w-100" type="submit">تسجيل دخول</button></div>
+            </form>
+        </div>
+        <div class="w-100">
+            <h3>سجلات اليوم</h3>
+             <table class="table table-bordered table-hover text-center">
+            <thead class="thead-dark">
+                <tr>
+                    <th>الزائر</th>
+                    <th>نوع الزائر</th>
+                    
+                    <th>الرتبة</th>
+                    <th>الوحدة</th>
+                    <th>الوظيفة</th>
+                    
+                    <th>سبب الزيارة</th>
+                    <th>متجه الى</th>
+                    
+                    <th>وقت الدخول</th>
+                    <th>وقت الخروج</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visitor in visitors %}
+                    <tr>
+                        <td>{{ visitor.name }}</td>
+                        <td>{{ visitor.visitor_type }}</td>
+                        <td>{{ visitor.rank|default:"-" }}</td>
+                        <td>{{ visitor.unit|default:"-" }}</td>
+                        <td>{{ visitor.job|default:"-" }}</td>
+                        <td>{{ visitor.visit_reason|default:"-" }}</td>
+                        <td>{{ visitor.destination|default:"-" }}</td>
+                        <td>{{ visitor.entry_time|date:"d-m-Y H:i:s"|arabic_numbers }}</td>
+                        <td>
+                            {% if visitor.exit_time %}
+                                {{ visitor.exit_time|date:"d-m-Y H:i:s"|arabic_numbers }}
+                            {% else %}
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="exit">
+                                        <input type="hidden" name="visitor_id" value="{{ visitor.pk }}">
+                                        <button class="btn btn-danger" type="submit">خروج</button>
+                                    </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9">لا توجد سجلات اليوم.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const visitorTypeSelect = document.getElementById('visitor_type');
+        const jobTitleField = document.getElementById('job_title').parentElement;
+        const rankField = document.getElementById('rank').parentElement;
+        const unitField = document.getElementById('unit').parentElement;
 
-<form method="POST">
-    {% csrf_token %}
-    <select name="visitor_type">
-        <option value="مدني">مدني</option>
-        <option value="عسكري">عسكري</option>
-    </select>
-    <input type="text" name="name" placeholder="اسم الزائر" required>
-    <input type="text" name="job_title" placeholder="وظيفة (إذا كان مدني)">
-    <input type="text" name="rank" placeholder="رتبة (إذا كان عسكري)">
-    <input type="text" name="unit" placeholder="وحدة (إذا كان عسكري)">
-    <input type="text" name="visit_reason" placeholder="سبب الزيارة">
-    <input type="text" name="destination" placeholder="المكان المتجه إليه">
-    <button type="submit">تسجيل الدخول</button>
-</form>
+        function toggleFields() {
+            if (visitorTypeSelect.value === 'عسكري') {
+                jobTitleField.style.display = 'none';
+                rankField.style.display = 'block';
+                unitField.style.display = 'block';
+            } else {
+                jobTitleField.style.display = 'block';
+                rankField.style.display = 'none';
+                unitField.style.display = 'none';
+            }
+        }
 
-<h3>السجلات اليوم:</h3>
-<table>
-    <tr>
-        <th>الزائر</th>
-        <th>نوع الزائر</th>
-        <th>وقت الدخول</th>
-        <th>وقت الخروج</th>
-    </tr>
-    {% for visitor in visitors %}
-        <tr>
-            <td>{{ visitor.name }}</td>
-            <td>{{ visitor.visitor_type }}</td>
-            <td>{{ visitor.entry_time }}</td>
-            <td>{{ visitor.exit_time }}</td>
-        </tr>
-    {% endfor %}
-</table>
+        visitorTypeSelect.addEventListener('change', toggleFields);
+
+        // Initial call to set the correct state on page load
+        toggleFields();
+    });
+</script>
+{% endblock content %}

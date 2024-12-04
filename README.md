@@ -77,6 +77,7 @@ This project is a comprehensive web application developed during military servic
     * Search and filter officer profiles.
     * View details like leave status, shift assignments, and attendance records.
     ![chrome_dOhcavrPQs](https://github.com/user-attachments/assets/1017e8d5-c124-40ca-8be6-be8dad6c588c)
+    ![advacned filtering](https://github.com/user-attachments/assets/2f57d424-8fdb-4236-96c1-73258bb40a1f)
 
   * Leave Requests:
     * Submit leave requests for review.
